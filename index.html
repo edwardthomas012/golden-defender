@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOLDEN DEFENDER - Arcade Cabinet Restoration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #FFD700;
+            --dark-gold: #B8860B;
+            --deep-purple: #1a0033;
+            --electric-blue: #00ffff;
+            --arcade-black: #0a0015;
+            --gradient-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--arcade-black);
+            color: #fff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.02) 50%, transparent 100%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 215, 0, 0.03) 2px, rgba(255, 215, 0, 0.03) 4px);
+            background-size: 100% 100%, 50px 50px;
+            animation: gridScroll 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridScroll {
+            0% { background-position: 0 0, 0 0; }
+            100% { background-position: 0 100px, 0 50px; }
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanlineMove 8s linear infinite;
+        }
+
+        @keyframes scanlineMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            position: relative;
+            padding: 100px 0 80px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 900;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)); }
+            to { filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.9)); }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--electric-blue);
+            letter-spacing: 0.3em;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            animation: flicker 2s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(26, 0, 51, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--gold);
+            z-index: 100;
+            padding: 15px 0;
+            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .nav-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-item {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+            border: 1px solid var(--gold);
+            padding: 10px 20px;
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-gold);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-item:hover {
+            color: var(--arcade-black);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .nav-item:hover::before {
+            left: 0;
+        }
+
+        .gallery-section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: var(--gradient-gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .gallery-card {
+            position: relative;
+            background: linear-gradient(135deg, rgba(26, 0, 51, 0.8), rgba(10, 0, 21, 0.9));
+            border: 2px solid var(--dark-gold);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .gallery-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-gold);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .gallery-card:hover {
+            transform: scale(1.05) translateY(-10px);
+            border-color: var(--gold);
+            box-shadow: 0 20px 50px rgba(255, 215, 0, 0.4);
+        }
+
+        .gallery-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+            position: relative;
+            z-index: 1;
+            filter: brightness(0.9);
+            transition: filter 0.4s ease;
+        }
+
+        .gallery-card:hover .card-image {
+            filter: brightness(1.1) saturate(1.2);
+        }
+
+        .card-content {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .card-count {
+            color: var(--electric-blue);
+            font-size: 0.9rem;
+        }
+
+        footer {
+            background: var(--deep-purple);
+            border-top: 3px solid var(--gold);
+            padding: 60px 0 30px;
+            margin-top: 100px;
+            position: relative;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 215, 0, 0.3);
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .copyright {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .lightbox img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border: 3px solid var(--gold);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 40px;
+            color: var(--gold);
+            cursor: pointer;
+            z-index: 10001;
+            background: rgba(0, 0, 0, 0.7);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--gold);
+        }
+
+        .lightbox-close:hover {
+            background: var(--gold);
+            color: var(--arcade-black);
+        }
+
+        @media (max-width: 768px) {
+            .nav-grid {
+                gap: 10px;
+            }
+
+            .nav-item {
+                padding: 8px 12px;
+                font-size: 0.75rem;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            header {
+                padding: 60px 0 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-grid"></div>
+    <div class="scanlines"></div>
+
+    <header>
+        <div class="container">
+            <h1 class="hero-title">GOLDEN DEFENDER</h1>
+            <p class="hero-subtitle">Arcade Cabinet Restoration</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-grid">
+            <a href="index.html" class="nav-item">Home</a>
+            <a href="bezel.html" class="nav-item">Bezel</a>
+            <a href="controls.html" class="nav-item">Controls</a>
+            <a href="marquee.html" class="nav-item">Marquee</a>
+            <a href="boards.html" class="nav-item">Boards</a>
+            <a href="monitor.html" class="nav-item">Monitor</a>
+            <a href="full-photos.html" class="nav-item">All Photos</a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="gallery-section">
+            <div class="container">
+                <h2 class="section-title">Explore the Build</h2>
+                <div class="gallery-grid">
+                    <a href="bezel.html" class="gallery-card">
+                        <img src="images/bezel/bezel1.jpg" alt="Golden Bezel" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Bezel'">
+                        <div class="card-content">
+                            <h3 class="card-title">Golden Bezel</h3>
+                            <p class="card-count">View Gallery →</p>
+                        </div>
+                    </a>
+
+                    <a href="controls.html" class="gallery-card">
+                        <img src="images/controls/controls1.jpg" alt="Golden Controls" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Controls'">
+                        <div class="card-content">
+                            <h3 class="card-title">Golden Controls</h3>
+                            <p class="card-count">View Gallery →</p>
+                        </div>
+                    </a>
+
+                    <a href="marquee.html" class="gallery-card">
+                        <img src="images/marquee/marquee1.jpg" alt="Golden Marquee" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Marquee'">
+                        <div class="card-content">
+                            <h3 class="card-title">Golden Marquee</h3>
+                            <p class="card-count">View Gallery →</p>
+                        </div>
+                    </a>
+
+                    <a href="boards.html" class="gallery-card">
+                        <img src="images/boards/boards1.jpg" alt="Golden Boards" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Boards'">
+                        <div class="card-content">
+                            <h3 class="card-title">Golden Boards</h3>
+                            <p class="card-count">View Gallery →</p>
+                        </div>
+                    </a>
+
+                    <a href="monitor.html" class="gallery-card">
+                        <img src="images/monitor/monitor1.jpg" alt="Golden Monitor" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Monitor'">
+                        <div class="card-content">
+                            <h3 class="card-title">Golden Monitor</h3>
+                            <p class="card-count">View Gallery →</p>
+                        </div>
+                    </a>
+
+                    <a href="full-photos.html" class="gallery-card">
+                        <img src="images/full-photos/photo1.jpg" alt="Full Cabinet Photos" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Full+Photos'">
+                        <div class="card-content">
+                            <h3 class="card-title">Full Photos</h3>
+                            <p class="card-count">View Complete Collection →</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p><span class="copyright">Copyright 2024 Golden Defender</span> | A Retro Arcade Restoration Project</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">×</span>
+        <div class="lightbox-content">
+            <img id="lightbox-img" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+        function openLightbox(src) {
+            document.getElementById('lightbox').classList.add('active');
+            document.getElementById('lightbox-img').src = src;
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+    </script>
+</body>
+</html>
