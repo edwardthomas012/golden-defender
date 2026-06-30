@@ -312,6 +312,36 @@ section.block.tight{padding:60px 0}
 .helper{font-family:'Space Mono';font-size:12px;color:var(--ink-mute);margin-top:16px;letter-spacing:.5px}
 .helper code{color:var(--gold-bri)}
 
+/* ---------------- ENEMIES (photo-left / text-right feature rows) ---------------- */
+.efeats{display:flex;flex-direction:column;gap:28px}
+.efeat{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:38px;align-items:center;
+  background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:24px;backdrop-filter:blur(6px);transition:.25s}
+.efeat:hover{border-color:var(--line-2);box-shadow:0 22px 54px rgba(0,0,0,.45)}
+.escan{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:#06070f;
+  border:1px solid var(--line-2);display:grid;place-items:center;box-shadow:inset 0 0 70px rgba(0,0,0,.7)}
+.escan::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 30%,transparent 55%,rgba(0,0,0,.5))}
+.escan img{width:100%;height:100%;object-fit:cover}
+.escan svg{width:56%;height:56%;color:var(--gold);filter:drop-shadow(0 0 16px rgba(255,206,77,.5));position:relative;z-index:1}
+.escan svg [fill]{fill:none}
+.escan svg path,.escan svg circle,.escan svg rect,.escan svg line,.escan svg polygon{
+  stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.escan .elines{position:absolute;inset:0;pointer-events:none;opacity:.45;z-index:2;
+  background:repeating-linear-gradient(to bottom,transparent 0 2px,rgba(0,0,0,.4) 2px 4px)}
+.escan .etag{position:absolute;left:12px;top:12px;z-index:3;font-family:'Space Mono';font-size:10px;letter-spacing:1px;
+  color:var(--plasma);background:rgba(4,5,13,.62);border:1px solid var(--line-2);padding:4px 8px;border-radius:7px}
+.einfo h3{font-family:'Sora';font-weight:800;font-size:clamp(28px,4vw,46px);letter-spacing:-1px;line-height:1;
+  color:var(--gold);text-shadow:0 0 30px rgba(255,206,77,.26);margin:8px 0 14px;text-transform:uppercase}
+.emeta{display:flex;align-items:center;gap:18px;margin-bottom:16px;flex-wrap:wrap}
+.ethreat{font-family:'Space Mono';font-size:11px;letter-spacing:1.5px;color:var(--ink-dim);
+  display:inline-flex;align-items:center;gap:7px;text-transform:uppercase}
+.ethreat i{width:9px;height:9px;border-radius:50%;background:var(--line-2);display:inline-block}
+.ethreat i.on{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.escore{font-family:'Space Mono';font-size:12px;letter-spacing:1px;color:var(--gold);
+  border:1px solid var(--gold-deep);border-radius:20px;padding:5px 13px}
+.einfo p{font-size:17px;color:var(--ink-dim);line-height:1.75;margin:0}
+@media(max-width:760px){.efeat{grid-template-columns:1fr;gap:20px}}
+
 /* ---------------- FOOTER ---------------- */
 footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:30px;position:relative;z-index:5;backdrop-filter:blur(8px)}
 .f{max-width:var(--maxw);margin:0 auto;padding:44px 26px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
@@ -336,6 +366,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
     <nav class="main" id="nav">
       <a href="#home" data-nav>Home</a>
       <a href="#story" data-nav>The Story</a>
+      <a href="#enemies" data-nav>Enemies</a>
       <a href="#galleries" data-nav>Galleries</a>
       <a href="#video" data-nav>Video</a>
       <a href="#sounds" data-nav>Sounds</a>
@@ -414,6 +445,25 @@ const SITE = {
     enemies:{ name:"Golden Enemies", blurb:"Landers, Mutants, Baiters, Bombers, Pods & Swarmers.", photos:[] },
     fullphotos:{ name:"Golden Full Photos", blurb:"The finished machine, head to toe.", photos:[] }
   },
+
+  /* ---- ENEMIES (the bestiary) ----
+     Each enemy: name, role, threat 1-5, score, desc, and img.
+     Leave img:"" to show the built-in vector "scan" sprite,
+     or set img:"images/enemies/lander.jpg" to use your own photo. */
+  enemies:[
+    { key:"lander",  name:"Lander",  role:"Abductor",       threat:2, score:150,  img:"",
+      desc:"The foot soldier of the invasion. Landers descend in waves and reach for the humanoids below, hauling them toward the top of the sky. Let one escape with its prize and the human is reborn as something far worse — a Mutant. Cut them down before they climb." },
+    { key:"mutant",  name:"Mutant",  role:"Corrupted human", threat:4, score:150,  img:"",
+      desc:"What is left when a Lander finishes its work: a captured humanoid fused into a hostile shell. Mutants swarm fast and erratic, firing as they weave and deliberately refusing to line up with your gun. When the planet falls, the whole sky fills with them." },
+    { key:"baiter",  name:"Baiter",  role:"Hunter-killer",   threat:5, score:200,  img:"",
+      desc:"Linger too long and the sky answers. A flat, iridescent craft that teleports in to punish hesitation — the fastest, deadliest thing in the game. It matches your speed, locks on, and never stops firing. You cannot outrun a Baiter. You can only kill it." },
+    { key:"bomber",  name:"Bomber",  role:"Minelayer",       threat:3, score:250,  img:"",
+      desc:"A slow, box-shaped drifter that threads the field laying a trail of stationary mines behind it. Rarely the thing that kills you directly — usually the thing you fly into while dodging everything else." },
+    { key:"pod",     name:"Pod",     role:"Carrier",         threat:3, score:1000, img:"",
+      desc:"A slow, glittering target worth a small fortune in points — but shoot it and it bursts. Inside waits a pack of Swarmers, and suddenly calm space becomes a knife fight. Worth the risk… if your timing is right." },
+    { key:"swarmer", name:"Swarmer", role:"Pack hunter",     threat:4, score:150,  img:"",
+      desc:"Spilled from a ruptured Pod, Swarmers are small, quick, and maddening to hit. They cluster along your firing line and chase you down. Clear them early — let them linger and they will turn the end of a wave into a nightmare." }
+  ],
 
   /* ---- THE STORY (your lore + images) ---- */
   story:{
@@ -744,7 +794,7 @@ const pad=n=>String(n).padStart(2,'0');
 })();
 
 /* ============ data helpers ============ */
-const GAL_ORDER=['beginnings','inspection','parts','paint','bezel','controls','marquee','boards','monitor','coindoor','creator','extras','tribute','enemies','fullphotos'];
+const GAL_ORDER=['beginnings','inspection','parts','paint','bezel','controls','marquee','boards','monitor','coindoor','creator','extras','tribute','fullphotos'];
 
 function radarBlips(){
   const pts=[[30,38],[68,30],[58,64],[40,72],[74,58],[24,58]];
@@ -806,7 +856,7 @@ function viewHome(){
     <div class="sec-head">
       <div><span class="eyebrow">Scanner contacts</span><h2>The Galleries</h2>
       <p class="lead">Every part of the build, catalogued. Select a set to open its grid and full-screen viewer.</p></div>
-      <a class="back" href="#galleries" data-nav>View all 15 →</a>
+      <a class="back" href="#galleries" data-nav>View all ${GAL_ORDER.length} →</a>
     </div>
     <div class="cards">${GAL_ORDER.slice(0,6).map(galCard).join('')}</div>
   </section>
@@ -844,7 +894,7 @@ function galCard(key){
 
 function viewGalleries(){
   return `<section class="block wrap">
-    <div class="sec-head"><div><span class="eyebrow">All photo sets · 15 contacts</span><h2>Galleries</h2>
+    <div class="sec-head"><div><span class="eyebrow">All photo sets · ${GAL_ORDER.length} contacts</span><h2>Galleries</h2>
     <p class="lead">From the cabinet as found to the finished gold machine. Select any set to open its grid, then tap a frame for the full-screen viewer with arrow-key navigation.</p></div></div>
     <div class="cards">${GAL_ORDER.map(galCard).join('')}</div>
   </section>`;
@@ -953,8 +1003,43 @@ function viewContact(){
   </div></section>`;
 }
 
+/* ============ ENEMIES ============ */
+const ENEMY_SPRITES={
+  lander:'<svg viewBox="0 0 120 120"><path d="M32 74 L32 54 Q32 38 60 38 Q88 38 88 54 L88 74"/><circle cx="60" cy="56" r="6"/><path d="M40 74 L34 92 M58 74 L56 94 M76 74 L70 92 M88 64 L100 70 M32 64 L20 70"/></svg>',
+  mutant:'<svg viewBox="0 0 120 120"><path d="M44 42 L56 32 L62 46 L74 34 L72 54 L88 50 L74 64 L86 80 L66 72 L60 90 L52 72 L34 80 L46 62 L30 56 L46 50 Z"/><circle cx="54" cy="56" r="3.5"/><circle cx="68" cy="56" r="3.5"/></svg>',
+  baiter:'<svg viewBox="0 0 120 120"><path d="M22 66 L60 50 L98 66 L60 82 Z"/><path d="M46 60 Q60 40 74 60"/><path d="M36 70 L30 78 M84 70 L90 78"/></svg>',
+  bomber:'<svg viewBox="0 0 120 120"><rect x="30" y="48" width="34" height="26" rx="4"/><path d="M38 48 L38 40 M56 48 L56 40"/><circle cx="80" cy="62" r="3.5"/><circle cx="92" cy="54" r="3"/><circle cx="96" cy="70" r="2.6"/><path d="M64 60 L74 60"/></svg>',
+  pod:'<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="12"/><path d="M60 30 L60 14 M60 90 L60 106 M30 60 L14 60 M90 60 L106 60 M39 39 L28 28 M81 39 L92 28 M39 81 L28 92 M81 81 L92 92"/></svg>',
+  swarmer:'<svg viewBox="0 0 120 120"><path d="M34 46 l12 9 l-12 9 M58 38 l12 9 l-12 9 M58 64 l12 9 l-12 9 M50 82 l12 9 l-12 9"/></svg>'
+};
+function enemySprite(key){ return ENEMY_SPRITES[key]||ENEMY_SPRITES.lander; }
+function threatDots(n){ let s=''; for(let i=0;i<5;i++) s+=`<i class="${i<n?'on':''}"></i>`; return s; }
+
+function viewEnemies(){
+  const rows=SITE.enemies.map((e,i)=>{
+    const visual=e.img ? `<img src="${esc(e.img)}" alt="${esc(e.name)}"/>` : enemySprite(e.key);
+    return `<article class="efeat">
+      <div class="efoto"><div class="escan">${visual}<div class="elines"></div><span class="etag">SCAN // ${pad(i+1)}</span></div></div>
+      <div class="einfo">
+        <span class="eyebrow">${esc(e.role)}</span>
+        <h3>${esc(e.name)}</h3>
+        <div class="emeta">
+          <span class="ethreat">THREAT ${threatDots(e.threat)}</span>
+          <span class="escore">${e.score.toLocaleString()} PTS</span>
+        </div>
+        <p>${esc(e.desc)}</p>
+      </div>
+    </article>`;
+  }).join('');
+  return `<section class="block wrap">
+    <div class="sec-head"><div><span class="eyebrow">Bestiary // sector threats</span><h2>Enemies</h2>
+    <p class="lead">Six classes of invader hunt the skies of Defender. Know them — or be overrun. Each one has its own way of ending your run.</p></div></div>
+    <div class="efeats">${rows}</div>
+  </section>`;
+}
+
 /* ============ ROUTER ============ */
-const ROUTES={home:viewHome,story:viewStory,galleries:viewGalleries,video:viewVideo,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
+const ROUTES={home:viewHome,story:viewStory,galleries:viewGalleries,enemies:viewEnemies,video:viewVideo,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
 function render(){
   const hash=(location.hash||'#home').slice(1);
   const [base,arg]=hash.split('/');
