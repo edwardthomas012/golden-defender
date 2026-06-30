@@ -1,503 +1,1009 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOLDEN DEFENDER - Arcade Cabinet Restoration</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --gold: #FFD700;
-            --dark-gold: #B8860B;
-            --deep-purple: #1a0033;
-            --electric-blue: #00ffff;
-            --arcade-black: #0a0015;
-            --gradient-gold: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GOLDEN DEFENDER — No. 50,001 · Sector 1981</title>
+<meta name="description" content="A tribute to the Golden Defender — numbered 50,001 in honor of the 50,000th Defender to roll off the production line in 1981. Galleries, lore, sounds and video, set against the cosmos." />
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<!-- ============================================================= -->
+<!--  GOLDEN DEFENDER  ·  cosmic edition  ·  single file            -->
+<!--  EDIT YOUR CONTENT in the data block far below                 -->
+<!--  (look for the "EDIT YOUR CONTENT HERE" banner).               -->
+<!-- ============================================================= -->
 
-        body {
-            font-family: 'Rajdhani', sans-serif;
-            background: var(--arcade-black);
-            color: #fff;
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
-        .background-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.02) 50%, transparent 100%),
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 215, 0, 0.03) 2px, rgba(255, 215, 0, 0.03) 4px);
-            background-size: 100% 100%, 50px 50px;
-            animation: gridScroll 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
+<style>
+:root{
+  --void:#04050d;
+  --void-2:#070a18;
+  --nebula-a:#1b1250;
+  --nebula-b:#0a2d54;
+  --glass:rgba(18,22,46,.55);
+  --glass-2:rgba(12,16,34,.66);
+  --line:rgba(140,160,230,.16);
+  --line-2:rgba(140,160,230,.28);
+  --gold:#ffce4d;
+  --gold-bri:#ffe9a8;
+  --gold-deep:#b07d12;
+  --plasma:#54d9ff;
+  --violet:#9a82ff;
+  --ink:#eef1ff;
+  --ink-dim:#a3abce;
+  --ink-mute:#6c7397;
+  --maxw:1240px;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--void);color:var(--ink);
+  font-family:'Inter',system-ui,sans-serif;font-size:17px;line-height:1.65;
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+/* deep-space nebula wash behind the starfield */
+.cosmos{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 18% 8%, rgba(154,130,255,.18), transparent 60%),
+    radial-gradient(55% 45% at 88% 12%, rgba(84,217,255,.14), transparent 60%),
+    radial-gradient(80% 60% at 50% 120%, rgba(255,206,77,.10), transparent 55%),
+    linear-gradient(180deg,#04050d 0%,#070a18 40%,#04050d 100%);
+}
+canvas#stars{position:fixed;inset:0;z-index:1;pointer-events:none}
+/* faint grid horizon, very subtle, far below */
+.cosmos::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(120% 80% at 50% 140%, rgba(255,206,77,.07), transparent 55%);}
 
-        @keyframes gridScroll {
-            0% { background-position: 0 0, 0 0; }
-            100% { background-position: 0 100px, 0 50px; }
-        }
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: 1000;
-            animation: scanlineMove 8s linear infinite;
-        }
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 26px;position:relative;z-index:5}
+.mono{font-family:'Space Mono',monospace}
+.eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--plasma);display:inline-flex;align-items:center;gap:9px}
+.eyebrow::before{content:"";width:22px;height:1px;background:linear-gradient(90deg,var(--plasma),transparent)}
+.display{font-family:'Sora',sans-serif;font-weight:800;line-height:.95;letter-spacing:-1px}
+.rule{height:1px;border:0;background:linear-gradient(90deg,transparent,var(--line-2),transparent);margin:0}
 
-        @keyframes scanlineMove {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(10px); }
-        }
+/* luminous gold foil */
+.foil{
+  background:linear-gradient(180deg,#fff6d4 0%,var(--gold-bri) 26%,var(--gold) 52%,#e0a52a 74%,#8a5f10 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 14px rgba(255,206,77,.35));
+}
 
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+/* ---------------- HEADER ---------------- */
+header{position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg,rgba(4,5,13,.86),rgba(4,5,13,.4));
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.bar{max-width:var(--maxw);margin:0 auto;padding:14px 26px;display:flex;align-items:center;gap:22px}
+.brand{display:flex;align-items:center;gap:13px;flex-shrink:0}
+.brand .orb{position:relative;width:40px;height:40px;flex-shrink:0;border-radius:50%;
+  background:radial-gradient(circle at 36% 30%,#fff3c4,var(--gold) 46%,#7a5410 88%);
+  box-shadow:0 0 22px rgba(255,206,77,.55),inset 0 -3px 8px rgba(0,0,0,.4)}
+.brand .orb::after{content:"";position:absolute;inset:-6px;border-radius:50%;
+  border:1px solid rgba(255,206,77,.4);transform:rotate(18deg)}
+.brand .nm{font-family:'Sora';font-weight:800;font-size:19px;letter-spacing:.5px;line-height:1}
+.brand .nm small{display:block;font-family:'Space Mono';font-weight:400;font-size:9px;letter-spacing:3px;
+  color:var(--ink-mute);margin-top:5px}
+nav.main{margin-left:auto;display:flex;gap:2px;flex-wrap:wrap}
+nav.main a{font-family:'Space Mono';font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ink-dim);padding:10px 13px;border-radius:9px;transition:.18s;position:relative}
+nav.main a:hover{color:var(--ink);background:rgba(140,160,230,.08)}
+nav.main a.active{color:var(--gold)}
+nav.main a.active::after{content:"";position:absolute;left:13px;right:13px;bottom:4px;height:2px;
+  background:var(--gold);box-shadow:0 0 10px var(--gold);border-radius:2px}
+.menu-btn{display:none;margin-left:auto;background:var(--glass);border:1px solid var(--line-2);
+  color:var(--ink);border-radius:10px;padding:10px 14px;font-family:'Space Mono';font-size:12px;letter-spacing:2px}
+@media(max-width:1000px){
+  nav.main{display:none;position:fixed;inset:67px 0 auto 0;flex-direction:column;gap:0;
+    background:rgba(7,10,24,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:8px;z-index:49}
+  nav.main.open{display:flex}
+  nav.main a{padding:15px 16px;font-size:14px;border-bottom:1px solid var(--line)}
+  nav.main a.active::after{display:none}
+  .menu-btn{display:block}
+}
 
-        header {
-            position: relative;
-            padding: 100px 0 80px;
-            text-align: center;
-            overflow: hidden;
-        }
+/* ---------------- VIEWS ---------------- */
+.view{display:none}.view.active{display:block;animation:rise .5s cubic-bezier(.2,.7,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+section.block{padding:96px 0;position:relative;z-index:5}
+section.block.tight{padding:60px 0}
 
-        .hero-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(3rem, 10vw, 8rem);
-            font-weight: 900;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
-            letter-spacing: 0.1em;
-            margin-bottom: 20px;
-            animation: titleGlow 3s ease-in-out infinite alternate;
-        }
+/* ---------------- HERO ---------------- */
+.hero{position:relative;min-height:90vh;display:flex;align-items:center;overflow:hidden;z-index:5}
+/* golden planet horizon — the signature */
+.planet{position:absolute;left:50%;bottom:-78vw;width:150vw;height:150vw;transform:translateX(-50%);
+  border-radius:50%;z-index:1;pointer-events:none;
+  background:radial-gradient(circle at 50% 8%, #2a1d05 0%, #120c02 38%, transparent 60%);
+  box-shadow:0 -2px 70px 8px rgba(255,206,77,.28), inset 0 6px 60px rgba(255,206,77,.12);}
+.planet::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--gold-bri),var(--gold),transparent);
+  filter:blur(.5px);box-shadow:0 0 26px 4px rgba(255,206,77,.6)}
+/* jagged Defender terrain ridge on the horizon */
+.terrain{position:absolute;left:0;right:0;bottom:calc(72vw - 2px);height:60px;z-index:2;pointer-events:none;opacity:.55}
+.terrain svg{width:100%;height:100%;display:block}
+.terrain path{fill:none;stroke:var(--gold);stroke-width:1.5;filter:drop-shadow(0 0 6px rgba(255,206,77,.7))}
 
-        @keyframes titleGlow {
-            from { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)); }
-            to { filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.9)); }
-        }
+.hero-inner{max-width:var(--maxw);margin:0 auto;padding:60px 26px;position:relative;z-index:6;width:100%}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:50px;align-items:center}
+@media(max-width:920px){.hero-grid{grid-template-columns:1fr;gap:34px}.hero{min-height:auto;padding-top:30px}}
+.hero h1{margin:18px 0 0;font-family:'Sora';font-weight:800;color:var(--gold);
+  text-shadow:0 0 46px rgba(255,206,77,.32),0 3px 0 rgba(0,0,0,.35);
+  font-size:clamp(58px,10vw,138px);line-height:.86;letter-spacing:-2px;text-transform:uppercase}
+.tgold{color:var(--gold);text-shadow:0 0 30px rgba(255,206,77,.35)}
+.hero .sub{display:flex;align-items:center;gap:16px;margin-top:20px;
+  font-family:'Space Mono';font-size:clamp(13px,1.8vw,18px);letter-spacing:6px;color:var(--ink);text-transform:uppercase}
+.hero .sub::before{content:"";width:42px;height:1px;background:var(--gold)}
+.hero p.lede{font-size:18px;color:var(--ink-dim);max-width:50ch;margin:28px 0 32px}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap}
+.btn{font-family:'Sora';font-weight:700;font-size:14px;letter-spacing:.5px;
+  padding:15px 24px;border-radius:12px;border:1px solid transparent;display:inline-flex;align-items:center;gap:10px;transition:.18s}
+.btn.primary{background:linear-gradient(180deg,var(--gold-bri),var(--gold) 58%,var(--gold-deep));color:#1c1304;
+  box-shadow:0 10px 30px rgba(255,206,77,.3)}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(255,206,77,.45)}
+.btn.ghost{border-color:var(--line-2);color:var(--ink);background:rgba(140,160,230,.06)}
+.btn.ghost:hover{border-color:var(--gold);color:var(--gold)}
 
-        .hero-subtitle {
-            font-size: clamp(1rem, 3vw, 1.5rem);
-            color: var(--electric-blue);
-            letter-spacing: 0.3em;
-            margin-bottom: 40px;
-            text-transform: uppercase;
-            animation: flicker 2s infinite alternate;
-        }
+/* milestone chip */
+.chip{display:inline-flex;align-items:center;gap:16px;margin-top:30px;padding:14px 22px 14px 18px;
+  border-radius:14px;background:var(--glass);border:1px solid var(--line-2);backdrop-filter:blur(10px);
+  box-shadow:0 10px 40px rgba(0,0,0,.4)}
+.chip .n{font-family:'Sora';font-weight:800;font-size:42px;line-height:.8;letter-spacing:-1px}
+.chip .l{font-family:'Space Mono';font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-dim);max-width:22ch;line-height:1.5}
 
-        @keyframes flicker {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
+/* radar scanner orb */
+.radar{position:relative;aspect-ratio:1;width:min(420px,80vw);margin:0 auto;border-radius:50%;
+  background:radial-gradient(circle,rgba(84,217,255,.06),rgba(8,12,28,.5) 70%);
+  border:1px solid var(--line-2);box-shadow:0 0 60px rgba(84,217,255,.12),inset 0 0 60px rgba(8,12,28,.6)}
+.radar .ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(140,160,230,.14)}
+.radar .ring.r2{inset:16%}.radar .ring.r3{inset:34%}.radar .ring.r4{inset:52%}
+.radar .cross,.radar .cross2{position:absolute;background:rgba(140,160,230,.14)}
+.radar .cross{left:0;right:0;top:50%;height:1px}.radar .cross2{top:0;bottom:0;left:50%;width:1px}
+.radar .sweep{position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg, rgba(255,206,77,.42), rgba(255,206,77,0) 70deg, transparent 360deg)}
+@media (prefers-reduced-motion: no-preference){.radar .sweep{animation:spin 4.5s linear infinite}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.radar .blip{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 12px var(--gold);transform:translate(-50%,-50%)}
+@media (prefers-reduced-motion: no-preference){.radar .blip{animation:pulse 2.4s ease-in-out infinite}}
+@keyframes pulse{0%,100%{opacity:.4;transform:translate(-50%,-50%) scale(.7)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}}
+.radar .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center}
+.radar .core .big{font-family:'Sora';font-weight:800;font-size:clamp(30px,7vw,52px);line-height:.85}
+.radar .core .cap{font-family:'Space Mono';font-size:10px;letter-spacing:2px;color:var(--ink-dim);text-transform:uppercase;margin-top:8px}
+.radar .ship{position:absolute;left:50%;top:50%;width:0;height:0;transform:translate(-50%,-50%)}
 
-        nav {
-            position: sticky;
-            top: 0;
-            background: rgba(26, 0, 51, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid var(--gold);
-            z-index: 100;
-            padding: 15px 0;
-            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.3);
-        }
+/* ---------------- TELEMETRY STRIP ---------------- */
+.telemetry{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.tcell{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:24px 22px;backdrop-filter:blur(8px);position:relative;overflow:hidden}
+.tcell::before{content:"";position:absolute;top:0;left:0;width:34px;height:2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.tcell .v{font-family:'Sora';font-weight:800;font-size:38px;line-height:1;color:var(--gold)}
+.tcell .k{font-family:'Space Mono';font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-mute);margin-top:10px}
+@media(max-width:760px){.telemetry{grid-template-columns:1fr 1fr}}
 
-        .nav-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+/* ---------------- SECTION HEADS ---------------- */
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:40px;flex-wrap:wrap}
+.sec-head h2{margin:12px 0 0;font-family:'Sora';font-weight:800;font-size:clamp(34px,5.4vw,62px);
+  letter-spacing:-1.5px;line-height:.95;text-transform:uppercase;color:var(--gold);text-shadow:0 0 34px rgba(255,206,77,.28)}
+.sec-head .lead{color:var(--ink-dim);max-width:54ch;margin:14px 0 0}
 
-        .nav-item {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
-            border: 1px solid var(--gold);
-            padding: 10px 20px;
-            color: var(--gold);
-            text-decoration: none;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.1em;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
+/* ---------------- CARDS (scanner contacts) ---------------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(264px,1fr));gap:18px}
+.card{position:relative;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+  background:var(--glass);backdrop-filter:blur(6px);cursor:pointer;transition:.22s;text-align:left;color:inherit;padding:0;width:100%;display:block}
+.card:hover{border-color:var(--gold);transform:translateY(-5px);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 30px rgba(255,206,77,.12)}
+.card .thumb{aspect-ratio:4/3;background:#080b1a;position:relative;overflow:hidden}
+.card .thumb img{width:100%;height:100%;object-fit:cover;transition:.45s}
+.card:hover .thumb img{transform:scale(1.07)}
+.card .thumb.empty{display:grid;place-items:center}
+.card .thumb.empty .ph{font-family:'Space Mono';font-size:11px;letter-spacing:1px;color:var(--ink-mute);text-align:center;line-height:1.9;opacity:.8}
+.card .scan{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(transparent 60%,rgba(4,5,13,.85));opacity:.9}
+.card .node{position:absolute;top:12px;left:12px;font-family:'Space Mono';font-size:10px;letter-spacing:1px;
+  color:var(--plasma);background:rgba(4,5,13,.6);border:1px solid var(--line-2);padding:5px 8px;border-radius:7px}
+.card .meta{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card .meta h3{margin:0;font-family:'Sora';font-weight:700;font-size:16px;letter-spacing:.2px;text-transform:uppercase;color:var(--gold)}
+.card .meta .ct{font-family:'Space Mono';font-size:11px;color:var(--gold);white-space:nowrap}
 
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-gold);
-            transition: left 0.3s ease;
-            z-index: -1;
-        }
+/* ---------------- PHOTO GRID + LIGHTBOX ---------------- */
+.gallery-top{margin-bottom:24px}
+.back{font-family:'Space Mono';font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-dim);
+  border:1px solid var(--line);background:var(--glass);padding:10px 15px;border-radius:10px;display:inline-flex;gap:8px}
+.back:hover{color:var(--gold);border-color:var(--gold)}
+.grid{columns:4 250px;column-gap:16px}
+.grid .tile{break-inside:avoid;margin-bottom:16px;position:relative;border-radius:12px;overflow:hidden;
+  border:1px solid var(--line);background:var(--glass);cursor:pointer;display:block;width:100%;padding:0}
+.grid .tile img{width:100%;height:auto;display:block;transition:.4s}
+.grid .tile::after{content:"";position:absolute;inset:0;border-radius:12px;pointer-events:none;
+  box-shadow:inset 0 0 0 0 var(--gold);transition:.2s}
+.grid .tile:hover img{transform:scale(1.05);filter:brightness(1.1)}
+.grid .tile:hover::after{box-shadow:inset 0 0 0 2px var(--gold)}
+.grid .tile .cap{position:absolute;left:0;right:0;bottom:0;padding:20px 13px 11px;font-family:'Space Mono';font-size:11px;
+  letter-spacing:.5px;color:#fff;opacity:0;transition:.2s;background:linear-gradient(transparent,rgba(4,5,13,.9))}
+.grid .tile:hover .cap{opacity:1}
 
-        .nav-item:hover {
-            color: var(--arcade-black);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5);
-        }
+.empty-state{border:1px dashed var(--gold-deep);border-radius:18px;padding:56px 32px;text-align:center;
+  background:var(--glass);backdrop-filter:blur(6px)}
+.empty-state .pixel{font-family:'Space Mono';color:var(--gold);font-size:13px;letter-spacing:2px;display:block;margin-bottom:14px}
+.empty-state p{color:var(--ink-dim);max-width:56ch;margin:0 auto}
+.empty-state code{background:rgba(8,12,28,.8);border:1px solid var(--line-2);padding:2px 8px;border-radius:6px;color:var(--gold-bri);font-size:14px;font-family:'Space Mono'}
 
-        .nav-item:hover::before {
-            left: 0;
-        }
+.lb{position:fixed;inset:0;z-index:90;background:rgba(3,4,11,.94);backdrop-filter:blur(10px);display:none;
+  align-items:center;justify-content:center;flex-direction:column}
+.lb.open{display:flex}
+.lb .stage{position:relative;max-width:92vw;max-height:80vh;border-radius:14px;overflow:hidden;
+  border:1px solid var(--line-2);box-shadow:0 0 0 1px rgba(255,206,77,.15),0 40px 90px rgba(0,0,0,.7)}
+.lb .stage img{max-width:92vw;max-height:80vh;width:auto;height:auto;display:block;background:#000}
+.lb .cap{margin-top:18px;font-family:'Space Mono';color:var(--ink-dim);font-size:13px;letter-spacing:.5px;text-align:center;max-width:80vw}
+.lb .counter{font-family:'Space Mono';font-size:11px;letter-spacing:2px;color:var(--gold);margin-top:9px}
+.lb-btn{position:absolute;background:var(--glass-2);border:1px solid var(--line-2);color:var(--ink);
+  width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:22px;transition:.15s;backdrop-filter:blur(6px)}
+.lb-btn:hover{border-color:var(--gold);color:var(--gold)}
+.lb .prev{left:20px;top:50%;transform:translateY(-50%)}.lb .next{right:20px;top:50%;transform:translateY(-50%)}
+.lb .close{top:20px;right:20px;width:48px;height:48px;font-size:20px;position:fixed}
+@media(max-width:640px){.lb .prev{left:8px}.lb .next{right:8px}.lb-btn{width:46px;height:46px}}
 
-        .gallery-section {
-            padding: 80px 0;
-        }
+/* ---------------- STORY ---------------- */
+.story-hero{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line-2);margin-bottom:24px}
+.story-hero img{width:100%;height:clamp(240px,44vw,500px);object-fit:cover;filter:brightness(.62) saturate(1.15)}
+.story-hero .ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+  background:linear-gradient(transparent 30%,rgba(4,5,13,.96));padding:38px}
+.story-hero .tag{font-family:'Space Mono';font-size:12px;letter-spacing:3px;color:var(--plasma);text-transform:uppercase;margin-bottom:12px}
+.story-hero .t{font-family:'Sora';font-weight:800;font-size:clamp(22px,4vw,44px);letter-spacing:-1px;
+  color:var(--gold-bri);text-shadow:0 0 30px rgba(255,206,77,.4);line-height:1}
+.chapter{max-width:780px;margin:0 auto}
+.chapter h3{font-family:'Sora';font-weight:800;font-size:clamp(24px,3.8vw,40px);letter-spacing:-1px;
+  color:var(--gold);margin:64px 0 16px;line-height:1.02}
+.chapter .dl{font-family:'Space Mono';font-size:11px;letter-spacing:2px;color:var(--ink-mute);text-transform:uppercase;display:block;margin-bottom:6px}
+.chapter p{font-size:18px;color:var(--ink-dim);line-height:1.8}
+.chapter .twin{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:34px 0}
+.chapter .twin img,.chapter .solo img{width:100%;border-radius:14px;border:1px solid var(--line-2);cursor:pointer}
+.chapter .solo{margin:34px 0}
+@media(max-width:640px){.chapter .twin{grid-template-columns:1fr}}
+.battle-cry{text-align:center;font-family:'Sora';font-weight:800;font-size:clamp(20px,4.4vw,40px);letter-spacing:-1px;
+  color:var(--gold);margin:74px auto;max-width:18ch;line-height:1.1;
+  text-shadow:0 0 40px rgba(255,206,77,.45)}
+.battle-cry small{display:block;font-family:'Space Mono';font-weight:400;font-size:12px;letter-spacing:3px;
+  color:var(--plasma);margin-bottom:14px;text-shadow:none}
 
-        .section-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            color: var(--gold);
-            text-align: center;
-            margin-bottom: 60px;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            position: relative;
-            display: inline-block;
-            left: 50%;
-            transform: translateX(-50%);
-        }
+.poem{max-width:700px;margin:0 auto;background:var(--glass);border:1px solid var(--line-2);border-radius:20px;
+  padding:clamp(30px,5vw,60px);position:relative;backdrop-filter:blur(8px);overflow:hidden}
+.poem::before{content:"";position:absolute;inset:0;border-radius:20px;pointer-events:none;
+  box-shadow:inset 0 0 60px rgba(255,206,77,.08);border:1px solid rgba(255,206,77,.18)}
+.poem .stanza{margin:0 0 26px;font-family:'Inter';font-weight:500;font-size:16px;line-height:2;color:var(--ink);
+  letter-spacing:.3px;text-align:center}
+.poem .stanza:last-child{margin-bottom:0;color:var(--gold-bri)}
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60%;
-            height: 3px;
-            background: var(--gradient-gold);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-        }
+/* ---------------- MEDIA ---------------- */
+.vid-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:22px}
+.vid{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--glass);backdrop-filter:blur(6px)}
+.vid .frame{aspect-ratio:16/9;background:#000;position:relative}
+.vid .frame iframe,.vid .frame video{width:100%;height:100%;border:0;display:block}
+.vid .frame.empty{display:grid;place-items:center;color:var(--ink-mute);font-family:'Space Mono';font-size:11px;text-align:center;line-height:1.9;padding:20px;letter-spacing:1px}
+.vid .lab{padding:16px 18px;font-family:'Sora';font-weight:600}
+.vid .lab small{display:block;color:var(--ink-mute);font-weight:400;margin-top:4px;font-size:13px;font-family:'Inter'}
 
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
-        }
+.audio-list{display:grid;gap:12px;max-width:780px}
+.track{display:flex;align-items:center;gap:16px;background:var(--glass);border:1px solid var(--line);
+  border-radius:14px;padding:16px 18px;transition:.18s;backdrop-filter:blur(6px)}
+.track:hover{border-color:var(--gold-deep)}
+.track .ico{width:44px;height:44px;border-radius:11px;flex-shrink:0;display:grid;place-items:center;
+  background:rgba(8,12,28,.7);border:1px solid var(--line-2);color:var(--gold);font-size:18px}
+.track .info{flex:1;min-width:0}
+.track .info b{font-family:'Sora';font-weight:700;display:block}
+.track .info span{color:var(--ink-mute);font-size:13px;font-family:'Space Mono'}
+.track audio{height:36px}
+.track .soon{font-family:'Space Mono';font-size:10px;letter-spacing:1px;color:var(--ink-mute)}
 
-        .gallery-card {
-            position: relative;
-            background: linear-gradient(135deg, rgba(26, 0, 51, 0.8), rgba(10, 0, 21, 0.9));
-            border: 2px solid var(--dark-gold);
-            overflow: hidden;
-            transition: all 0.4s ease;
-            cursor: pointer;
-        }
+/* ---------------- CONTACT / FAQ ---------------- */
+.panel-card{background:var(--glass);border:1px solid var(--line-2);border-radius:20px;padding:clamp(28px,4vw,46px);backdrop-filter:blur(8px)}
+.faq-item{border-bottom:1px solid var(--line);padding:24px 0}
+.faq-item:last-child{border-bottom:0}
+.faq-item h4{margin:0 0 9px;font-family:'Sora';font-weight:700;font-size:18px;color:var(--gold-bri)}
+.faq-item p{margin:0;color:var(--ink-dim)}
 
-        .gallery-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-gold);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            z-index: 0;
-        }
+.split{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+@media(max-width:880px){.split{grid-template-columns:1fr;gap:30px}}
+.helper{font-family:'Space Mono';font-size:12px;color:var(--ink-mute);margin-top:16px;letter-spacing:.5px}
+.helper code{color:var(--gold-bri)}
 
-        .gallery-card:hover {
-            transform: scale(1.05) translateY(-10px);
-            border-color: var(--gold);
-            box-shadow: 0 20px 50px rgba(255, 215, 0, 0.4);
-        }
-
-        .gallery-card:hover::before {
-            opacity: 0.1;
-        }
-
-        .card-image {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            display: block;
-            position: relative;
-            z-index: 1;
-            filter: brightness(0.9);
-            transition: filter 0.4s ease;
-        }
-
-        .gallery-card:hover .card-image {
-            filter: brightness(1.1) saturate(1.2);
-        }
-
-        .card-content {
-            padding: 20px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .card-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
-            color: var(--gold);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .card-count {
-            color: var(--electric-blue);
-            font-size: 0.9rem;
-        }
-
-        footer {
-            background: var(--deep-purple);
-            border-top: 3px solid var(--gold);
-            padding: 60px 0 30px;
-            margin-top: 100px;
-            position: relative;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 215, 0, 0.3);
-            color: #888;
-            font-size: 0.9rem;
-        }
-
-        .copyright {
-            color: var(--gold);
-            font-weight: 600;
-        }
-
-        /* Lightbox */
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .lightbox.active {
-            display: flex;
-        }
-
-        .lightbox-content {
-            max-width: 90%;
-            max-height: 90%;
-            position: relative;
-        }
-
-        .lightbox img {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
-            border: 3px solid var(--gold);
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
-        }
-
-        .lightbox-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 40px;
-            color: var(--gold);
-            cursor: pointer;
-            z-index: 10001;
-            background: rgba(0, 0, 0, 0.7);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--gold);
-        }
-
-        .lightbox-close:hover {
-            background: var(--gold);
-            color: var(--arcade-black);
-        }
-
-        @media (max-width: 768px) {
-            .nav-grid {
-                gap: 10px;
-            }
-
-            .nav-item {
-                padding: 8px 12px;
-                font-size: 0.75rem;
-            }
-
-            .gallery-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            header {
-                padding: 60px 0 40px;
-            }
-        }
-    </style>
+/* ---------------- FOOTER ---------------- */
+footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:30px;position:relative;z-index:5;backdrop-filter:blur(8px)}
+.f{max-width:var(--maxw);margin:0 auto;padding:44px 26px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.f .left{font-family:'Space Mono';font-size:12px;letter-spacing:1px;color:var(--ink-mute);line-height:2}
+.f .sig{font-family:'Space Mono';font-size:12px;letter-spacing:2px;color:var(--gold);display:inline-flex;align-items:center;gap:9px}
+.f .sig::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+@media (prefers-reduced-motion: no-preference){.f .sig::before{animation:pulse2 1.6s ease-in-out infinite}}
+@keyframes pulse2{50%{opacity:.3}}
+</style>
 </head>
 <body>
-    <div class="background-grid"></div>
-    <div class="scanlines"></div>
+<div class="cosmos"></div>
+<canvas id="stars"></canvas>
 
-    <header>
-        <div class="container">
-            <h1 class="hero-title">GOLDEN DEFENDER</h1>
-            <p class="hero-subtitle">Arcade Cabinet Restoration</p>
-        </div>
-    </header>
-
-    <nav>
-        <div class="nav-grid">
-            <a href="index.html" class="nav-item">Home</a>
-            <a href="bezel.html" class="nav-item">Bezel</a>
-            <a href="controls.html" class="nav-item">Controls</a>
-            <a href="marquee.html" class="nav-item">Marquee</a>
-            <a href="boards.html" class="nav-item">Boards</a>
-            <a href="monitor.html" class="nav-item">Monitor</a>
-            <a href="full-photos.html" class="nav-item">All Photos</a>
-        </div>
+<header>
+  <div class="bar">
+    <a class="brand" href="#home" data-nav>
+      <span class="orb"></span>
+      <span class="nm">Golden Defender<small>SECTOR 1981 · NO. 50,001</small></span>
+    </a>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">MENU</button>
+    <nav class="main" id="nav">
+      <a href="#home" data-nav>Home</a>
+      <a href="#story" data-nav>The Story</a>
+      <a href="#galleries" data-nav>Galleries</a>
+      <a href="#video" data-nav>Video</a>
+      <a href="#sounds" data-nav>Sounds</a>
+      <a href="#schematics" data-nav>Schematics</a>
+      <a href="#contact" data-nav>Contact</a>
     </nav>
+  </div>
+</header>
 
-    <main>
-        <section class="gallery-section">
-            <div class="container">
-                <h2 class="section-title">Explore the Build</h2>
-                <div class="gallery-grid">
-                    <a href="bezel.html" class="gallery-card">
-                        <img src="images/bezel/bezel1.jpg" alt="Golden Bezel" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Bezel'">
-                        <div class="card-content">
-                            <h3 class="card-title">Golden Bezel</h3>
-                            <p class="card-count">View Gallery →</p>
-                        </div>
-                    </a>
+<main id="app"></main>
 
-                    <a href="controls.html" class="gallery-card">
-                        <img src="images/controls/controls1.jpg" alt="Golden Controls" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Controls'">
-                        <div class="card-content">
-                            <h3 class="card-title">Golden Controls</h3>
-                            <p class="card-count">View Gallery →</p>
-                        </div>
-                    </a>
+<div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lb-btn close" id="lbClose" aria-label="Close">✕</button>
+  <button class="lb-btn prev" id="lbPrev" aria-label="Previous">‹</button>
+  <div class="stage"><img id="lbImg" alt="" /></div>
+  <button class="lb-btn next" id="lbNext" aria-label="Next">›</button>
+  <div class="cap" id="lbCap"></div>
+  <div class="counter" id="lbCount"></div>
+</div>
 
-                    <a href="marquee.html" class="gallery-card">
-                        <img src="images/marquee/marquee1.jpg" alt="Golden Marquee" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Marquee'">
-                        <div class="card-content">
-                            <h3 class="card-title">Golden Marquee</h3>
-                            <p class="card-count">View Gallery →</p>
-                        </div>
-                    </a>
+<footer>
+  <div class="f">
+    <div class="left">© <span id="yr"></span> Golden Defender · No. 50,001<br>A tribute to the 50,000th machine · Williams Electronics, 1981</div>
+    <div class="sig">SYSTEMS NOMINAL · INSERT COIN</div>
+  </div>
+</footer>
 
-                    <a href="boards.html" class="gallery-card">
-                        <img src="images/boards/boards1.jpg" alt="Golden Boards" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Boards'">
-                        <div class="card-content">
-                            <h3 class="card-title">Golden Boards</h3>
-                            <p class="card-count">View Gallery →</p>
-                        </div>
-                    </a>
+<!-- ============================================================= -->
+<!--                  EDIT YOUR CONTENT HERE                       -->
+<!--  This is the ONLY block you touch to add your own photos and  -->
+<!--  videos. Full instructions are in the comments inside it.     -->
+<!-- ============================================================= -->
+<script id="site-data">
+/*
+  HOW TO ADD YOUR OWN PHOTOS
+  --------------------------
+  1) Put your image files in a folder next to this page, e.g. /images/bezel/
+  2) In a gallery below, add lines to its `photos` array:
+        { src: "images/bezel/01.jpg", cap: "New chrome bezel" }
+     - src = path or full URL to the photo
+     - cap = caption shown on hover and in the viewer (optional)
+  3) Save. That's it — the grid, lightbox, counts and thumbnails update automatically.
 
-                    <a href="monitor.html" class="gallery-card">
-                        <img src="images/monitor/monitor1.jpg" alt="Golden Monitor" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Monitor'">
-                        <div class="card-content">
-                            <h3 class="card-title">Golden Monitor</h3>
-                            <p class="card-count">View Gallery →</p>
-                        </div>
-                    </a>
+  HOW TO ADD VIDEOS
+  -----------------
+  - YouTube:  { title:"My clip", note:"optional", youtube:"VIDEO_ID" }
+              (the ID is the part after watch?v= )
+  - A file:   { title:"My clip", file:"videos/clip.mp4" }
 
-                    <a href="full-photos.html" class="gallery-card">
-                        <img src="images/full-photos/photo1.jpg" alt="Full Cabinet Photos" class="card-image" onerror="this.src='https://via.placeholder.com/300x250/1a0033/FFD700?text=Full+Photos'">
-                        <div class="card-content">
-                            <h3 class="card-title">Full Photos</h3>
-                            <p class="card-count">View Complete Collection →</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </section>
-    </main>
+  The galleries below are pre-loaded with images from your current site so you can
+  see everything working. Swap those URLs for your own files whenever you're ready.
+*/
 
-    <footer>
-        <div class="container">
-            <div class="footer-bottom">
-                <p><span class="copyright">Copyright 2024 Golden Defender</span> | A Retro Arcade Restoration Project</p>
-            </div>
+const SITE = {
+
+  /* ---- HERO image (the cabinet monitor on the home page) ---- */
+  heroImage: "https://lh3.googleusercontent.com/sitesv/AA5AbUA-qPPH-2dGMnVNLWqaZoRKNCiW9OUYjPbuvgJ5N9b2IVaYybvSKbUOcMxmow7w9LH8Yu5-ORqaLE-JVUblWTaYINNbYfDPb7Yl6tEOSgwQEya9k2Jbxn0MVnKbD7VV7mDnQhjlS5H2JkaOAm76jiaSTXbWJhu8rYM14HP1vsqnu__a5jkTo6BPJBsB6Lic4Nyhpm-bJid4wa1mNHK4bywsjszY-pJ4003zI4xHj7s=w1280",
+
+  /* ---- PHOTO GALLERIES ----
+     Each key is one gallery. Add/rename freely.
+     `cover` is optional; if blank, the first photo is used as the cover. */
+  galleries: {
+    beginnings:{ name:"Golden Beginnings", blurb:"Where the restoration started — the cabinet as found.", photos:[] },
+    inspection:{ name:"Golden Inspection", blurb:"A close look at every panel before the work began.", photos:[] },
+    parts:{ name:"Golden Parts", blurb:"The components, hardware, and pieces sourced for the build.", photos:[] },
+    paint:{ name:"Golden Paint", blurb:"Stripping, prepping, and laying down that signature gold.", photos:[] },
+    bezel:{ name:"Golden Bezel", blurb:"The monitor bezel, restored and gleaming.", photos:[] },
+    controls:{ name:"Golden Controls", blurb:"Joysticks, buttons, and the player panel.", photos:[] },
+    marquee:{ name:"Golden Marquee", blurb:"The lit crown of the cabinet.", photos:[] },
+    boards:{ name:"Golden Boards", blurb:"The brains — PCBs, wiring, and electronics.", photos:[] },
+    monitor:{ name:"Golden Monitor", blurb:"The CRT that brings the vectors to life.", photos:[] },
+    coindoor:{ name:"Golden Coin Door", blurb:"Quarters welcome. The coin mechanism and door.", photos:[] },
+    creator:{ name:"Golden Creator", blurb:"Behind the scenes with the restorer.", photos:[] },
+    extras:{ name:"Golden Extras", blurb:"Odds, ends, and the finishing touches.", photos:[] },
+    tribute:{ name:"Golden Tribute", blurb:"The plaque and the milestone honored.", photos:[] },
+    enemies:{ name:"Golden Enemies", blurb:"Landers, Mutants, Baiters, Bombers, Pods & Swarmers.", photos:[] },
+    fullphotos:{ name:"Golden Full Photos", blurb:"The finished machine, head to toe.", photos:[] }
+  },
+
+  /* ---- THE STORY (your lore + images) ---- */
+  story:{
+    heroImage:"",
+    opening:"IT ALL BEGAN IN THE YEAR 2112 . . .",
+    chapters:[] /* filled programmatically below from your text */
+  },
+
+  /* ---- VIDEOS ---- */
+  videos:[
+    { title:"The Golden Story", note:"The saga of the Golden Defender, in motion", youtube:"zIEGTE0hOmo" }
+    /* add more like: { title:"Power-On", note:"First boot after restoration", youtube:"VIDEO_ID" } */
+  ],
+
+  /* ---- GOLDEN SONGS ---- */
+  songs:[
+    { title:"Golden Defender Theme", note:"Original tribute track" },
+    { title:"Hero of Wave 255", note:"" }
+  ],
+
+  /* ---- CLASSIC SOUNDS (the cabinet's own effects) ---- */
+  sounds:[
+    { title:"Smart Bomb", note:"" },
+    { title:"Hyperspace", note:"" },
+    { title:"Laser Fire", note:"" },
+    { title:"Wave Complete", note:"" }
+  ],
+
+  /* ---- SCHEMATICS ---- */
+  schematics:{ blurb:"Reference diagrams for the Williams Defender hardware.", photos:[] },
+
+  /* ---- CONTACT ---- */
+  contact:{
+    intro:"Questions about the restoration, the milestone, or the machine? Drop a line.",
+    email:"hello@goldendefender.example",
+    faq:[
+      { q:"What is the Golden Defender?", a:"A tribute build honoring the 50,000th Defender that rolled off the production line in 1981. This machine is numbered 50,001 — a tribute number — and finished in gold to mark the milestone." },
+      { q:"Is it a real, playable machine?", a:"Yes. Every system was inspected, repaired, and restored to working order. Insert a coin and it plays." },
+      { q:"Can I see it in person?", a:"Reach out using the contact details above to arrange a viewing." }
+    ]
+  }
+};
+
+/* =============================================================
+   DEMO CONTENT — images pulled from your existing site so the
+   galleries look full out of the box. Replace with your own
+   files anytime (see instructions at the top of this script).
+   ============================================================= */
+SITE.galleries.beginnings.photos = [
+"AA5AbUBfdVvfaGfuIAheSNC4OF9RhlWX-5sc-jjDFkhiVK-6S3wugyU-Aq45e9Li0SoSRsjwt4Kh1biEWBhYH-l7Rdjo2rB-Jp5_OfwNj-ZV7kSWXpJD5zAqjid7A9rJsVKQ4neLWuYXlVbHQu-nuKVhWNCTz8wKh79FvOVoJIfutNxiJS-RNcm2M1H1Dma5mXGyY2rdAYxm_L1a7MxOz5GSgk9xxSmmjIIooUbeF-C2",
+"AA5AbUC7-bNVRjF7nIPpq4F7v3_2N_9Xuuf-2t7C90JOY0q866kvX2UgyTvVWWNmWqjBlMlXjA0DvBFYrIvNPNkYWnLFGJuUI5BL9JJWoMw7sQAfU6gK68Qfji5vyUG2xS_OxpkI0O_aemrSsqAkHrVHDFO0_xUv0GOEhndqBDTl2vpdSZv9yIfPfmn6akfYx49NTikzUhGC1L63RmKyg25ceLlJUlJBiILc20QiwsTWEVw",
+"AA5AbUDXS0Z9VsP17hQGs5K-Rd5Y748kdx2koppKSBObenl5MCvo73fc3pVp5FT2zEVb0x8A58pyLJJbKUnCytHcx6Kh70KIrpLc_aVmnWGza6e63xb1mzpduLJRak9E45maEXjmUVXPPwivOzFFWw7YuQAwwYp_izIaxJDA2-qNZlvShByv37pU1Zx84SmAZmCFT0kJW5RGhiIgB854P-cTcLqPE_KIQWoykSAeYGckK_M",
+"AA5AbUC9VRszNJ4S217CYGuijxO_GdYeVc5XfRb3ueMY5V3AbhmnIKLkS1EPA46y77sRlAHcECmQ8Isq_2uT9HGJyVe70IWbQnSoCTbj7b_cwA0EP3a6igDXo-J1j3FvXYo9OUMn2JpTESSL7JPNIQ9f6vw6RL6YuUl_RFcWKJES83zxHAMZobKa7l7dw8tGJfQfp-ExigXIOTA29NnsId_2JmyaaDW0VoL4n7M4FH9E",
+"AA5AbUCL0_cx18tVU_dBM7wkFXM1R2RyrAkABOKQIRa0I2vlEzTXnyXMsIKIbm80kOhCmTFMyzfxFeTjrHiupVlSFJalRu3fUbWGzpPjQj4Ql2RoaEk8FOFR-lx7VEAp8atEXMDAM2WzWFgR1D31mJJtb0PWSEftqApu03SO8ooM3s3URKnNyXF1ziOE4gkq5YTzbV_34a_4CaINy3LyDlvYqYl01MBp8mBXgz3cPmcwQPY",
+"AA5AbUC7NW0j9MfoYu2OW2LRep0ij75cnnuG0r4ZKAzjIIFPtgOBq2GXVvCbqiFbZ3d6AnFqrOMwO4FLUwBo93QjjFiJ9aI09QR_F6argbWWyTQe2tYjMHuvfNO-EVepLCykQ8IGG7MYIcK_Qd3oHHO_a5c2i3qPmmom4ztYhAWTjXbnmspHkBwOthez_PXqzWogLRKi0OBnDYMlgBET0SncHWdiL_ducENVVFyhTkDHOlQ",
+"AA5AbUCCO0nlyCQq_H3VghsSVEPvw11Xv91gHOuQNy4Gf-wal_fAvj68oxl_GThh_5vHsvko41m2UiNYxAzB9AAxil6VZj20PXiTRp4PQfCdJEIVrMpeYNy5pLLnzozYRdkovxDTnoBKQJ08yXQhJlCtblBkW1d3Z5Yrm0WYFxVsXxOHBzHviEacipXDTQ3WcUfswv2f7UbrtJ0n3vXImeMYi5Ivx0qGqOtsPd9HcBjo7o8",
+"AA5AbUCFBI3ojrvvEldliRn2-dcKxcuB13zN_X9O1nsfNXA-MhF6vd0XappsWYmwVOtYYaVTtnV9-1pF2EF7loYSkIOEAjjq23IdlL3QcPsc4RHt22Rdexb9xPHrjX3y5UovtPpwuySmrb-MLUYD7knDwqFJK_pQncv9hkOYjRgy_K2o1w_OJM8oMwB187MWwdov68YgqNJGwwMF515hvddhIj9XsnibKvP7QvTFjvs3U1A",
+"AA5AbUB92TV3nbRzEBY_JEMm3B7Nhfv3oBiopgb_sy2BwK1iqWKeGK7EEoJaQOrmC2GboqGCCG9rVN8WhKFXKEOjbwt6oVtqnu6BJnF3RJqj6nHNPHb-Rbnobkq8G1FI0ljn_FjWGvOJVvEypQZy2dMZihUULuyrFojmhUhfoQwT25HcMWAx5emNGZeGA8bYVldUoaAVl8doHbKVsIxijLBXAkFw0G9QOBBL66Ujo0-PTSE",
+"AA5AbUD5J9WtJG0TwMusI-65X2Xa1q61TwX5WV8QfmQOzpQZEOinP2pDx4rpGY2yOeh88De9bRrpbQkMR5HG2g_5Q7DCHs0N5M_JVrF04uDYudkczG9xYqEZVp0UnNWREfpvMD4U7hVrejNGdMrgYW5o30cSjnKEWQdJhHkEIw2KQiMyI4sN6LwNhmAlDBQaPwZtwtY5idusGUCYB6Q-doQj0G3t2c1yOwyJ-1FESQDfJS8",
+"AA5AbUAUK3xVy5vfgRoSlxYqanl-oUepHZCHgUJ5WQ0lOodXSDWlqrUT1yuy61u8rCc3at7A3u2crRKPBpjB3q8PmS4_xKKVCiKgAYryCYJWQaYPfFgdfm1N6YmNzbp3G_ZU1vYy9Fj1j233pQw_4at5oLL4iGQJ1RYMmF1JnrdKQuGqSrrSog2aF46CP378Xtec8BkT_TlzGU9c4i9whj84vjXyG8AI79kpRPmKFkj0HlI",
+"AA5AbUBk-S6NGxIUqWyB6WdpLyVgcllPIddvFu9bA9ipZbZ-ccwOhbRWB99iLgQvfbO-Z3XOcDU1V3bMegFq-zBieUyPOOn-MyyzLGTeqnGczJ6MuWdDesiXWXEbdfMnyFQhGvNuf9-kTKNJhwQWxT_fRteXVn9K13caESw47i69yhfFRjXWLb8NbWIhpNFUM1j3cQ2mYOR_1aqy-AbAVZCRToZogDjb9arn5UbsB5cIAj8",
+"AA5AbUCYKbST5YItBnw7YqnSEuH4SMNc5ijhw3lyNoSLVXJC6p7R4bs9dgZwCTtwTTgLcXZrtIshE7agVfA0oa6sKUNo7DPXBBMdWjIRq559rczema6v0efrHF76z6sHWE9ldKqLSmlONOGmZJdkORvb-tifRNK4qL403gxL5ddnINAkRCA4iZ_pWUrQGESmFiOXe6y4jy8C7OtxufvRSMJTUaTNewZvIHxrdxwxecYJPLc",
+"AA5AbUBybcCd6NMAq-QD6m3aqayeLPrzD3Ta599Lbn27SWSIKnMZ3J8gylZ_Ekapkcu9i4xjJpeoCuzgrnke4rYP9ddur-alMBfXO5PfQ91Cl966afHpqtI956pfzfgsCDfk318oOwSf__jNwSXVUMIr5su3nucx8_7L7vg0YQt0P0kPBm18P6Fzc7eFrRRRNYN292Mgz1Up7gdUuajpXf_nefGKfoHdfzF5QEP9IXbqDXk",
+"AA5AbUAfAShMMAbscwKCF8DrEbTEe3xKizwY6DBd8xZSEFgS7bVJM9BYQDfew_8O-gM5hePJv4GZVD4juGV4DUeHuMSzAsE7IH71sH1D7QK_5TqwtJiSFdPefTEnBQXBIkPzH_QYPIq1uWpDox5rz8OeNGjB9jVgbzZxtfXorntlA14fN4RBVZ_H36raNdeITFhuEGHyKe6qe_Nbq4O-8q20luBRvRX9P1hEqA6yGXVeo6o",
+"AA5AbUDWlrdXBcgB0ZNwKwvDpO3EqyHlRj_w4j_-CLrO1pGP2pcGQ2CM0Oyfsh4VaUNNdiVo9jF89W39QRHlvY9YK1eXyR07gIbcdhUnj6dbKvNNPqTdHMAQL1k7j1sulIEuLlCZI1i0GI3bie0evIjNvxr1vRhd-S4_WtcuPdWxtkNz6NhNVimhkj0-dLVoJH9T3qUMEblqDYCSbE8ufQAd1COfIFvSeiHyIyDsc4uBu8o",
+"AA5AbUAOgQZTl4vA_L3AmsIZvb1ggiUG9hoZmWRw-GcUxJNs5RerSpropjMFR_SH1jxlsldfIbCOOWo0vZ0bjxMFdplwTWT2FSH6VrbJfjkbQIvMSIzacRSmqe70cT6v83STEdZFFll4VLMYD3dyaOVs454Vu3MNsjFrGQctoQajcLSX60-EHj557JGjpzvbVCVTrhOrba7cLsfo6os6ilqzccD36b2eohC72A3ERYLW0sg",
+"AA5AbUAoCYTIkWVvklD4yaVSNubd9B3WW9224INZ7Tm1wlBgoeLd9TpATWRSpXBt6lepTK8gcQxoacwvlNKiuLIFGr9OjAKIxw_wM0Toj79J33JtsWdXCgacEN7IZDGDg_2iNAK0rwfmTAR7dGE7ZC6WTLFnzFs6KG4l24r_mn9pJqzoKo2WZEUbnCaHDCwwRd4tGEmEu5yUfO2Ud5EOT9DeLTTreHdHHe9oK08ts_263Zw",
+"AA5AbUARbrOH3hErZQ8juQ-ahp0eqcG1KKhj-C7BhMu52LF-3phY3dHr_MzCb1X5qx_hdmpTSvmCLJXgFBjxVjanvQhSmSO890wS-seiQSM6uGKBA2xzldcpd6CTdc04sKXbCR5N2jOVZ2bgkEU_DRQS23YyWoSwJaGaB-XK0OLKS1wXWMps2dTDj0N4nblvKPkYxBdH1tfUFDvOzbUhrxcU--o8Bl5NCGZT2Atzfln4QsY",
+"AA5AbUC--dJQdZR-guOotlsJ-2p59aNTYwJ8m1hyxJYFodfgpk5_apK4z6AJIDyCT1DfEb51obNsVYPpFzLIWdDsy1uK5r1SOngwHIGilzv4j8RqU7laa2DLuMyx5p-OZHgHtJ2Sli4Y2ONJppJHmw0oJnYZdOX5gx8QK4ngW1gGcWC_qtC9085UilG_2fZF8HtE-PkSmUtM2FIlnhFCGeyFJFXTUQPpH4KqY0ru4MwaQxQ",
+"AA5AbUB7_cqUU4vxhLcKFtvfqvqrgdmVjjotfjlZ9uN8P9v6S-I2A1vGyuffkNFaN9j6r3HdjhS644B7d28qBcL1mCizUZQB8fDCGDb-7iRvy810fIMoNGmhacne4RJ2CJqeglWIf1TSDWzqrGexzwC2q2us9sEHOsRTLPW0zQ5ffSthmLx3BzeQE8TPr9kNWIcVHNN7oDFgJTtH2pV1nRaZggmXB3qYUlUGuYrhGg",
+"AA5AbUAxWpn8_VgRN_Wie9vXtiaAcd4X47-EWzSBFo9fM6NoPTKPYgHj63PRm0GLZ-rEhv6i2WYdqpmyvVVilrBDbUyM3F9nIbVaZo1gIq2MQEZR9BdarnhvutZcf0_hF6MG-TL6DuH5F_gmy_KPWVYcRjNtJ2hUUdyvW6cT15f_IB9PFbIxYMc4qcTmZZmLbL8seX_Hq-6_BDpmslspjqFwdCO4tqQoZEswT_n0RNuZ5aU",
+"AA5AbUDAlCPnmXcibOA6ymkrb3G9d_CB72nfs-Eny4ROo7_7-qSnBMA8NQQKflCNyNCJckUAkZYdEr4pPfFrqw8E9DTUIUopJG-D3-UcZz7rdAENTXDZzmq9XVcbyCKQm-clfnHnHtUA7aRlNRuQ-_a4337MAH_UEO7R6gvh27R70THuks2OAri7jnJursgGoP08XRlGJPDCcauJ9xJ_cx-SMmGmZpazZaxe_TQQlNlLeNc",
+"AA5AbUB0fBmSPjOU73UdoKH4be1azmDPMFmzuS1Nmvaq5BjGMQ8s6aSbke0ffWfMT7jeUaC-XvbkCKxKsbal00R606OdOmRuQK02rZNn0PrEbJhnOXIevXAy3NJlWi17TF8wCkAYAvaHlHlDrFxEfA5kBjoeAwLa18c1WLkr4AghS2sVlGTafGOa2XU3dSv8-N1zHyhTNBKCFyVoAVymPZIuIFjlh_Ass_mbbnSwtmmg",
+"AA5AbUDh3562hqxKiA1pXfNPIP7Y-Ixrm_KO8SVLgJu3MH_7YSeBq14QkcB4UhFsYQjMeCYUm3NMXRT553sMMqXCX25NV11fxABfp_tuFUyUgHDQ1xqgHfbx3K0CZcyH4WG7jbTCYnna5vlauF22nHXXdpUIdhU2dfMpVKpJ2ADSQc890-Fp8cHK6N1XvymXlAWalFzwS9oNyqS5JHurRewiY0xcH2DB2SngAvFOI_eQSok",
+"AA5AbUAvvlFV0aR_yItIAFFioRJc08c9L1L1QsQij-v7dSOMZePbvPpOZXEV6a_XMGJVzYNMSJEM95W9cWz8AsSLgheAbhgvjW_qVD-O3gQHpZOE5YP9YPYCBs-mAHo1Ei9VTvj4UbWKxtEoOlefG4FN2Canf8QX1IuWH34EChoX5sWHd4ix1VleW_gXHmEP1qy4JpvRAccQ0M9KWUDEkmYEVViGTHDREVxlEryo723A7xo",
+"AA5AbUAk8mNE-bnffU1vRxq9AERYYV4uf8JQzqZPLab88d3Swlw29sbTX0lkWxC_HbIdXQ5FNGy2wMIWbLFFOOLyPVhzTPvzzRjHAPbGWfVAjxi4I5L1z-prOtYuvt0Jbn2jrID5qoS-ojKy9DvuSSaFM3EMFGcySoCDNEy1Q-U5RJcye14AsMPwWxKBy4fdrzHRh7mjfyjd7u4xAqDOarel2SWT62jj8OTRzykLeUU6",
+"AA5AbUC4HBKde4zFr1bHOcyM653-01LqfBg6jtBjmgNn8zLJiYjmpdbo1J2Bm0dOHHMNmS-iNPhg5Ul9zyC-wvAHZ5j9ij1wDrWlPnJMVg2Ghvd4omtPiDcz5J3bvWopEbHdyLLZWKscrMk-sAKingTaa8x7JiV7YifPOd88QfKt0aD_tn2lc2aP9TZxr9MnUdldf_sryk2k6TWZT_duHsCBkixxCtTxa8AG3wA5lp59JK4",
+"AA5AbUAjRpC2rnAVYBH1FFnDqKkvxhrivHnTswG-GQfDMqp3awL01LozmN7dIjKGS82m3MvHKNp4VuOYRVbKiMH48grMc8J4d9sSEwz7BqvZCYjfIF00XqhfPe-gx5pNzWKSwvLQ5XCGa6HoEE_W39jN25nj0o4IJ52OGcHtOyj07yIHbzstikcl4dvFxi6vtPXb2KNzcNxpD0CncN8G1tkvw_S7loab5IX9OETtjhGakes",
+"AA5AbUD3OspiSTnxWIBMskKJTKWdFMC0v4k1jgX5bDCSddhgexfWEhXxenqAq2jXuYkF3DuFqkMxH8ahkd46jJP8flf_K7WVIqbQVgmneAYOpmznncg4OSQb1umnde3YuiOjqu2EHo7M1JvpfFXjulB_M0HOg4a-sWqO1jO1A0UDfZNqSUFyb3zAaaG8dNC3fMMwQMgygbg-1wn2csZNMeKlfUDvgqK2xrgv1UzbHInZGDU"
+].map((id,i)=>({src:gURL(id),cap:"Golden Beginnings · "+(i+1)}));
+
+/* helper to rebuild Google-hosted image URLs from their ids */
+function gURL(id){ return "https://lh3.googleusercontent.com/sitesv/"+id+"=w1280"; }
+
+/* The Story chapters (your words, preserved) */
+SITE.story.heroImage = gURL("AA5AbUA-qPPH-2dGMnVNLWqaZoRKNCiW9OUYjPbuvgJ5N9b2IVaYybvSKbUOcMxmow7w9LH8Yu5-ORqaLE-JVUblWTaYINNbYfDPb7Yl6tEOSgwQEya9k2Jbxn0MVnKbD7VV7mDnQhjlS5H2JkaOAm76jiaSTXbWJhu8rYM14HP1vsqnu__a5jkTo6BPJBsB6Lic4Nyhpm-bJid4wa1mNHK4bywsjszY-pJ4003zI4xHj7s");
+SITE.story.chapters = [
+ {h:"At first, scientists thought it was just another meteorite…", p:"But as they studied it, they realized it was something much more extraordinary: an ancient arcade game from 1981, called Golden Defender. Baffled and desperately wanting to make sense of it, they powered it up. The game had a unique glow, its gold lights flickering and its rusty old speakers crackling to life. A strange energy began to emanate from the machine, and soon scientists across the globe noticed it was drawing aliens from across the galaxy to our planet. These creatures — Mutants, Baiters, Landers, Swarmers, Pods, and Bombers — had traveled the vast expanse of space to conquer Earth and harness the power of the Legendary Golden Defender.", imgs:["AA5AbUAThEBgr7Tbkl9FoPFvBRZZ4PUl10pqCoo7cxGycnx5PTRnC2XCF2dWSO9dQxCJghW2GjJ8RC5PwL_MGHTqWDjUyjDlNnGmK3a6DZTd6c7fW2n9hsmGL9sFjZXMPOcuFJnyyRFslcIsWIqZmZwSE3xRdwM9rvhtURfQQDpusiDuYB1GNYKmvVgZxUAZjeNTeODWp6HgwdCpQyHEmQIYaIudIICjrFKbQaC1BM0Xrkg","AA5AbUBlBVqJxMyj3rQfoDxyayMzdqKWk4dkaqFKG49pOwk429xpj9dGwgeLTpVsY_MJLNCyZ-i-iI2pozeZskcE7UR1bFFBPTPSuCCtNefZGXUpp8iO8j7zTvwIAEw8E9MiAUHKnA1wGrOKFZ2psmZpgzsYPmNxgY6vSZM6wGw4dYxAWBgUA4edkZRsDGcfSw_GG1nwB9tYdwlE3K7Gn2VAeTTgG5YJr_tDsWKzNflxdZ0"]},
+ {h:"As they descended upon Earth in waves…", p:"The planet's militaries were no match for their overwhelming numbers and advanced technology. The Baiters, more cunning and agile than the rest, were particularly troublesome. Swarmers, small and deadly, carried an eerie sound when shots rang out — almost as if they were laughing. Landers picked up civilians and turned them into crazed Mutants. It seemed all hope was lost. Humanity's only hope lay in the hands of the One person who could master the Golden Defender and use its power to save the world.", imgs:["AA5AbUBXDukffXr-xZEyeXwzyfskshV5SKwncFf_4vp5DkbCMyTweIr3Z_oQfBSZpyYon2fyrCVplxrhhEJC6Tn-bDJUZZneJzLJHBQQtsPrQ9Cj7nZnDubJzKJQxx3VcmN5rTWUSN7h1SlGDkNkaaAhmchoU3ekD0mMbZDKYwi2-rzH7BR25KN6IAqpTtsYzrzPxdZJuL-tf97Um6qiGfTlYFVckqomJCOLtIL3zfV3K7M","AA5AbUDJc9k5y-ZtEhJDenSL0FJknQf8EjVIgllgOFjW9fwuJXfz-k8vq1hbeFquYEKKcyP6NeaUGgQNKuvJ4mqiibIlSOJF4Uoa7VqQv_Z4Gs_dE102VvLuoq6_QsfNr-0843fFdgX3GQC47JLNZ6dxWA60loIKgqsuCKPcL1Vue-6WD7Oos6MoQ49yWnTgW5F9Q6FmGYxLX79UwPds6_I7uSfGt3FbMafyO5cyqMfKYVc"]},
+ {h:"In the midst of this unimaginable devastation…", p:"There was a glimmer of hope. A small group of programmers led by Eugene Jarvis and Larry DeMar had developed a powerful weapon that could harness the very essence of the planet itself — but only through the Legendary Golden Defender. Who will brave this machine? Who will stand and fight for all humanity? This person, known only as the Chosen One, had been chosen by fate to rise to the challenge.", imgs:["AA5AbUATShxC7r0LwCT6zYn0AuHclp6b38ORER4BgpDcSSPNP6syu41wrFrxZo2Rth9Q1voionxXa1h_E0DhaUtkptLyX6DSGyFEexZwW9KCDrk57eDKtbA6AKPCrLyOtuIKxEpVwukV83Q8pHiWVNcawT-CwfFyBCO1pwWu_YRgUvMWoNUrSBE69MUvnsIxvZBzctnjCFHa1iGgYCkH_Wm8TbHabA5zUKXQtvd_UgpH","AA5AbUByjvhc6O7YxE736XAmbfOEBvmazAEY8Zl1qahYMSYDbEe44PU8JlmrLFhY9Nkz6kFmtgjy7T0VA0aA5Q5DSwg5VyG3fSMM_qsE25C7eBEumxHQ1esR7DzkfIqEQ0ObV-ueIKJstK5oYJjIvUL658c1zIc61sna_UHOcP5hiOSnrtIKvUxrCYUx-3eVJPlr5f1feoPcPYVtV8R2GniSvuHfgxofAC4_TXx25SvzpPM"]},
+ {h:"And so, the battle begins…", p:"In the beginning, the Chosen One fought bravely, repelling wave after wave with quick reflexes and strategic thinking. He learned to anticipate the Baiters, to strike at the heart of Swarmers, and to use the Golden Defender's powerful Smart Bombs to incinerate Landers before they could turn more humans into Mutants. But as the battles raged on, the Chosen One began to tire. His hands ached, his eyes burned, and his mind grew weary from the constant stress of combat.", imgs:["AA5AbUCAQFGMGxZerWJFwPbTgmKS04mPFOCK8Xrr-qHqShVRRrl6WBcPGLJBM1Vq5JEihvabMidZZmhCckUEYxZvzxHR84DRiPwr3BkvdSxD6Jhg-Ji0UdoH9CUDLU5CkhJHSJidl6Mj-mVU_36WBhVVgOBkajfXOJXipUe22mjZD_E4IRfNWAUUwg3t24peix3WYaQ3oI2xUePuGknkdYRJumtIh7XZftUuYLJie0FFwiY","AA5AbUAdDKnQZOwhbYBdWK6arulFZYVS-mnJpNVWWa6tdB1N9i6EV0oXHh-bjuTAH_De0fjq_tGkqtUpBx9vgN5ULczpFGjP4fR2DVvUexwhZr5XHk3-aHODgzijSh3TvKu0FA4FPFDePCOVuVw7ZHEM0T9YVv1maaMqW_mwH29Wy9OypCzvRbXV3ytJrdfEZoLTsVWhWGGUxP4SJDFH3jMZ77V6lNXa2pD5Z3cRn95-"]},
+ {h:"The Chosen One fought on…", p:"His fingers bleeding from the friction of the controls, his mind racing to keep up with the aliens' cunning tactics. He could feel the weight of the world on his shoulders — the knowledge that the fate of humanity rested on his every move. In the chaos he found solace in the rhythm of the game, the dance between him and the aliens. His reputation spread throughout the world. He became a symbol of hope, a beacon of light in the darkness. They sang songs of his exploits and painted murals of his battles.", imgs:["AA5AbUAcoh-NzpZGS0wsijGK-T-Csys5Dtt0k_UCdHA92TttrdZJtJcE9Vj3Eb29JFGxs00xasAhjVnEprXlv723rYiVTe91yFvgUf8IcAmdxCtTVdwPnecE0t-sQhOqjRwsixog35cFJJvHcBCB1IMElgeB0ygTyLQw0LTxHykvffQjsZ7kT9qULy-BqFPQawNauKLw9VLsy7iwJfBGw7cghjlahy59aI8z2MPJWO0V","AA5AbUATSNRdSLUPURP911nQe1acXWIv16x7UtFNmaSI3d2lr7HrL4VeV6VLgYWRCQUaDJ52z3iXf8RqoPD7lqvBXbv3rZYUkY3P-AfTcg7R2j8KMQlT0P0BqJUwGUNxSuzIXgEj4TZR8mwDt5ocAvay4WEkfp5Kc5fkspbTtQQAukQHolNBPRurAMGmG2w6yYivSch54rIiUGFVW2rV1oHex9Pn6oW_GtYWp1IkrXTYq_o"]},
+ {h:"All of a sudden… wave 253 crashed upon him.", p:"A relentless tide of Baiters, Mutants, Swarmers, Landers, Pods, and Bombers. The Chosen One fought with desperate fury, every move calculated and precise. He knew this was it — the final waves before the aliens would flee and the world could breathe again. The battle raged on for what felt like an eternity. 254… he looked up at a sky of crimson and orange as the sun dipped below the horizon, signifying the beginning of the end. Wave 255 — the final battle — was about to engulf him, and with it, the fate of the entire human race.", imgs:["AA5AbUCbhmMZlrZlqWQjqehfyhpcxfRZthqjiqlCB3W41LgnN9O8FZri_CLbhboZZWCeq8AoXEJ00Wqg-QQNYU0ovbn6ykOjQn3iR4H-w_1gMC7FaNHtgMu74ySVKKrsACFB-RFUrnPr1n-yzKPOcSVZY6OcI8p6P6CNyhwVUR8kMdtd6k3kG8SjLvzI8IKUqb18RiIar0dGALIfuetVAWo7zh37ufI-FB2seO1PzneNcpM","AA5AbUC_5Y65oJuGxqJOBqWfmBEtzJXj5k1pgx6m_rJsSbteSqWYCTWvH26RdxvqASMz-JJ6-QRW23IwOCuoh-DoXDg0MfH4-mPSeddjTYfZYNKBr-rALPA-X8p7tUwdbDcZ23IJ-5Gj1kMAKFG2ajbfHzwlAhkdBg8HIV_N26XP1ccn5iJvoDS_5Sf5LT5GD7FG8UhPcLCxqbpDYu3e6BocWKm5S9Sf7B4s-Ds60_2fSmc"]},
+ {h:"The final epic battle…", p:"A chaotic ballet of pure violence. Baiters, laser-focused. Swarmers concentrating all firepower into a barrage of bullets. Landers from below, Mutants from above, Pods and Bombers behind — bombarded from all sides. With no other option, he hyperspaced at the moment of demise, chancing the very existence of humanity. He warped in unharmed, just behind the aliens. With one final tactic, quickly and without pause, he triggered the Smart Bombs on the massive onslaught…", imgs:["AA5AbUBCeg085dIvYSGzVahRbqRZGfgZMMWr4nLo2gJzoboIAS2ZR-7tdOPZhRoxswv8JygBaOBarsEyrqvO1db9lcLF_xPt3Fu3jeFHxWYAVTXthmFws9Y5NcbfPzBOFrA3pYDT2Sr2SGT82-nelI3vmOhAJrmF8RmLEd2IVxwa4mILIc6Vd1n1BABGc29BzzAUw2wGPPJGvyntdDjtYfJp9dgP5tOTq5rvUXilU-Pk"]},
+ {h:"Wave 255 is over… wave 1 glows in a single crimson number.", p:"The Chosen One let out a shuddering breath, his shoulders slumping for the first time in what seemed like years. Around him, the battlefield lay strewn with twisted wreckage and the lifeless husks of aliens. A distant rumble echoed through the sky — the aliens were retreating, fleeing back to their home world. He climbed wearily from the remains of his Golden Defender, surveying the devastation. The survivors, few and haggard, gathered around him, their faces etched with fear and hope. Before collapsing, the Chosen One bellowed…", imgs:["AA5AbUCvzjEsn16xTPHN20fsjKtTCwCVFbmnAaNDlO6ov0EODBNVGus6XRbnp3tJpEZS9DYSh9du1FQsTnPUpnNifQGjNfecjU-cnY4ELI-_JV8n3scHr8abofalZIPYI3rVeajWgC90q8Pd-LB2M4_GDh4JNguku4tuHpudpJVO3necTeRxbl8D_Ya9nW_5qAo1J_Cjx_jSuqF0lES9iZvmDRCRkEllYErtjZFxytzPesU"]}
+];
+SITE.story.cry = "LET'S SAVE THE HUMANS!!";
+
+/* The Poem (your words) */
+SITE.poem = [
+ "In a world of pixels and play,\nWhere humanoids roamed in disarray,\nA hero emerged from the fray,\nTo save them all, come what may.",
+ "Defender the name, a game so grand,\nWith smart bombs, lasers and spaceships at hand.\nBattling through waves so bright,\nFighting off alien invaders in flight.",
+ "The humanoids watched in amaze,\nAs Defender won their praise,\nFighting for justice, fair and true,\nAgainst the invaders, red and blue.",
+ "Their fingers nimble, their eyes so keen,\nThey guide the ship with skill unseen.\nThrough levels twisted, challenges dire,\nThey fight onward, never tired.",
+ "So let us sing this tale of might,\nOf how a game can bring forth light,\nIn a world of chaos and strife,\nDefender proved to be their light."
+];
+</script>
+
+<script>
+/* ============ boot ============ */
+document.getElementById('yr').textContent=new Date().getFullYear();
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const app=$('#app');
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+
+/* ============ STARFIELD ============ */
+(function spacefield(){
+  const c=$('#stars'),x=c.getContext('2d');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let w,h,dpr,t=0,stars=[],dust=[],shoots=[],comets=[],novas=[],bh=null;
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+
+  function size(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    w=c.width=innerWidth*dpr; h=c.height=innerHeight*dpr;
+    c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px';
+    const n=Math.round(innerWidth*innerHeight/6500);
+    stars=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,
+      r:(Math.random()*1.3+.3)*dpr,a:Math.random()*.6+.25,tw:Math.random()*6.28,sp:Math.random()*.5+.15}));
+    dust=Array.from({length:Math.round(n/9)},()=>({x:Math.random()*w,y:Math.random()*h,
+      r:(Math.random()*1.6+.8)*dpr,a:Math.random()*.5+.2,tw:Math.random()*6.28}));
+    // black hole — distant, upper-right, with golden accretion disk
+    const R=Math.max(20*dpr,Math.min(54*dpr,Math.min(w,h)*0.05));
+    bh={x:w*0.85,y:h*0.19,R,rot:0,
+      parts:Array.from({length:46},()=>({ang:Math.random()*6.28,rad:rnd(R*1.35,R*5.2),
+        sp:rnd(.01,.03),vr:rnd(.15,.5)*dpr}))};
+  }
+
+  function drawBlackHole(){
+    const {x:bx,y:by,R}=bh;
+    // outer gravitational glow
+    let g=x.createRadialGradient(bx,by,R*0.8,bx,by,R*6);
+    g.addColorStop(0,'rgba(255,180,70,.10)');g.addColorStop(.5,'rgba(150,130,255,.05)');g.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=g;x.beginPath();x.arc(bx,by,R*6,0,6.2832);x.fill();
+    // infalling matter (spiraling particles)
+    x.globalCompositeOperation='lighter';
+    for(const p of bh.parts){
+      if(!reduce){ p.ang+=p.sp*(1+ (R*2/p.rad)); p.rad-=p.vr*(R/p.rad); }
+      if(p.rad<R*1.12){ p.rad=rnd(R*4.4,R*5.4); p.ang=Math.random()*6.28; }
+      const px=bx+Math.cos(p.ang)*p.rad, py=by+Math.sin(p.ang)*p.rad*0.42; // flattened disk
+      const heat=Math.max(0,Math.min(1,(R*5-p.rad)/(R*4)));
+      const col=`rgba(255,${Math.round(150+95*heat)},${Math.round(40+30*(1-heat))},${.5+.5*heat})`;
+      x.fillStyle=col;x.beginPath();x.arc(px,py,(.8+1.4*heat)*dpr,0,6.2832);x.fill();
+    }
+    // accretion disk ring (rotating, flattened, doppler-bright on one side)
+    x.save();x.translate(bx,by);if(!reduce)bh.rot+=0.006;x.rotate(bh.rot);x.scale(1,0.4);
+    for(let k=0;k<2;k++){
+      const rr=R*(1.5+k*0.5);
+      const lg=x.createLinearGradient(-rr,0,rr,0);
+      lg.addColorStop(0,'rgba(255,120,30,.0)');lg.addColorStop(.35,'rgba(255,150,40,.55)');
+      lg.addColorStop(.5,'rgba(255,224,150,.9)');lg.addColorStop(.65,'rgba(255,150,40,.55)');lg.addColorStop(1,'rgba(255,120,30,0)');
+      x.strokeStyle=lg;x.lineWidth=(2.4-k*0.8)*dpr;x.beginPath();x.arc(0,0,rr,0,6.2832);x.stroke();
+    }
+    x.restore();
+    x.globalCompositeOperation='source-over';
+    // photon ring (bright thin halo)
+    x.strokeStyle='rgba(255,240,200,.85)';x.lineWidth=1.4*dpr;
+    x.beginPath();x.arc(bx,by,R*1.04,0,6.2832);x.stroke();
+    // event horizon (the void)
+    const eg=x.createRadialGradient(bx,by,R*0.2,bx,by,R);
+    eg.addColorStop(0,'#000');eg.addColorStop(.82,'#000');eg.addColorStop(1,'rgba(0,0,0,.2)');
+    x.fillStyle=eg;x.beginPath();x.arc(bx,by,R,0,6.2832);x.fill();
+  }
+
+  function spawnShoot(){
+    const fromLeft=Math.random()<.5;
+    const sp=rnd(3.4,5.6)*dpr, ang=rnd(0.25,0.6)*(fromLeft?1:-1)+(fromLeft?0:Math.PI);
+    shoots.push({x:fromLeft?rnd(0,w*.5):rnd(w*.5,w),y:rnd(0,h*.45),
+      vx:Math.cos(ang)*sp,vy:Math.abs(Math.sin(ang))*sp,life:0,max:rnd(80,120),
+      len:rnd(120,210)*dpr});
+  }
+  function drawShoots(){
+    for(let i=shoots.length-1;i>=0;i--){
+      const s=shoots[i];s.life++;s.x+=s.vx;s.y+=s.vy;
+      const a=Math.max(0,1-s.life/s.max), L=s.len, ux=s.vx, uy=s.vy, m=Math.hypot(ux,uy);
+      const tx=s.x-ux/m*L, ty=s.y-uy/m*L;
+      const g=x.createLinearGradient(s.x,s.y,tx,ty);
+      g.addColorStop(0,`rgba(255,244,200,${a})`);g.addColorStop(1,'rgba(255,244,200,0)');
+      x.globalCompositeOperation='lighter';
+      x.strokeStyle=g;x.lineWidth=1.7*dpr;x.beginPath();x.moveTo(s.x,s.y);x.lineTo(tx,ty);x.stroke();
+      x.globalCompositeOperation='source-over';
+      if(s.life>s.max||s.x<-L||s.x>w+L||s.y>h+L)shoots.splice(i,1);
+    }
+  }
+
+  function spawnComet(){
+    const fromLeft=Math.random()<.5, sp=rnd(2.2,3.0)*dpr;
+    const ang=rnd(0.10,0.30)*(fromLeft?1:-1);
+    comets.push({x:fromLeft?-90*dpr:w+90*dpr, y:rnd(h*.08,h*.5),
+      vx:(fromLeft?1:-1)*sp*Math.cos(ang), vy:sp*Math.sin(ang)+0.32*dpr,
+      len:rnd(160,250)*dpr, wd:rnd(3.4,5.4)*dpr, bend:rnd(-1,1)*9*dpr, life:0});
+  }
+  // smooth tapered tail (teardrop) with a gentle curve, filled by a gradient
+  function tail(Hx,Hy,Tx,Ty,pxp,pyp,wHalf,cx,cy,stops){
+    const g=x.createLinearGradient(Hx,Hy,Tx,Ty);
+    for(const s of stops)g.addColorStop(s[0],s[1]);
+    x.fillStyle=g;x.beginPath();
+    x.moveTo(Hx+pxp*wHalf,Hy+pyp*wHalf);
+    x.quadraticCurveTo(cx+pxp*wHalf*0.6,cy+pyp*wHalf*0.6,Tx,Ty);
+    x.quadraticCurveTo(cx-pxp*wHalf*0.6,cy-pyp*wHalf*0.6,Hx-pxp*wHalf,Hy-pyp*wHalf);
+    x.closePath();x.fill();
+  }
+  function drawComets(){
+    for(let i=comets.length-1;i>=0;i--){
+      const cm=comets[i];cm.life++;cm.x+=cm.vx;cm.y+=cm.vy;
+      const m=Math.hypot(cm.vx,cm.vy),ux=cm.vx/m,uy=cm.vy/m,pxp=-uy,pyp=ux;
+      const Hx=cm.x,Hy=cm.y,L=cm.len,w0=cm.wd;
+      const cax=Hx-ux*L*0.5, cay=Hy-uy*L*0.5;
+      x.globalCompositeOperation='lighter';
+      // broad diffuse dust tail: white-gold near head fading to red at the tip
+      tail(Hx,Hy,Hx-ux*L,Hy-uy*L,pxp,pyp,w0*2.4,cax+pxp*cm.bend,cay+pyp*cm.bend,
+        [[0,'rgba(255,242,214,.55)'],[.28,'rgba(255,184,96,.34)'],[.62,'rgba(255,96,44,.18)'],[1,'rgba(255,60,30,0)']]);
+      // bright inner streak (hot core)
+      tail(Hx,Hy,Hx-ux*L*0.72,Hy-uy*L*0.72,pxp,pyp,w0*0.85,cax+pxp*cm.bend*.6,cay+pyp*cm.bend*.6,
+        [[0,'rgba(255,255,250,.95)'],[.45,'rgba(255,228,176,.55)'],[1,'rgba(255,180,110,0)']]);
+      // glowing head (coma)
+      const hg=x.createRadialGradient(Hx,Hy,0,Hx,Hy,w0*3.2);
+      hg.addColorStop(0,'rgba(255,255,252,1)');hg.addColorStop(.35,'rgba(255,238,200,.85)');hg.addColorStop(1,'rgba(255,200,120,0)');
+      x.fillStyle=hg;x.beginPath();x.arc(Hx,Hy,w0*3.2,0,6.2832);x.fill();
+      x.globalCompositeOperation='source-over';
+      if(cm.x<-180*dpr||cm.x>w+180*dpr||cm.y>h+180*dpr)comets.splice(i,1);
+    }
+  }
+
+  function spawnNova(){
+    const cx=rnd(w*.14,w*.86), cy=rnd(h*.1,h*.62);
+    const ej=Array.from({length:46},()=>{const a=Math.random()*6.2832;
+      return{ux:Math.cos(a),uy:Math.sin(a),r:rnd(.6,1.9)*dpr,off:rnd(.5,1.12)};});
+    novas.push({x:cx,y:cy,life:0,max:175,maxR:rnd(150,240)*dpr,ej});
+  }
+  function drawNovas(){
+    for(let i=novas.length-1;i>=0;i--){
+      const nv=novas[i];nv.life++;const p=nv.life/nv.max;
+      x.globalCompositeOperation='lighter';
+      // 1) flash bloom — brilliant, fast rise then fade
+      const flash=p<.1?(p/.1):Math.max(0,1-(p-.1)/.42);
+      if(flash>0){
+        const fr=nv.maxR*(0.5+0.5*Math.min(1,p/.1));
+        const fg=x.createRadialGradient(nv.x,nv.y,0,nv.x,nv.y,fr);
+        fg.addColorStop(0,`rgba(255,255,255,${flash})`);
+        fg.addColorStop(.22,`rgba(220,236,255,${flash*.85})`);
+        fg.addColorStop(.55,`rgba(255,226,150,${flash*.42})`);
+        fg.addColorStop(1,'rgba(255,180,90,0)');
+        x.fillStyle=fg;x.beginPath();x.arc(nv.x,nv.y,fr,0,6.2832);x.fill();
+        // soft star-flare cross at the brightest moment
+        if(p<.2){const fa=(1-p/.2)*0.55,FL=nv.maxR*1.35;
+          for(let k=0;k<2;k++){const ax=k?FL:0,ay=k?0:FL;
+            const lg=x.createLinearGradient(nv.x-ax,nv.y-ay,nv.x+ax,nv.y+ay);
+            lg.addColorStop(0,'rgba(255,246,222,0)');lg.addColorStop(.5,`rgba(255,246,222,${fa})`);lg.addColorStop(1,'rgba(255,246,222,0)');
+            x.strokeStyle=lg;x.lineWidth=1.5*dpr;x.beginPath();x.moveTo(nv.x-ax,nv.y-ay);x.lineTo(nv.x+ax,nv.y+ay);x.stroke();}}
+      }
+      // 2) expanding luminous shell — soft thick blast wave, blue-white edge over warm interior
+      const e=1-Math.pow(1-p,2.2), R=nv.maxR*e;
+      if(R>2){
+        const sa=Math.max(0,1-p)*0.95;
+        const sg=x.createRadialGradient(nv.x,nv.y,R*0.5,nv.x,nv.y,R*1.05);
+        sg.addColorStop(0,'rgba(255,150,60,0)');
+        sg.addColorStop(.72,`rgba(255,168,72,${sa*.16})`);
+        sg.addColorStop(.9,`rgba(255,212,132,${sa*.55})`);
+        sg.addColorStop(.985,`rgba(196,224,255,${sa*.5})`);
+        sg.addColorStop(1,'rgba(196,224,255,0)');
+        x.fillStyle=sg;x.beginPath();x.arc(nv.x,nv.y,R*1.05,0,6.2832);x.fill();
+      }
+      // 3) ejecta debris streaking outward
+      const ea=Math.max(0,1-p*1.05);
+      if(ea>0) for(const d of nv.ej){
+        const dist=e*nv.maxR*d.off;
+        const dx=nv.x+d.ux*dist, dy=nv.y+d.uy*dist;
+        const sx=nv.x+d.ux*dist*0.85, sy=nv.y+d.uy*dist*0.85;
+        const tg=x.createLinearGradient(sx,sy,dx,dy);
+        tg.addColorStop(0,'rgba(255,200,120,0)');tg.addColorStop(1,`rgba(255,232,184,${ea})`);
+        x.strokeStyle=tg;x.lineWidth=d.r;x.beginPath();x.moveTo(sx,sy);x.lineTo(dx,dy);x.stroke();
+        x.fillStyle=`rgba(255,240,210,${ea})`;x.beginPath();x.arc(dx,dy,d.r,0,6.2832);x.fill();
+      }
+      // 4) lingering remnant glow, fading
+      if(p>.4){const ra=(1-p)*0.26;
+        const ng=x.createRadialGradient(nv.x,nv.y,0,nv.x,nv.y,nv.maxR*0.8);
+        ng.addColorStop(0,`rgba(150,180,255,${ra})`);ng.addColorStop(1,'rgba(150,180,255,0)');
+        x.fillStyle=ng;x.beginPath();x.arc(nv.x,nv.y,nv.maxR*0.8,0,6.2832);x.fill();}
+      x.globalCompositeOperation='source-over';
+      if(nv.life>nv.max)novas.splice(i,1);
+    }
+  }
+
+  function frame(){
+    x.clearRect(0,0,w,h);
+    for(const s of stars){
+      const tw=reduce?1:(.6+.4*Math.sin(s.tw+t*.04*s.sp));
+      x.globalAlpha=s.a*tw;x.fillStyle='#dfe6ff';
+      x.beginPath();x.arc(s.x,s.y,s.r,0,6.2832);x.fill();
+      if(!reduce){s.y+=s.sp*.12*dpr;if(s.y>h){s.y=0;s.x=Math.random()*w;}}
+    }
+    for(const d of dust){
+      const tw=reduce?1:(.5+.5*Math.sin(d.tw+t*.05));
+      x.globalAlpha=d.a*tw;x.fillStyle='#ffd66a';
+      x.beginPath();x.arc(d.x,d.y,d.r,0,6.2832);x.fill();
+    }
+    x.globalAlpha=1;
+    drawBlackHole();
+    if(!reduce){
+      // multiple shooting stars, more frequent
+      if(shoots.length<4 && Math.random()<.022) spawnShoot();
+      drawShoots();
+      // flaming comet — rarer, at most one
+      if(comets.length===0 && Math.random()<.0022) spawnComet();
+      drawComets();
+      // supernova — occasional
+      if(novas.length===0 && Math.random()<.0016) spawnNova();
+      drawNovas();
+    }
+    x.globalAlpha=1;t++;
+    if(!reduce)requestAnimationFrame(frame);
+  }
+  size();frame();
+  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{size();if(reduce)frame();},200)});
+})();
+
+/* ============ data helpers ============ */
+const GAL_ORDER=['beginnings','inspection','parts','paint','bezel','controls','marquee','boards','monitor','coindoor','creator','extras','tribute','enemies','fullphotos'];
+
+function radarBlips(){
+  const pts=[[30,38],[68,30],[58,64],[40,72],[74,58],[24,58]];
+  return pts.map((p,i)=>`<span class="blip" style="left:${p[0]}%;top:${p[1]}%;animation-delay:${i*.35}s"></span>`).join('');
+}
+function terrainPath(){
+  let d='M0,40'; let x=0; const seg=7;
+  for(let i=0;i<=seg;i++){ x=i*(1000/seg); const y=10+Math.round(Math.random()*40); d+=` L${x},${y}`; }
+  return d;
+}
+
+/* ============ VIEWS ============ */
+function viewHome(){
+  const g=SITE.galleries;
+  const total=Object.values(g).reduce((n,x)=>n+x.photos.length,0);
+  return `
+  <section class="hero">
+    <div class="planet"></div>
+    <div class="terrain"><svg viewBox="0 0 1000 60" preserveAspectRatio="none"><path d="${terrainPath()}"></path></svg></div>
+    <div class="hero-inner">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow">Transmission · Sector 1981 · Williams Electronics</span>
+          <h1>Golden<br>Defender</h1>
+          <div class="sub">The 50,001<span style="font-size:.6em">ST</span> Machine</div>
+          <p class="lede">Across the galaxy they came — Landers, Baiters, Bombers. One machine stood between them and humanity. This is the restoration of the 50,001st Defender, finished in gold and brought back to life, panel by panel.</p>
+          <div class="cta-row">
+            <a class="btn primary" href="#galleries" data-nav>Explore the galleries →</a>
+            <a class="btn ghost" href="#story" data-nav>Read the saga</a>
+          </div>
+          <div class="chip">
+            <span class="n tgold">#50,001</span>
+            <span class="l">Numbered 50,001 — a 24-karat tribute to the 50,000th machine.</span>
+          </div>
         </div>
-    </footer>
-
-    <!-- Lightbox -->
-    <div class="lightbox" id="lightbox">
-        <span class="lightbox-close" onclick="closeLightbox()">×</span>
-        <div class="lightbox-content">
-            <img id="lightbox-img" src="" alt="">
+        <div>
+          <div class="radar">
+            <span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span><span class="ring r4"></span>
+            <span class="cross"></span><span class="cross2"></span>
+            <span class="sweep"></span>
+            ${radarBlips()}
+            <div class="core"><div class="big tgold">255</div><div class="cap">Waves cleared</div></div>
+          </div>
         </div>
+      </div>
     </div>
+  </section>
 
-    <script>
-        function openLightbox(src) {
-            document.getElementById('lightbox').classList.add('active');
-            document.getElementById('lightbox-img').src = src;
-        }
+  <section class="block tight wrap">
+    <div class="telemetry">
+      <div class="tcell"><div class="v">50,001<sup style="font-size:16px">st</sup></div><div class="k">Tribute number</div></div>
+      <div class="tcell"><div class="v">${total}</div><div class="k">Restoration frames</div></div>
+      <div class="tcell"><div class="v">255</div><div class="k">Waves survived</div></div>
+      <div class="tcell"><div class="v">1981</div><div class="k">Year of origin</div></div>
+    </div>
+  </section>
 
-        function closeLightbox() {
-            document.getElementById('lightbox').classList.remove('active');
-        }
+  <section class="block wrap" style="padding-top:30px">
+    <div class="sec-head">
+      <div><span class="eyebrow">Scanner contacts</span><h2>The Galleries</h2>
+      <p class="lead">Every part of the build, catalogued. Select a set to open its grid and full-screen viewer.</p></div>
+      <a class="back" href="#galleries" data-nav>View all 15 →</a>
+    </div>
+    <div class="cards">${GAL_ORDER.slice(0,6).map(galCard).join('')}</div>
+  </section>
 
-        document.getElementById('lightbox').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeLightbox();
-            }
-        });
+  <hr class="rule"/>
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeLightbox();
-            }
-        });
-    </script>
+  <section class="block wrap">
+    <div class="hero-grid" style="align-items:center">
+      <div>
+        <span class="eyebrow">Logbook · Year 2112</span>
+        <h2 class="display tgold" style="font-size:clamp(32px,5vw,56px);margin:12px 0 16px;text-transform:uppercase;letter-spacing:-1.5px">It all began with a falling star.</h2>
+        <p style="color:var(--ink-dim);font-size:18px">A meteorite that wasn't a meteorite — an arcade machine from 1981 with a strange gold glow, pulling invaders across the void. And one Chosen One standing between Earth and 255 waves. The full saga lives here.</p>
+        <a class="btn ghost" href="#story" data-nav style="margin-top:20px">Enter the story →</a>
+      </div>
+      <div class="story-hero" style="margin:0">
+        <img src="${esc(SITE.story.heroImage)}" alt="Story key art"/>
+        <div class="ov"><span class="tag">// incoming transmission</span><div class="t">${esc(SITE.story.opening)}</div></div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function galCard(key){
+  const g=SITE.galleries[key]; if(!g) return '';
+  const cover=g.cover||(g.photos[0]&&g.photos[0].src);
+  const idx=String(GAL_ORDER.indexOf(key)+1).padStart(2,'0');
+  const thumb=cover
+    ?`<img src="${esc(cover)}" alt="" loading="lazy"/><div class="scan"></div>`
+    :`<div class="ph">◌ NO SIGNAL<br>awaiting photos</div>`;
+  return `<button class="card" data-open="${key}">
+    <div class="thumb ${cover?'':'empty'}"><span class="node">CT-${idx}</span>${thumb}</div>
+    <div class="meta"><h3>${esc(g.name)}</h3><span class="ct">${pad(g.photos.length)} ◈</span></div>
+  </button>`;
+}
+
+function viewGalleries(){
+  return `<section class="block wrap">
+    <div class="sec-head"><div><span class="eyebrow">All photo sets · 15 contacts</span><h2>Galleries</h2>
+    <p class="lead">From the cabinet as found to the finished gold machine. Select any set to open its grid, then tap a frame for the full-screen viewer with arrow-key navigation.</p></div></div>
+    <div class="cards">${GAL_ORDER.map(galCard).join('')}</div>
+  </section>`;
+}
+
+function viewGallery(key){
+  const g=SITE.galleries[key]; if(!g) return viewGalleries();
+  const idx=String(GAL_ORDER.indexOf(key)+1).padStart(2,'0');
+  const body=g.photos.length
+    ? `<div class="grid">${g.photos.map((p,i)=>`
+        <button class="tile" data-lb="${key}" data-i="${i}">
+          <img src="${esc(p.src)}" alt="${esc(p.cap||g.name)}" loading="lazy"/>
+          ${p.cap?`<span class="cap">${esc(p.cap)}</span>`:''}
+        </button>`).join('')}</div>`
+    : `<div class="empty-state"><span class="pixel">◌ AWAITING TRANSMISSION</span>
+        <p>This set has no photos yet. Open the page file, find <code>galleries.${key}</code> in the content block, and add images to its <code>photos</code> list — they'll appear here instantly.</p></div>`;
+  return `<section class="block wrap">
+    <div class="gallery-top"><a class="back" href="#galleries" data-nav>← All galleries</a></div>
+    <div class="sec-head" style="margin-bottom:28px"><div>
+      <span class="eyebrow">Contact CT-${idx} · ${pad(g.photos.length)} frames</span>
+      <h2>${esc(g.name)}</h2><p class="lead">${esc(g.blurb||'')}</p></div></div>
+    ${body}
+  </section>`;
+}
+
+function viewStory(){
+  const s=SITE.story;
+  const chapters=s.chapters.map((c,i)=>{
+    const imgs=(c.imgs||[]).map(id=>gURL(id));
+    let media='';
+    if(imgs.length===2) media=`<div class="twin"><img src="${imgs[0]}" data-img alt=""/><img src="${imgs[1]}" data-img alt=""/></div>`;
+    else if(imgs.length===1) media=`<div class="solo"><img src="${imgs[0]}" data-img alt=""/></div>`;
+    return `<div class="chapter"><h3><span class="dl">// log ${pad(i+1)}</span>${esc(c.h)}</h3><p>${esc(c.p)}</p>${media}</div>`;
+  }).join('');
+  return `<section class="block wrap">
+    <div class="story-hero">
+      <img src="${esc(s.heroImage)}" alt="A Golden Story"/>
+      <div class="ov"><span class="tag">// incoming transmission · year 2112</span><div class="t">${esc(s.opening)}</div></div>
+    </div>
+    <div class="chapter"><p style="font-size:19px;margin-top:30px">A blinding light fills the sky as a massive object hurtles toward Earth at an unimaginable speed — metallic, seemingly indestructible. It crashes, and panic ensues as screens worldwide short-circuit into static. Scientists race to the impact site, desperate to unravel the mystery of this terrifying visitor from the unknown.</p></div>
+    ${chapters}
+    <div class="battle-cry"><small>// final transmission</small>“${esc(s.cry)}”</div>
+
+    <div class="sec-head" style="margin:30px 0 30px"><div><span class="eyebrow">Verse</span><h2>A Golden Poem</h2></div></div>
+    <div class="poem">${SITE.poem.map(st=>`<p class="stanza">${esc(st).replace(/\n/g,'<br>')}</p>`).join('')}</div>
+  </section>`;
+}
+
+function viewVideo(){
+  const v=SITE.videos;
+  const grid=v.length
+    ? `<div class="vid-grid">${v.map(x=>{
+        let frame;
+        if(x.youtube) frame=`<iframe src="https://www.youtube.com/embed/${esc(x.youtube)}" title="${esc(x.title)}" allowfullscreen loading="lazy"></iframe>`;
+        else if(x.file) frame=`<video src="${esc(x.file)}" controls preload="metadata"></video>`;
+        else frame=`<div class="empty">NO SOURCE SET</div>`;
+        return `<div class="vid"><div class="frame">${frame}</div><div class="lab">${esc(x.title)}${x.note?`<small>${esc(x.note)}</small>`:''}</div></div>`;
+      }).join('')}</div>`
+    : `<div class="empty-state"><span class="pixel">▶ AWAITING FOOTAGE</span>
+        <p>Add clips under <code>videos</code> in the content block. YouTube: <code>{title:"…", youtube:"VIDEO_ID"}</code>. File: <code>{title:"…", file:"videos/clip.mp4"}</code>.</p></div>`;
+  return `<section class="block wrap">
+    <div class="sec-head"><div><span class="eyebrow">Visual feed</span><h2>Golden Video</h2>
+    <p class="lead">Power-ons, gameplay, and restoration footage of the machine in motion.</p></div></div>${grid}
+  </section>`;
+}
+
+function viewSounds(){
+  const row=t=>`<div class="track"><div class="ico">♪</div>
+    <div class="info"><b>${esc(t.title)}</b>${t.note?`<span>${esc(t.note)}</span>`:''}</div>
+    ${t.audio?`<audio controls src="${esc(t.audio)}"></audio>`:`<span class="soon">ADD FILE</span>`}</div>`;
+  return `<section class="block wrap">
+    <div class="sec-head"><div><span class="eyebrow">Audio channel</span><h2>Golden Songs</h2>
+    <p class="lead">Original tribute tracks for the Golden Defender.</p></div></div>
+    <div class="audio-list">${SITE.songs.map(row).join('')}</div>
+    <div class="sec-head" style="margin:70px 0 30px"><div><span class="eyebrow">From the cabinet</span><h2>Classic Sounds</h2>
+    <p class="lead">The unmistakable effects of Defender — smart bombs, hyperspace, laser fire.</p></div></div>
+    <div class="audio-list">${SITE.sounds.map(row).join('')}</div>
+    <p class="helper">// attach audio with <code>audio:"sounds/file.mp3"</code> on any track in the content block.</p>
+  </section>`;
+}
+
+function viewSchematics(){
+  const s=SITE.schematics;
+  const body=s.photos.length
+    ? `<div class="grid">${s.photos.map((p,i)=>`<button class="tile" data-lb="schematics" data-i="${i}">
+        <img src="${esc(p.src)}" alt="${esc(p.cap||'Schematic')}" loading="lazy"/>${p.cap?`<span class="cap">${esc(p.cap)}</span>`:''}</button>`).join('')}</div>`
+    : `<div class="empty-state"><span class="pixel">▦ AWAITING DIAGRAMS</span>
+        <p>Add schematic images under <code>schematics.photos</code> in the content block; they'll appear here with the same full-screen viewer.</p></div>`;
+  return `<section class="block wrap"><div class="sec-head"><div><span class="eyebrow">Reference</span><h2>Schematics</h2>
+    <p class="lead">${esc(s.blurb)}</p></div></div>${body}</section>`;
+}
+
+function viewContact(){
+  const c=SITE.contact;
+  return `<section class="block wrap"><div class="split">
+    <div>
+      <span class="eyebrow">Open a channel</span>
+      <h2 class="display tgold" style="font-size:clamp(36px,5.4vw,62px);margin:12px 0 16px;text-transform:uppercase;letter-spacing:-1.5px">Contact</h2>
+      <p style="color:var(--ink-dim);font-size:18px">${esc(c.intro)}</p>
+      <a class="btn primary" href="mailto:${esc(c.email)}" style="margin-top:22px">✉ ${esc(c.email)}</a>
+      <p class="helper">// change this address under <code>contact.email</code> in the content block.</p>
+    </div>
+    <div class="panel-card"><span class="eyebrow">Good to know</span>
+      <div style="margin-top:16px">${c.faq.map(f=>`<div class="faq-item"><h4>${esc(f.q)}</h4><p>${esc(f.a)}</p></div>`).join('')}</div>
+    </div>
+  </div></section>`;
+}
+
+/* ============ ROUTER ============ */
+const ROUTES={home:viewHome,story:viewStory,galleries:viewGalleries,video:viewVideo,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
+function render(){
+  const hash=(location.hash||'#home').slice(1);
+  const [base,arg]=hash.split('/');
+  const html=(base==='g'&&arg)?viewGallery(arg):(ROUTES[base]||viewHome)();
+  app.innerHTML=`<div class="view active">${html}</div>`;
+  $$('nav.main a').forEach(a=>{const t=a.getAttribute('href').slice(1);
+    a.classList.toggle('active',t===base||(base==='g'&&t==='galleries')||(base===''&&t==='home'));});
+  $$('[data-open]').forEach(b=>b.addEventListener('click',()=>{location.hash='#g/'+b.dataset.open;}));
+  $$('[data-lb]').forEach(b=>b.addEventListener('click',()=>openLightbox(b.dataset.lb,+b.dataset.i)));
+  $$('[data-img]').forEach(im=>im.addEventListener('click',()=>openSolo(im.src,im.alt)));
+  $('#nav').classList.remove('open');
+  window.scrollTo({top:0});
+}
+addEventListener('hashchange',render);
+$('#menuBtn').addEventListener('click',()=>$('#nav').classList.toggle('open'));
+
+/* ============ LIGHTBOX ============ */
+let LB={list:[],i:0};
+function srcList(key){ return key==='schematics'?SITE.schematics.photos:((SITE.galleries[key]||{}).photos||[]); }
+function openLightbox(key,i){ LB.list=srcList(key); LB.i=i; showLB(); }
+function openSolo(src,cap){ LB.list=[{src,cap}]; LB.i=0; showLB(); }
+function showLB(){
+  const p=LB.list[LB.i]; if(!p) return;
+  $('#lbImg').src=p.src; $('#lbImg').alt=p.cap||'';
+  $('#lbCap').textContent=p.cap||'';
+  $('#lbCount').textContent=LB.list.length>1?`${pad(LB.i+1)} / ${pad(LB.list.length)}`:'';
+  const multi=LB.list.length>1;
+  $('#lbPrev').style.display=multi?'grid':'none';
+  $('#lbNext').style.display=multi?'grid':'none';
+  $('#lightbox').classList.add('open'); document.body.style.overflow='hidden';
+}
+function closeLB(){ $('#lightbox').classList.remove('open'); document.body.style.overflow=''; }
+function step(d){ LB.i=(LB.i+d+LB.list.length)%LB.list.length; showLB(); }
+$('#lbClose').addEventListener('click',closeLB);
+$('#lbPrev').addEventListener('click',()=>step(-1));
+$('#lbNext').addEventListener('click',()=>step(1));
+$('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLB();});
+addEventListener('keydown',e=>{
+  if(!$('#lightbox').classList.contains('open'))return;
+  if(e.key==='Escape')closeLB();
+  if(e.key==='ArrowLeft')step(-1);
+  if(e.key==='ArrowRight')step(1);
+});
+let tx=0;
+$('#lightbox').addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+$('#lightbox').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50&&LB.list.length>1)step(dx<0?1:-1);});
+
+render();
+
+</script>
 </body>
 </html>
