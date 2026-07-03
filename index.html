@@ -268,6 +268,26 @@ section.block.tight{padding:60px 0}
 .chapter .twin img,.chapter .solo img{width:100%;border-radius:14px;border:1px solid var(--line-2);cursor:pointer}
 .chapter .solo{margin:34px 0}
 @media(max-width:640px){.chapter .twin{grid-template-columns:1fr}}
+/* story chapters — alternating photo/text feature rows */
+.cfeats{display:flex;flex-direction:column;gap:26px;max-width:1000px;margin:44px auto 0}
+.cfeat{display:grid;grid-template-columns:1fr 1fr;gap:38px;align-items:center;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:30px}
+.cfeat.rev .cmedia{order:2}
+.cfeat.rev .ctext{order:1}
+.cmedia{display:flex;gap:10px}
+.cmedia img{width:100%;border-radius:14px;border:1px solid var(--line-2);cursor:pointer;display:block;aspect-ratio:4/3;object-fit:cover}
+.cmedia.ph{align-items:center;justify-content:center;aspect-ratio:4/3;border-radius:14px;border:1px dashed var(--line-2);
+  font-family:'Space Mono';font-size:11px;letter-spacing:1.5px;color:var(--ink-mute)}
+.ctext .dl{font-family:'Space Mono';font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:10px}
+.ctext h3{font-family:'Sora';font-weight:800;font-size:clamp(20px,2.6vw,27px);letter-spacing:-.5px;margin:0 0 14px;color:var(--ink)}
+.ctext p{font-size:16px;color:var(--ink-dim);line-height:1.75;margin:0}
+@media(max-width:760px){
+  .cfeat{grid-template-columns:1fr;padding:22px;gap:20px}
+  .cfeat.rev .cmedia{order:1}.cfeat.rev .ctext{order:2}
+}
+.story-end{text-align:center;margin-top:56px}
+.story-end .btn{margin-top:8px}
 .battle-cry{text-align:center;font-family:'Sora';font-weight:800;font-size:clamp(20px,4.4vw,40px);letter-spacing:-1px;
   color:var(--gold);margin:74px auto;max-width:18ch;line-height:1.1;
   text-shadow:0 0 40px rgba(255,206,77,.45)}
@@ -755,25 +775,6 @@ const pad=n=>String(n).padStart(2,'0');
     const eg=x.createRadialGradient(bx,by,R*0.2,bx,by,R);
     eg.addColorStop(0,'#000');eg.addColorStop(.82,'#000');eg.addColorStop(1,'rgba(0,0,0,.2)');
     x.fillStyle=eg;x.beginPath();x.arc(bx,by,R,0,6.2832);x.fill();
-    // hidden alien face, watching from within the void
-    const pulse=reduce?1:(.55+.45*Math.sin(t*0.045));
-    x.save();x.beginPath();x.arc(bx,by,R*0.98,0,6.2832);x.clip();
-    // faint head outline
-    x.strokeStyle=`rgba(255,206,77,${.12+.08*pulse})`;x.lineWidth=1*dpr;
-    x.beginPath();x.ellipse(bx,by+R*0.06,R*0.62,R*0.78,0,0,6.2832);x.stroke();
-    // glowing green eyes
-    const ew=R*0.34, eh=R*0.19, eoff=R*0.27, ey=by-R*0.03;
-    for(const sgn of [-1,1]){
-      const ex=bx+sgn*eoff;
-      x.save();x.translate(ex,ey);x.rotate(sgn*0.42);
-      const eyeg=x.createRadialGradient(0,0,0,0,0,ew);
-      eyeg.addColorStop(0,`rgba(210,255,225,${.9*pulse})`);
-      eyeg.addColorStop(.4,`rgba(91,255,134,${.7*pulse})`);
-      eyeg.addColorStop(1,'rgba(10,122,44,0)');
-      x.fillStyle=eyeg;x.beginPath();x.ellipse(0,0,ew,eh,0,0,6.2832);x.fill();
-      x.restore();
-    }
-    x.restore();
   }
 
   function spawnShoot(){
@@ -1060,10 +1061,15 @@ function viewStory(){
   const s=SITE.story;
   const chapters=s.chapters.map((c,i)=>{
     const imgs=(c.imgs||[]).map(id=>gURL(id));
-    let media='';
-    if(imgs.length===2) media=`<div class="twin"><img src="${imgs[0]}" data-img alt=""/><img src="${imgs[1]}" data-img alt=""/></div>`;
-    else if(imgs.length===1) media=`<div class="solo"><img src="${imgs[0]}" data-img alt=""/></div>`;
-    return `<div class="chapter"><h3><span class="dl">// log ${pad(i+1)}</span>${esc(c.h)}</h3><p>${esc(c.p)}</p>${media}</div>`;
+    const media=imgs.length===2
+      ? `<div class="cmedia">${imgs.map(u=>`<img src="${esc(u)}" data-img alt=""/>`).join('')}</div>`
+      : imgs.length===1
+        ? `<div class="cmedia"><img src="${esc(imgs[0])}" data-img alt=""/></div>`
+        : `<div class="cmedia ph">// TRANSMISSION IMAGE PENDING //</div>`;
+    return `<article class="cfeat${i%2?' rev':''}">
+      ${media}
+      <div class="ctext"><span class="dl">// log ${pad(i+1)}</span><h3>${esc(c.h)}</h3><p>${esc(c.p)}</p></div>
+    </article>`;
   }).join('');
   const v=SITE.videos;
   const vidGrid=v.length
@@ -1081,14 +1087,17 @@ function viewStory(){
       <img src="${esc(s.heroImage)}" alt="A Golden Story"/>
       <div class="ov"><span class="tag">// incoming transmission · year 2112</span><div class="t">${esc(s.opening)}</div></div>
     </div>
-    <div class="chapter"><p style="font-size:19px;margin-top:30px">A blinding light fills the sky as a massive object hurtles toward Earth at an unimaginable speed — metallic, seemingly indestructible. It crashes, and panic ensues as screens worldwide short-circuit into static. Scientists race to the impact site, desperate to unravel the mystery of this terrifying visitor from the unknown.</p></div>
-    ${chapters}
-    <div class="battle-cry"><small>// final transmission</small>“${esc(s.cry)}”
-      <a class="btn ghost" href="#poem" data-nav style="margin-top:22px">Read the Golden Poem →</a>
-    </div>
 
     <div class="sec-head" style="margin:50px 0 30px"><div><span class="eyebrow">Visual feed</span><h2>Golden Video</h2>
     <p class="lead">Power-ons, gameplay, and restoration footage of the machine in motion.</p></div></div>${vidGrid}
+
+    <div class="chapter"><p style="font-size:19px;margin-top:50px">A blinding light fills the sky as a massive object hurtles toward Earth at an unimaginable speed — metallic, seemingly indestructible. It crashes, and panic ensues as screens worldwide short-circuit into static. Scientists race to the impact site, desperate to unravel the mystery of this terrifying visitor from the unknown.</p></div>
+    <div class="cfeats">${chapters}</div>
+
+    <div class="story-end">
+      <div class="battle-cry"><small>// final transmission</small>“${esc(s.cry)}”</div>
+      <a class="btn ghost" href="#poem" data-nav>Read the Golden Poem →</a>
+    </div>
   </section>`;
 }
 
