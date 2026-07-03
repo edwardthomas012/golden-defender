@@ -348,6 +348,23 @@ section.block.tight{padding:60px 0}
 .pdfx{cursor:pointer;font-family:'Space Mono';font-size:12px;letter-spacing:1px;color:var(--ink);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:9px 14px}
 .pdfx:hover{background:rgba(255,255,255,.15)}
 @keyframes fade{from{opacity:0}to{opacity:1}}
+/* ET alien emblem + sprinkle */
+.et-sig{display:flex;justify-content:center;margin-bottom:22px}
+.et-emblem{width:132px;height:132px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
+.et-emblem .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
+.et-emblem .et-stars circle:nth-child(2){animation-delay:.4s}
+.et-emblem .et-stars circle:nth-child(3){animation-delay:.9s}
+.et-emblem .et-stars circle:nth-child(4){animation-delay:1.4s}
+.et-emblem .et-stars circle:nth-child(5){animation-delay:.7s}
+.et-emblem .et-stars circle:nth-child(6){animation-delay:1.1s}
+.et-emblem .et-face{animation:etaura 3s ease-in-out infinite}
+@keyframes ettwinkle{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes etaura{0%,100%{filter:drop-shadow(0 0 2px rgba(91,255,134,.25))}50%{filter:drop-shadow(0 0 7px rgba(91,255,134,.7))}}
+#et-sprinkle{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.etmark-fx{position:fixed;opacity:.15;animation:etbob 6s ease-in-out infinite}
+.etmark-fx svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 5px rgba(91,255,134,.35))}
+@keyframes etbob{0%,100%{transform:translateY(0) rotate(var(--rot,0deg))}50%{transform:translateY(-12px) rotate(var(--rot,0deg))}}
+@media(prefers-reduced-motion:reduce){.et-emblem .et-stars circle,.et-emblem .et-face,.etmark-fx{animation:none!important}}
 .escan svg{width:56%;height:56%;color:var(--gold);filter:drop-shadow(0 0 16px rgba(255,206,77,.5));position:relative;z-index:1}
 .escan svg [fill]{fill:none}
 .escan svg path,.escan svg circle,.escan svg rect,.escan svg line,.escan svg polygon{
@@ -382,6 +399,21 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 <div class="cosmos"></div>
 <canvas id="stars"></canvas>
 
+<!-- reusable ET alien graphic -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="hd" cx="40%" cy="32%" r="80%"><stop offset="0%" stop-color="#fff4cf"/><stop offset="46%" stop-color="#ffce4d"/><stop offset="100%" stop-color="#8f5f12"/></radialGradient>
+  <radialGradient id="ey" cx="50%" cy="38%" r="70%"><stop offset="0%" stop-color="#e8ffef"/><stop offset="30%" stop-color="#5bff86"/><stop offset="100%" stop-color="#0a7a2c"/></radialGradient>
+  <filter id="gl" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <g id="sym-alien">
+    <path d="M60 6 C93 6 109 31 109 59 C109 94 82 131 60 139 C38 131 11 94 11 59 C11 31 27 6 60 6 Z" fill="url(#hd)" stroke="#5f3f0c" stroke-width="2.2"/>
+    <path d="M34 26 C24 40 22 60 27 78" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2.4" stroke-linecap="round"/>
+    <g filter="url(#gl)"><ellipse cx="41" cy="68" rx="17" ry="9.5" fill="url(#ey)" transform="rotate(27 41 68)"/><ellipse cx="79" cy="68" rx="17" ry="9.5" fill="url(#ey)" transform="rotate(-27 79 68)"/></g>
+    <circle cx="36" cy="63" r="2.6" fill="#f0fff5"/><circle cx="84" cy="63" r="2.6" fill="#f0fff5"/>
+    <ellipse cx="55" cy="96" rx="1.7" ry="2.8" fill="rgba(70,46,6,.75)"/><ellipse cx="65" cy="96" rx="1.7" ry="2.8" fill="rgba(70,46,6,.75)"/>
+    <path d="M52 109 Q60 114 68 109" fill="none" stroke="rgba(70,46,6,.75)" stroke-width="2.2" stroke-linecap="round"/>
+  </g>
+</defs></svg>
+
 <header>
   <div class="bar">
     <a class="brand" href="#home" data-nav>
@@ -414,6 +446,27 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 </div>
 
 <footer>
+  <div class="et-sig">
+    <svg class="et-emblem" viewBox="0 0 220 220" role="img" aria-label="Enhanced by ET — Edward Thomas">
+      <defs>
+        <radialGradient id="epl" cx="42%" cy="38%" r="70%"><stop offset="0%" stop-color="#1a2740"/><stop offset="100%" stop-color="#070a14"/></radialGradient>
+        <radialGradient id="eglow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(255,206,77,.5)"/><stop offset="100%" stop-color="rgba(255,206,77,0)"/></radialGradient>
+        <path id="et-arc-top" d="M24 110 A86 86 0 0 1 196 110"/>
+      </defs>
+      <circle cx="110" cy="110" r="104" fill="url(#epl)" stroke="#ffce4d" stroke-width="2.5"/>
+      <circle cx="110" cy="110" r="66" fill="url(#eglow)"/>
+      <g transform="rotate(-18 110 110)">
+        <ellipse cx="110" cy="110" rx="98" ry="34" fill="none" stroke="rgba(255,206,77,.5)" stroke-width="2"/>
+        <circle r="3" fill="#fff0b8"><animateMotion dur="7s" repeatCount="indefinite" path="M12 110 a98 34 0 1 1 196 0 a98 34 0 1 1 -196 0"/></circle>
+      </g>
+      <g class="et-stars" fill="#ffe08a">
+        <circle cx="40" cy="52" r="2.4"/><circle cx="182" cy="70" r="1.8"/><circle cx="168" cy="150" r="2.6"/>
+        <circle cx="52" cy="168" r="2"/><circle cx="196" cy="118" r="1.6"/><circle cx="30" cy="120" r="1.8"/>
+      </g>
+      <g class="et-face" transform="translate(110 108) scale(0.62) translate(-60 -74)"><use href="#sym-alien"/></g>
+      <text class="et-arc-text" text-anchor="middle" font-family="'Space Mono',monospace" font-size="14" letter-spacing="4" fill="#ffce4d"><textPath href="#et-arc-top" startOffset="50%">ENHANCED BY ET</textPath></text>
+    </svg>
+  </div>
   <div class="f">
     <div class="left">© <span id="yr"></span> Golden Defender · No. 50,001<br>A tribute to the 50,000th machine · Williams Electronics, 1981</div>
     <div class="sig">SYSTEMS NOMINAL · INSERT COIN</div>
@@ -1195,6 +1248,33 @@ render();
   }
   draw();
   if(!reduce){ setInterval(function(){ t=(t+0.02)%1000; draw(); }, 70); }
+})();
+
+/* ---- sprinkle ET aliens in random spots (desktop) ---- */
+(function(){
+  if (window.innerWidth < 900) return;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  function sprinkle(){
+    var old=document.getElementById('et-sprinkle'); if(old) old.remove();
+    var wrap=document.createElement('div'); wrap.id='et-sprinkle';
+    var n=5;
+    for(var i=0;i<n;i++){
+      var s=document.createElement('div'); s.className='etmark-fx';
+      var right=Math.random()<0.5;
+      var lane=right?rnd(92,97.5):rnd(1.5,6);        // hug left/right margins
+      s.style.left=lane+'vw';
+      s.style.top=rnd(12,84)+'vh';
+      s.style.width=rnd(24,44).toFixed(0)+'px';
+      s.style.setProperty('--rot',(rnd(-16,16)|0)+'deg');
+      if(!reduce) s.style.animationDelay=rnd(0,4).toFixed(2)+'s';
+      s.innerHTML='<svg viewBox="0 0 120 150"><use href="#sym-alien"/></svg>';
+      wrap.appendChild(s);
+    }
+    document.body.appendChild(wrap);
+  }
+  sprinkle();
+  window.addEventListener('hashchange', sprinkle);   // re-scatter as you browse
 })();
 
 </script>
