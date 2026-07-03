@@ -431,9 +431,9 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
     <nav class="main" id="nav">
       <a href="#home" data-nav>Home</a>
       <a href="#story" data-nav>The Story</a>
+      <a href="#poem" data-nav>Poem</a>
       <a href="#enemies" data-nav>Enemies</a>
       <a href="#galleries" data-nav>Galleries</a>
-      <a href="#video" data-nav>Video</a>
       <a href="#sounds" data-nav>Sounds</a>
       <a href="#schematics" data-nav>Schematics</a>
       <a href="#contact" data-nav>Contact</a>
@@ -456,9 +456,9 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   <nav class="fnav" aria-label="Footer">
     <a href="#home" data-nav>Home</a>
     <a href="#story" data-nav>The Story</a>
+    <a href="#poem" data-nav>Poem</a>
     <a href="#enemies" data-nav>Enemies</a>
     <a href="#galleries" data-nav>Galleries</a>
-    <a href="#video" data-nav>Video</a>
     <a href="#sounds" data-nav>Sounds</a>
     <a href="#schematics" data-nav>Schematics</a>
     <a href="#contact" data-nav>Contact</a>
@@ -1065,23 +1065,8 @@ function viewStory(){
     else if(imgs.length===1) media=`<div class="solo"><img src="${imgs[0]}" data-img alt=""/></div>`;
     return `<div class="chapter"><h3><span class="dl">// log ${pad(i+1)}</span>${esc(c.h)}</h3><p>${esc(c.p)}</p>${media}</div>`;
   }).join('');
-  return `<section class="block wrap">
-    <div class="story-hero">
-      <img src="${esc(s.heroImage)}" alt="A Golden Story"/>
-      <div class="ov"><span class="tag">// incoming transmission · year 2112</span><div class="t">${esc(s.opening)}</div></div>
-    </div>
-    <div class="chapter"><p style="font-size:19px;margin-top:30px">A blinding light fills the sky as a massive object hurtles toward Earth at an unimaginable speed — metallic, seemingly indestructible. It crashes, and panic ensues as screens worldwide short-circuit into static. Scientists race to the impact site, desperate to unravel the mystery of this terrifying visitor from the unknown.</p></div>
-    ${chapters}
-    <div class="battle-cry"><small>// final transmission</small>“${esc(s.cry)}”</div>
-
-    <div class="sec-head" style="margin:30px 0 30px"><div><span class="eyebrow">Verse</span><h2>A Golden Poem</h2></div></div>
-    <div class="poem">${SITE.poem.map(st=>`<p class="stanza">${esc(st).replace(/\n/g,'<br>')}</p>`).join('')}</div>
-  </section>`;
-}
-
-function viewVideo(){
   const v=SITE.videos;
-  const grid=v.length
+  const vidGrid=v.length
     ? `<div class="vid-grid">${v.map(x=>{
         let frame;
         if(x.youtube) frame=`<iframe src="https://www.youtube.com/embed/${esc(x.youtube)}" title="${esc(x.title)}" allowfullscreen loading="lazy"></iframe>`;
@@ -1092,8 +1077,26 @@ function viewVideo(){
     : `<div class="empty-state"><span class="pixel">▶ AWAITING FOOTAGE</span>
         <p>Add clips under <code>videos</code> in the content block. YouTube: <code>{title:"…", youtube:"VIDEO_ID"}</code>. File: <code>{title:"…", file:"videos/clip.mp4"}</code>.</p></div>`;
   return `<section class="block wrap">
-    <div class="sec-head"><div><span class="eyebrow">Visual feed</span><h2>Golden Video</h2>
-    <p class="lead">Power-ons, gameplay, and restoration footage of the machine in motion.</p></div></div>${grid}
+    <div class="story-hero">
+      <img src="${esc(s.heroImage)}" alt="A Golden Story"/>
+      <div class="ov"><span class="tag">// incoming transmission · year 2112</span><div class="t">${esc(s.opening)}</div></div>
+    </div>
+    <div class="chapter"><p style="font-size:19px;margin-top:30px">A blinding light fills the sky as a massive object hurtles toward Earth at an unimaginable speed — metallic, seemingly indestructible. It crashes, and panic ensues as screens worldwide short-circuit into static. Scientists race to the impact site, desperate to unravel the mystery of this terrifying visitor from the unknown.</p></div>
+    ${chapters}
+    <div class="battle-cry"><small>// final transmission</small>“${esc(s.cry)}”
+      <a class="btn ghost" href="#poem" data-nav style="margin-top:22px">Read the Golden Poem →</a>
+    </div>
+
+    <div class="sec-head" style="margin:50px 0 30px"><div><span class="eyebrow">Visual feed</span><h2>Golden Video</h2>
+    <p class="lead">Power-ons, gameplay, and restoration footage of the machine in motion.</p></div></div>${vidGrid}
+  </section>`;
+}
+
+function viewPoem(){
+  return `<section class="block wrap">
+    <div class="sec-head"><div><span class="eyebrow">Verse</span><h2>A Golden Poem</h2>
+    <p class="lead">A tribute in verse to the machine, its journey, and the legend it carries.</p></div></div>
+    <div class="poem">${SITE.poem.map(st=>`<p class="stanza">${esc(st).replace(/\n/g,'<br>')}</p>`).join('')}</div>
   </section>`;
 }
 
@@ -1198,7 +1201,7 @@ function viewEnemies(){
 }
 
 /* ============ ROUTER ============ */
-const ROUTES={home:viewHome,story:viewStory,galleries:viewGalleries,enemies:viewEnemies,video:viewVideo,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
+const ROUTES={home:viewHome,story:viewStory,galleries:viewGalleries,enemies:viewEnemies,poem:viewPoem,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
 function render(){
   const hash=(location.hash||'#home').slice(1);
   const [base,arg]=hash.split('/');
