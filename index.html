@@ -351,6 +351,12 @@ section.block.tight{padding:60px 0}
 /* ET alien emblem + sprinkle */
 .et-sig{display:flex;justify-content:center;flex-shrink:0}
 .f .sig{margin-top:8px}
+.fnav{max-width:var(--maxw);margin:0 auto;padding:26px 26px 0;display:flex;flex-wrap:wrap;
+  justify-content:center;gap:6px 4px;border-bottom:1px solid var(--line);padding-bottom:22px}
+.fnav a{font-family:'Space Mono';font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ink-mute);padding:7px 14px;border-radius:20px;transition:.2s}
+.fnav a:hover{color:var(--gold);background:rgba(255,206,77,.08)}
+@media(max-width:640px){.fnav{gap:4px 2px}.fnav a{padding:6px 10px;font-size:10px}}
 .et-emblem{width:132px;height:132px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
 .et-emblem .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
 .et-emblem .et-stars circle:nth-child(2){animation-delay:.4s}
@@ -447,6 +453,16 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 </div>
 
 <footer>
+  <nav class="fnav" aria-label="Footer">
+    <a href="#home" data-nav>Home</a>
+    <a href="#story" data-nav>The Story</a>
+    <a href="#enemies" data-nav>Enemies</a>
+    <a href="#galleries" data-nav>Galleries</a>
+    <a href="#video" data-nav>Video</a>
+    <a href="#sounds" data-nav>Sounds</a>
+    <a href="#schematics" data-nav>Schematics</a>
+    <a href="#contact" data-nav>Contact</a>
+  </nav>
   <div class="f">
     <div class="left">© <span id="yr"></span> Golden Defender · No. 50,001<br>A tribute to the 50,000th machine · Williams Electronics, 1981
       <div class="sig">SYSTEMS NOMINAL · INSERT COIN</div>
@@ -695,7 +711,7 @@ const pad=n=>String(n).padStart(2,'0');
     const R=Math.max(20*dpr,Math.min(54*dpr,Math.min(w,h)*0.05));
     bh={x:w*0.85,y:h*0.19,R,rot:0,
       parts:Array.from({length:46},()=>({ang:Math.random()*6.28,rad:rnd(R*1.35,R*5.2),
-        sp:rnd(.01,.03),vr:rnd(.15,.5)*dpr}))};
+        sp:rnd(.005,.015),vr:rnd(.07,.22)*dpr}))};
   }
 
   function drawBlackHole(){
@@ -714,14 +730,21 @@ const pad=n=>String(n).padStart(2,'0');
       const col=`rgba(255,${Math.round(150+95*heat)},${Math.round(40+30*(1-heat))},${.5+.5*heat})`;
       x.fillStyle=col;x.beginPath();x.arc(px,py,(.8+1.4*heat)*dpr,0,6.2832);x.fill();
     }
-    // accretion disk ring (rotating, flattened, doppler-bright on one side)
+    // accretion disk — multi-band, Saturn-style rings with subtle color variation
     x.save();x.translate(bx,by);if(!reduce)bh.rot+=0.006;x.rotate(bh.rot);x.scale(1,0.4);
-    for(let k=0;k<2;k++){
-      const rr=R*(1.5+k*0.5);
+    const bands=[
+      {rr:1.32,w:1.6,hue:'255,224,150',peak:.5},   // warm gold — innermost
+      {rr:1.62,w:2.6,hue:'255,236,190',peak:.85},  // bright cream — main ring
+      {rr:1.98,w:1.4,hue:'190,215,255',peak:.4},   // pale blue band
+      {rr:2.3, w:1.1,hue:'255,190,210',peak:.32},  // faint rose band
+      {rr:2.6, w:0.9,hue:'255,206,120',peak:.24},  // thin outer gold
+    ];
+    for(const b of bands){
+      const rr=R*b.rr;
       const lg=x.createLinearGradient(-rr,0,rr,0);
-      lg.addColorStop(0,'rgba(255,120,30,.0)');lg.addColorStop(.35,'rgba(255,150,40,.55)');
-      lg.addColorStop(.5,'rgba(255,224,150,.9)');lg.addColorStop(.65,'rgba(255,150,40,.55)');lg.addColorStop(1,'rgba(255,120,30,0)');
-      x.strokeStyle=lg;x.lineWidth=(2.4-k*0.8)*dpr;x.beginPath();x.arc(0,0,rr,0,6.2832);x.stroke();
+      lg.addColorStop(0,`rgba(${b.hue},0)`);lg.addColorStop(.35,`rgba(${b.hue},${b.peak*0.55})`);
+      lg.addColorStop(.5,`rgba(${b.hue},${b.peak})`);lg.addColorStop(.65,`rgba(${b.hue},${b.peak*0.55})`);lg.addColorStop(1,`rgba(${b.hue},0)`);
+      x.strokeStyle=lg;x.lineWidth=b.w*dpr;x.beginPath();x.arc(0,0,rr,0,6.2832);x.stroke();
     }
     x.restore();
     x.globalCompositeOperation='source-over';
@@ -732,6 +755,25 @@ const pad=n=>String(n).padStart(2,'0');
     const eg=x.createRadialGradient(bx,by,R*0.2,bx,by,R);
     eg.addColorStop(0,'#000');eg.addColorStop(.82,'#000');eg.addColorStop(1,'rgba(0,0,0,.2)');
     x.fillStyle=eg;x.beginPath();x.arc(bx,by,R,0,6.2832);x.fill();
+    // hidden alien face, watching from within the void
+    const pulse=reduce?1:(.55+.45*Math.sin(t*0.045));
+    x.save();x.beginPath();x.arc(bx,by,R*0.98,0,6.2832);x.clip();
+    // faint head outline
+    x.strokeStyle=`rgba(255,206,77,${.12+.08*pulse})`;x.lineWidth=1*dpr;
+    x.beginPath();x.ellipse(bx,by+R*0.06,R*0.62,R*0.78,0,0,6.2832);x.stroke();
+    // glowing green eyes
+    const ew=R*0.34, eh=R*0.19, eoff=R*0.27, ey=by-R*0.03;
+    for(const sgn of [-1,1]){
+      const ex=bx+sgn*eoff;
+      x.save();x.translate(ex,ey);x.rotate(sgn*0.42);
+      const eyeg=x.createRadialGradient(0,0,0,0,0,ew);
+      eyeg.addColorStop(0,`rgba(210,255,225,${.9*pulse})`);
+      eyeg.addColorStop(.4,`rgba(91,255,134,${.7*pulse})`);
+      eyeg.addColorStop(1,'rgba(10,122,44,0)');
+      x.fillStyle=eyeg;x.beginPath();x.ellipse(0,0,ew,eh,0,0,6.2832);x.fill();
+      x.restore();
+    }
+    x.restore();
   }
 
   function spawnShoot(){
