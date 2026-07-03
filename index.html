@@ -349,7 +349,8 @@ section.block.tight{padding:60px 0}
 .pdfx:hover{background:rgba(255,255,255,.15)}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 /* ET alien emblem + sprinkle */
-.et-sig{display:flex;justify-content:center;margin-bottom:22px}
+.et-sig{display:flex;justify-content:center;flex-shrink:0}
+.f .sig{margin-top:8px}
 .et-emblem{width:132px;height:132px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
 .et-emblem .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
 .et-emblem .et-stars circle:nth-child(2){animation-delay:.4s}
@@ -446,7 +447,11 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 </div>
 
 <footer>
-  <div class="et-sig">
+  <div class="f">
+    <div class="left">© <span id="yr"></span> Golden Defender · No. 50,001<br>A tribute to the 50,000th machine · Williams Electronics, 1981
+      <div class="sig">SYSTEMS NOMINAL · INSERT COIN</div>
+    </div>
+    <div class="et-sig">
     <svg class="et-emblem" viewBox="0 0 220 220" role="img" aria-label="Enhanced by ET — Edward Thomas">
       <defs>
         <radialGradient id="epl" cx="42%" cy="38%" r="70%"><stop offset="0%" stop-color="#1a2740"/><stop offset="100%" stop-color="#070a14"/></radialGradient>
@@ -466,10 +471,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
       <g class="et-face" transform="translate(110 108) scale(0.62) translate(-60 -74)"><use href="#sym-alien"/></g>
       <text class="et-arc-text" text-anchor="middle" font-family="'Space Mono',monospace" font-size="14" letter-spacing="4" fill="#ffce4d"><textPath href="#et-arc-top" startOffset="50%">ENHANCED BY ET</textPath></text>
     </svg>
-  </div>
-  <div class="f">
-    <div class="left">© <span id="yr"></span> Golden Defender · No. 50,001<br>A tribute to the 50,000th machine · Williams Electronics, 1981</div>
-    <div class="sig">SYSTEMS NOMINAL · INSERT COIN</div>
+    </div>
   </div>
 </footer>
 
