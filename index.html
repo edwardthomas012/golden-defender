@@ -288,6 +288,12 @@ section.block.tight{padding:60px 0}
 }
 .story-end{text-align:center;margin-top:56px}
 .story-end .btn{margin-top:8px}
+.callsign{text-align:center;margin:8px auto 4px;max-width:700px;position:relative}
+.callsign .rule{width:1px;height:34px;background:linear-gradient(var(--gold),transparent);margin:0 auto 18px;opacity:.6}
+.callsign small{display:block;font-family:'Space Mono';font-size:11px;letter-spacing:3px;color:var(--plasma);
+  text-transform:uppercase;margin-bottom:14px}
+.callsign .word{font-family:'Sora';font-weight:800;font-style:italic;font-size:clamp(36px,7vw,68px);letter-spacing:-1px}
+.callsign .rule2{width:60px;height:2px;background:var(--gold);margin:20px auto 0;opacity:.45;border-radius:2px}
 .prologue{max-width:1000px;margin:44px auto 0;border-radius:20px;overflow:hidden;position:relative;
   border:1px solid var(--line-2)}
 .prologue img{width:100%;display:block;aspect-ratio:1000/562;object-fit:cover;filter:brightness(.92) saturate(1.03)}
@@ -1064,7 +1070,7 @@ function viewGallery(key){
 
 function viewStory(){
   const s=SITE.story;
-  const chapters=s.chapters.map((c,i)=>{
+  const chapterList=s.chapters.map((c,i)=>{
     const imgs=(c.imgs||[]).map(id=> (id.startsWith('data:')||id.startsWith('http')) ? id : gURL(id));
     const media=imgs.length===2
       ? `<div class="cmedia">${imgs.map(u=>`<img src="${esc(u)}" data-img alt=""/>`).join('')}</div>`
@@ -1075,7 +1081,9 @@ function viewStory(){
       ${media}
       <div class="ctext"><span class="dl">// log ${pad(i+1)}</span><h3>${esc(c.h)}</h3><p>${esc(c.p)}</p></div>
     </article>`;
-  }).join('');
+  });
+  chapterList.splice(7,0,`<div class="callsign"><div class="rule"></div><small>// he earns a name</small><div class="word tgold">“Goldilocks”</div><div class="rule2"></div></div>`);
+  const chapters=chapterList.join('');
   const v=SITE.videos;
   const vidGrid=v.length
     ? `<div class="vid-grid">${v.map(x=>{
