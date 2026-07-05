@@ -339,10 +339,12 @@ section.block.tight{padding:60px 0}
 
 /* ---------------- CONTACT / FAQ ---------------- */
 .panel-card{background:var(--glass);border:1px solid var(--line-2);border-radius:20px;padding:clamp(28px,4vw,46px);backdrop-filter:blur(8px)}
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 40px}
 .faq-item{border-bottom:1px solid var(--line);padding:24px 0}
 .faq-item:last-child{border-bottom:0}
 .faq-item h4{margin:0 0 9px;font-family:'Sora';font-weight:700;font-size:18px;color:var(--gold-bri)}
 .faq-item p{margin:0;color:var(--ink-dim)}
+@media(max-width:760px){.faq-grid{grid-template-columns:1fr}}
 
 .split{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start}
 @media(max-width:880px){.split{grid-template-columns:1fr;gap:30px}}
@@ -665,9 +667,21 @@ const SITE = {
     intro:"Questions about the restoration, the milestone, or the machine? Drop a line.",
     email:"hello@goldendefender.example",
     faq:[
-      { q:"What is the Golden Defender?", a:"A tribute build honoring the 50,000th Defender that rolled off the production line in 1981. This machine is numbered 50,001 — a tribute number — and finished in gold to mark the milestone." },
-      { q:"Is it a real, playable machine?", a:"Yes. Every system was inspected, repaired, and restored to working order. Insert a coin and it plays." },
-      { q:"Can I see it in person?", a:"Reach out using the contact details above to arrange a viewing." }
+      { q:"Why did you choose to restore a Williams Defender arcade?", a:"Williams Defender is a legendary arcade game from the 80s, known for its impact on the gaming world. It was one of the most challenging and iconic games of its era." },
+      { q:"Why a \"Golden\" version?", a:"The Golden version represents a celebration of the 50,000th machine, a milestone for the game's production. Gold signifies its value in arcade history and adds a unique visual appeal." },
+      { q:"Why focus on the 50,000th machine?", a:"The 50,000th machine represents a historical moment in the game's production run, marking its success and influence. It's like commemorating a rare collector's item." },
+      { q:"What makes this restoration special compared to other versions?", a:"This restoration brings the original arcade game back to life, but the Golden version adds a touch of exclusivity, making it a true collector's piece with a one-of-a-kind finish." },
+      { q:"Did you preserve any original features of the machine?", a:"Yes, I kept the original gameplay, mechanics, and cabinet structure intact. The goal was to restore it while enhancing its aesthetic value with the Golden theme." },
+      { q:"How long did the restoration take?", a:"The restoration process took several months, involving both sourcing authentic parts and customizing the Golden design to reflect the significance of the 50,000th machine." },
+      { q:"What inspired you to take on this project?", a:"I've always had a passion for vintage arcade games and wanted to honor the legacy of Williams Defender by creating something visually iconic and historically meaningful." },
+      { q:"Is the Golden version fully playable?", a:"Absolutely! The machine is fully functional and playable, maintaining the original Defender gameplay while showcasing the Golden exterior." },
+      { q:"How does the Golden version stand out visually?", a:"The Golden finish gives the arcade a sleek, premium look that contrasts with the original colors. It draws attention and adds an element of luxury to the machine." },
+      { q:"Will this Golden Defender be available for display or sale?", a:"Right now, it's a personal project that I restored for its sentimental and historical value, but it could potentially be displayed at events or shared with collectors in the future." },
+      { q:"What does the number 50,001 mean?", a:"It's a tribute number. The original 50,000th Defender rolled off the Williams production line in 1981 — this machine is numbered 50,001 in its honor, finished in gold to mark the milestone." },
+      { q:"Who created the original Defender?", a:"Defender was created in 1981 by Eugene Jarvis, Larry DeMar, and Sam Dicker at Williams Electronics — the same team credited for the game's iconic sound design." },
+      { q:"Where can I hear the game's music and sound effects?", a:"Head to the Songs and Sounds pages — tribute tracks from fans and musicians, plus every classic effect straight from the cabinet." },
+      { q:"Is there a video of the machine running?", a:"Yes — visit The Story page for power-on, gameplay, and restoration footage." },
+      { q:"Can I download the schematics?", a:"Yes. The Schematics page has the full Early and Later series service manuals, viewable on-screen or downloadable as a zip." }
     ]
   }
 };
@@ -1205,18 +1219,16 @@ function viewSchematics(){
 
 function viewContact(){
   const c=SITE.contact;
-  return `<section class="block wrap"><div class="split">
-    <div>
+  return `<section class="block wrap">
+    <div class="sec-head"><div>
       <span class="eyebrow">Open a channel</span>
       <h2 class="display tgold" style="font-size:clamp(36px,5.4vw,62px);margin:12px 0 16px;text-transform:uppercase;letter-spacing:-1.5px">Contact</h2>
-      <p style="color:var(--ink-dim);font-size:18px">${esc(c.intro)}</p>
+      <p style="color:var(--ink-dim);font-size:18px;max-width:60ch">${esc(c.intro)}</p>
       <a class="btn primary" href="mailto:${esc(c.email)}" style="margin-top:22px">✉ ${esc(c.email)}</a>
-      <p class="helper">// change this address under <code>contact.email</code> in the content block.</p>
-    </div>
-    <div class="panel-card"><span class="eyebrow">Good to know</span>
-      <div style="margin-top:16px">${c.faq.map(f=>`<div class="faq-item"><h4>${esc(f.q)}</h4><p>${esc(f.a)}</p></div>`).join('')}</div>
-    </div>
-  </div></section>`;
+    </div></div>
+    <div class="sec-head" style="margin:56px 0 26px"><div><span class="eyebrow">Good to know</span><h2>FAQ</h2></div></div>
+    <div class="faq-grid">${c.faq.map(f=>`<div class="faq-item"><h4>${esc(f.q)}</h4><p>${esc(f.a)}</p></div>`).join('')}</div>
+  </section>`;
 }
 
 /* ============ ENEMIES ============ */
