@@ -571,7 +571,9 @@ const SITE = {
     monitor:{ name:"Golden Monitor", blurb:"The CRT that brings the vectors to life.", photos:[] },
     coindoor:{ name:"Golden Coin Door", blurb:"Quarters welcome. The coin mechanism and door.", photos:[] },
     creator:{ name:"Golden Creator", blurb:"Behind the scenes with the restorer.", photos:[] },
-    extras:{ name:"Golden Extras", blurb:"Odds, ends, and the finishing touches.", photos:[] },
+    extras:{ name:"Golden Extras", blurb:"Odds, ends, bonus footage, and the finishing touches.",
+      videos:[{ title:"A Fan's Perspective", note:"A player's take on what makes Defender so brutal", file:"videos/british-man-talking-defender.mp4" }],
+      photos:[] },
     tribute:{ name:"Golden Tribute", blurb:"The plaque and the milestone honored.", photos:[] },
     enemies:{ name:"Golden Enemies", blurb:"Landers, Mutants, Baiters, Bombers, Pods & Swarmers.", photos:[] },
     fullphotos:{ name:"Golden Full Photos", blurb:"The finished machine, head to toe.", photos:[] }
@@ -613,8 +615,7 @@ const SITE = {
 
   /* ---- VIDEOS ---- */
   videos:[
-    { title:"The Golden Story", note:"The saga of the Golden Defender, in motion", youtube:"zIEGTE0hOmo" },
-    { title:"A Fan's Perspective", note:"A player's take on what makes Defender so brutal", file:"videos/british-man-talking-defender.mp4" }
+    { title:"The Golden Story", note:"The saga of the Golden Defender, in motion", youtube:"zIEGTE0hOmo" }
     /* add more like: { title:"Power-On", note:"First boot after restoration", youtube:"VIDEO_ID" } */
   ],
 
@@ -1090,9 +1091,20 @@ function viewGalleries(){
   </section>`;
 }
 
+function renderVideos(list){
+  if(!list||!list.length) return '';
+  return `<div class="vid-grid">${list.map(x=>{
+      let frame;
+      if(x.youtube) frame=`<iframe src="https://www.youtube.com/embed/${esc(x.youtube)}" title="${esc(x.title)}" allowfullscreen loading="lazy"></iframe>`;
+      else if(x.file) frame=`<video src="${esc(x.file)}" controls preload="metadata"></video>`;
+      else frame=`<div class="empty">NO SOURCE SET</div>`;
+      return `<div class="vid"><div class="frame">${frame}</div><div class="lab">${esc(x.title)}${x.note?`<small>${esc(x.note)}</small>`:''}</div></div>`;
+    }).join('')}</div>`;
+}
 function viewGallery(key){
   const g=SITE.galleries[key]; if(!g) return viewGalleries();
   const idx=String(GAL_ORDER.indexOf(key)+1).padStart(2,'0');
+  const vids=renderVideos(g.videos);
   const body=g.photos.length
     ? `<div class="grid">${g.photos.map((p,i)=>`
         <button class="tile" data-lb="${key}" data-i="${i}">
@@ -1106,6 +1118,7 @@ function viewGallery(key){
     <div class="sec-head" style="margin-bottom:28px"><div>
       <span class="eyebrow">Contact CT-${idx} · ${pad(g.photos.length)} frames</span>
       <h2>${esc(g.name)}</h2><p class="lead">${esc(g.blurb||'')}</p></div></div>
+    ${vids?vids+'<div style="height:36px"></div>':''}
     ${body}
   </section>`;
 }
@@ -1128,13 +1141,7 @@ function viewStory(){
   const chapters=chapterList.join('');
   const v=SITE.videos;
   const vidGrid=v.length
-    ? `<div class="vid-grid">${v.map(x=>{
-        let frame;
-        if(x.youtube) frame=`<iframe src="https://www.youtube.com/embed/${esc(x.youtube)}" title="${esc(x.title)}" allowfullscreen loading="lazy"></iframe>`;
-        else if(x.file) frame=`<video src="${esc(x.file)}" controls preload="metadata"></video>`;
-        else frame=`<div class="empty">NO SOURCE SET</div>`;
-        return `<div class="vid"><div class="frame">${frame}</div><div class="lab">${esc(x.title)}${x.note?`<small>${esc(x.note)}</small>`:''}</div></div>`;
-      }).join('')}</div>`
+    ? renderVideos(v)
     : `<div class="empty-state"><span class="pixel">▶ AWAITING FOOTAGE</span>
         <p>Add clips under <code>videos</code> in the content block. YouTube: <code>{title:"…", youtube:"VIDEO_ID"}</code>. File: <code>{title:"…", file:"videos/clip.mp4"}</code>.</p></div>`;
   return `<section class="block wrap">
