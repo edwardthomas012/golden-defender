@@ -1112,6 +1112,7 @@ const ICON_PLAY_BIG='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fil
 const ICON_VOL='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_VOL_OFF='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 9l5 5m0-5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_FULL='<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5m11-5v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_FULL_EXIT='<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4m11 5v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function renderVideos(list){
   if(!list||!list.length) return '';
@@ -1374,11 +1375,20 @@ function wireVideoControls(root){
     bar.addEventListener('click',e=>{ e.stopPropagation(); seek(e); showCtrl(); });
 
     muteBtn.addEventListener('click',e=>{ e.stopPropagation(); video.muted=!video.muted; muteBtn.innerHTML=video.muted?ICON_VOL_OFF:ICON_VOL; showCtrl(); });
+
+    const isFs=()=>document.fullscreenElement===frame || document.webkitFullscreenElement===frame;
     fullBtn.addEventListener('click',e=>{ e.stopPropagation();
-      if(frame.requestFullscreen) frame.requestFullscreen();
-      else if(video.requestFullscreen) video.requestFullscreen();
+      if(isFs()){
+        if(document.exitFullscreen) document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } else if(frame.requestFullscreen){ frame.requestFullscreen(); }
+      else if(frame.webkitRequestFullscreen){ frame.webkitRequestFullscreen(); }
+      else if(video.requestFullscreen){ video.requestFullscreen(); }
       showCtrl();
     });
+    const syncFsIcon=()=>{ fullBtn.innerHTML=isFs()?ICON_FULL_EXIT:ICON_FULL; showCtrl(); };
+    document.addEventListener('fullscreenchange',syncFsIcon);
+    document.addEventListener('webkitfullscreenchange',syncFsIcon);
   });
 }
 $('#menuBtn').addEventListener('click',()=>$('#nav').classList.toggle('open'));
