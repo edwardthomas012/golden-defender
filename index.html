@@ -333,6 +333,7 @@ section.block.tight{padding:60px 0}
 .track .info{flex:1;min-width:0}
 .track .info b{font-family:'Sora';font-weight:700;display:block}
 .track .info span{color:var(--ink-mute);font-size:13px;font-family:'Space Mono'}
+.track .info span.artist{color:var(--gold);font-size:12px;letter-spacing:.5px;display:block;margin-top:2px}
 .track audio{height:36px}
 .track .soon{font-family:'Space Mono';font-size:10px;letter-spacing:1px;color:var(--ink-mute)}
 
@@ -467,6 +468,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
       <a href="#poem" data-nav>Poem</a>
       <a href="#enemies" data-nav>Enemies</a>
       <a href="#galleries" data-nav>Galleries</a>
+      <a href="#songs" data-nav>Songs</a>
       <a href="#sounds" data-nav>Sounds</a>
       <a href="#schematics" data-nav>Schematics</a>
       <a href="#contact" data-nav>Contact</a>
@@ -492,6 +494,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
     <a href="#poem" data-nav>Poem</a>
     <a href="#enemies" data-nav>Enemies</a>
     <a href="#galleries" data-nav>Galleries</a>
+    <a href="#songs" data-nav>Songs</a>
     <a href="#sounds" data-nav>Sounds</a>
     <a href="#schematics" data-nav>Schematics</a>
     <a href="#contact" data-nav>Contact</a>
@@ -614,8 +617,15 @@ const SITE = {
 
   /* ---- GOLDEN SONGS ---- */
   songs:[
-    { title:"Golden Defender Theme", note:"Original tribute track" },
-    { title:"Hero of Wave 255", note:"" }
+    { title:"Time Capsule Funk", artist:"Toomasu", audio:"songs/time-capsule-funk.mp3" },
+    { title:"Golden Defender Funk", artist:"Toomasu", audio:"songs/golden-defender-funk.mp3" },
+    { title:"Defender Rap", artist:"Toomasu", audio:"songs/defender-rap.mp3" },
+    { title:"Defender Song", artist:"Buckner & Garcia", audio:"songs/defender-song-buckner-garcia.mp3" },
+    { title:"Never Give Up", artist:"McChris Is Dead", audio:"songs/never-give-up.mp3" },
+    { title:"Manilla Road - Defender", artist:"Manilla Road", audio:"songs/manilla-road-defender.mp3" },
+    { title:"Defender Parody", artist:"Michael Welch", audio:"songs/defender-parody-michael-welch.mp3" },
+    { title:"The Great Defender (Down at the Arcade)", artist:"Lou Reed", audio:"songs/the-great-defender-lou-reed.mp3" },
+    { title:"Toccata and Fugue in D minor, BWV 565", artist:"Bach", audio:"songs/bach-toccata-fugue-d-minor.mp3" }
   ],
 
   /* ---- CLASSIC SOUNDS (the cabinet's own effects) ---- */
@@ -1140,18 +1150,25 @@ function viewPoem(){
   </section>`;
 }
 
-function viewSounds(){
-  const row=t=>`<div class="track"><div class="ico">♪</div>
-    <div class="info"><b>${esc(t.title)}</b>${t.note?`<span>${esc(t.note)}</span>`:''}</div>
-    ${t.audio?`<audio controls src="${esc(t.audio)}"></audio>`:`<span class="soon">ADD FILE</span>`}</div>`;
+function trackRow(t){
+  return `<div class="track"><div class="ico">♪</div>
+    <div class="info"><b>${esc(t.title)}</b>${t.artist?`<span class="artist">${esc(t.artist)}</span>`:''}${t.note?`<span>${esc(t.note)}</span>`:''}</div>
+    ${t.audio?`<audio controls preload="none" src="${esc(t.audio)}"></audio>`:`<span class="soon">ADD FILE</span>`}</div>`;
+}
+function viewSongs(){
   return `<section class="block wrap">
     <div class="sec-head"><div><span class="eyebrow">Audio channel</span><h2>Golden Songs</h2>
-    <p class="lead">Original tribute tracks for the Golden Defender.</p></div></div>
-    <div class="audio-list">${SITE.songs.map(row).join('')}</div>
-    <div class="sec-head" style="margin:70px 0 30px"><div><span class="eyebrow">From the cabinet</span><h2>Classic Sounds</h2>
+    <p class="lead">Original tribute tracks for the Golden Defender, made by fans, musicians, and one very dedicated owner.</p></div></div>
+    <div class="audio-list">${SITE.songs.map(trackRow).join('')}</div>
+    <p class="helper">// attach a track with <code>audio:"songs/file.mp3"</code>, and credit the artist with <code>artist:"…"</code> in the content block.</p>
+  </section>`;
+}
+function viewSounds(){
+  return `<section class="block wrap">
+    <div class="sec-head"><div><span class="eyebrow">From the cabinet</span><h2>Classic Sounds</h2>
     <p class="lead">The unmistakable effects of Defender — smart bombs, hyperspace, laser fire, and the cries of the invasion itself.</p>
     <p class="credit">Sound design by <b>Jarvis · DeMar · Dicker</b> — Williams Electronics, 1981</p></div></div>
-    <div class="audio-list">${SITE.sounds.map(row).join('')}</div>
+    <div class="audio-list">${SITE.sounds.map(trackRow).join('')}</div>
     <p class="helper">// attach audio with <code>audio:"sounds/file.mp3"</code> on any track in the content block.</p>
   </section>`;
 }
@@ -1242,7 +1259,7 @@ function viewEnemies(){
 }
 
 /* ============ ROUTER ============ */
-const ROUTES={home:viewHome,story:viewStory,galleries:viewGalleries,enemies:viewEnemies,poem:viewPoem,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
+const ROUTES={home:viewHome,story:viewStory,galleries:viewGalleries,enemies:viewEnemies,poem:viewPoem,songs:viewSongs,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
 function render(){
   const hash=(location.hash||'#home').slice(1);
   const [base,arg]=hash.split('/');
