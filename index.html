@@ -320,8 +320,22 @@ section.block.tight{padding:60px 0}
 .vid-solo{max-width:640px;margin:0 auto}
 .vid{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--glass);backdrop-filter:blur(6px)}
 .vid .frame{aspect-ratio:16/9;background:#000;position:relative}
-.vid .frame iframe,.vid .frame video{width:100%;height:100%;border:0;display:block}
+.vid .frame iframe,.vid .frame video{width:100%;height:100%;border:0;display:block;object-fit:contain;background:#000}
 .vid .frame.empty{display:grid;place-items:center;color:var(--ink-mute);font-family:'Space Mono';font-size:11px;text-align:center;line-height:1.9;padding:20px;letter-spacing:1px}
+.vid .frame .ctrl{position:absolute;left:0;right:0;bottom:0;z-index:4;display:flex;align-items:center;gap:12px;
+  padding:10px 14px;background:linear-gradient(0deg,rgba(0,0,0,.88) 0%,rgba(0,0,0,.55) 60%,transparent 100%);
+  opacity:0;transform:translateY(4px);transition:opacity .18s ease,transform .18s ease}
+.vid .frame:hover .ctrl,.vid .frame.playing .ctrl,.vid .frame.ctrl-show .ctrl{opacity:1;transform:translateY(0)}
+.vid .frame .ctrl button{background:none;border:0;padding:4px;color:var(--ink);cursor:pointer;display:grid;place-items:center;flex:0 0 auto}
+.vid .frame .ctrl button svg{width:19px;height:19px;fill:currentColor;display:block}
+.vid .frame .ctrl button:hover{color:var(--gold)}
+.vid .frame .ctrl .bar{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.28);position:relative;cursor:pointer}
+.vid .frame .ctrl .bar .fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--gold);width:0%;pointer-events:none}
+.vid .frame .ctrl .bar .fill::after{content:"";position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:11px;height:11px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px rgba(255,206,77,.7)}
+.vid .frame .ctrl .time{font-family:'Space Mono';font-size:11px;color:var(--ink-mute);white-space:nowrap;flex:0 0 auto}
+.vid .frame .big-play{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:rgba(0,0,0,.15);border:0;cursor:pointer;color:var(--ink)}
+.vid .frame .big-play svg{width:56px;height:56px;filter:drop-shadow(0 4px 14px rgba(0,0,0,.6))}
+.vid .frame.playing .big-play{display:none}
 .vid .lab{padding:16px 18px;font-family:'Sora';font-weight:600}
 .vid .lab small{display:block;color:var(--ink-mute);font-weight:400;margin-top:4px;font-size:13px;font-family:'Inter'}
 
@@ -1092,12 +1106,27 @@ function viewGalleries(){
   </section>`;
 }
 
+const ICON_PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+const ICON_PAUSE='<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
+const ICON_PLAY_BIG='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.45)" stroke="rgba(255,255,255,.6)" stroke-width="1"/><path d="M10 7.5v9l7-4.5z" fill="currentColor"/></svg>';
+const ICON_VOL='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_VOL_OFF='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 9l5 5m0-5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_FULL='<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5m11-5v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
 function renderVideos(list){
   if(!list||!list.length) return '';
   const items=list.map(x=>{
       let frame;
       if(x.youtube) frame=`<iframe src="https://www.youtube.com/embed/${esc(x.youtube)}" title="${esc(x.title)}" allowfullscreen loading="lazy"></iframe>`;
-      else if(x.file) frame=`<video src="${esc(x.file)}" controls preload="metadata"></video>`;
+      else if(x.file) frame=`<video src="${esc(x.file)}" preload="metadata" playsinline></video>
+        <button class="big-play" aria-label="Play video">${ICON_PLAY_BIG}</button>
+        <div class="ctrl">
+          <button class="c-play" aria-label="Play/Pause">${ICON_PLAY}</button>
+          <div class="bar"><div class="fill"></div></div>
+          <span class="time">0:00 / 0:00</span>
+          <button class="c-mute" aria-label="Mute">${ICON_VOL}</button>
+          <button class="c-full" aria-label="Fullscreen">${ICON_FULL}</button>
+        </div>`;
       else frame=`<div class="empty">NO SOURCE SET</div>`;
       return `<div class="vid"><div class="frame">${frame}</div><div class="lab">${esc(x.title)}${x.note?`<small>${esc(x.note)}</small>`:''}</div></div>`;
     }).join('');
@@ -1291,10 +1320,62 @@ function render(){
   $$('[data-open]').forEach(b=>b.addEventListener('click',()=>{location.hash='#g/'+b.dataset.open;}));
   $$('[data-lb]').forEach(b=>b.addEventListener('click',()=>openLightbox(b.dataset.lb,+b.dataset.i)));
   $$('[data-img]').forEach(im=>im.addEventListener('click',()=>openSolo(im.src,im.alt)));
+  wireVideoControls(app);
   $('#nav').classList.remove('open');
   window.scrollTo({top:0});
 }
 addEventListener('hashchange',render);
+
+function wireVideoControls(root){
+  const fmt=s=>{ if(!isFinite(s)||s<0) return '0:00'; const m=Math.floor(s/60), sec=Math.floor(s%60); return m+':'+String(sec).padStart(2,'0'); };
+  root.querySelectorAll('.vid .frame').forEach(frame=>{
+    const video=frame.querySelector('video');
+    const ctrl=frame.querySelector('.ctrl');
+    if(!video||!ctrl) return; // youtube iframe or empty slot, nothing to wire
+    const bigPlay=frame.querySelector('.big-play');
+    const playBtn=ctrl.querySelector('.c-play');
+    const muteBtn=ctrl.querySelector('.c-mute');
+    const fullBtn=ctrl.querySelector('.c-full');
+    const bar=ctrl.querySelector('.bar');
+    const fill=ctrl.querySelector('.fill');
+    const timeEl=ctrl.querySelector('.time');
+    let hideTimer=null;
+
+    const showCtrl=()=>{ frame.classList.add('ctrl-show'); clearTimeout(hideTimer);
+      hideTimer=setTimeout(()=>{ if(!video.paused) frame.classList.remove('ctrl-show'); },2200); };
+
+    const togglePlay=()=>{ video.paused?video.play():video.pause(); };
+
+    bigPlay.addEventListener('click',togglePlay);
+    playBtn.addEventListener('click',togglePlay);
+    video.addEventListener('click',togglePlay);
+    frame.addEventListener('mousemove',showCtrl);
+    frame.addEventListener('click',showCtrl);
+
+    video.addEventListener('play',()=>{ frame.classList.add('playing'); playBtn.innerHTML=ICON_PAUSE; showCtrl(); });
+    video.addEventListener('pause',()=>{ frame.classList.remove('playing'); frame.classList.remove('ctrl-show'); playBtn.innerHTML=ICON_PLAY; clearTimeout(hideTimer); });
+    video.addEventListener('ended',()=>{ frame.classList.remove('playing'); frame.classList.remove('ctrl-show'); playBtn.innerHTML=ICON_PLAY; });
+
+    video.addEventListener('loadedmetadata',()=>{ timeEl.textContent=fmt(0)+' / '+fmt(video.duration); });
+    video.addEventListener('timeupdate',()=>{
+      if(video.duration) fill.style.width=(video.currentTime/video.duration*100)+'%';
+      timeEl.textContent=fmt(video.currentTime)+' / '+fmt(video.duration);
+    });
+
+    const seek=e=>{
+      const r=bar.getBoundingClientRect();
+      const pct=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));
+      if(video.duration) video.currentTime=pct*video.duration;
+    };
+    bar.addEventListener('click',e=>{ e.stopPropagation(); seek(e); });
+
+    muteBtn.addEventListener('click',e=>{ e.stopPropagation(); video.muted=!video.muted; muteBtn.innerHTML=video.muted?ICON_VOL_OFF:ICON_VOL; });
+    fullBtn.addEventListener('click',e=>{ e.stopPropagation();
+      if(frame.requestFullscreen) frame.requestFullscreen();
+      else if(video.requestFullscreen) video.requestFullscreen();
+    });
+  });
+}
 $('#menuBtn').addEventListener('click',()=>$('#nav').classList.toggle('open'));
 
 /* ============ LIGHTBOX ============ */
