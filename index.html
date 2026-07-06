@@ -576,7 +576,7 @@ const SITE = {
      `cover` is optional; if blank, the first photo is used as the cover. */
   galleries: {
     history:{ name:"Golden History", blurb:"The story of the Golden Defender, told in photos.", photos:[] },
-    inspection:{ name:"Golden Inspection", blurb:"A close look at every panel before the work began.", photos:[] },
+    inspection:{ name:"Golden Inspection", blurb:"A close look at every panel before the work began.", cover:"images/inspection/16-inspection-sign-cover.jpg", photos:[] },
     parts:{ name:"Golden Parts", blurb:"The components, hardware, and pieces sourced for the build.", photos:[] },
     paint:{ name:"Golden Paint", blurb:"Stripping, prepping, and laying down that signature gold.", photos:[] },
     bezel:{ name:"Golden Bezel", blurb:"The monitor bezel, restored and gleaming.", photos:[] },
@@ -724,6 +724,30 @@ SITE.galleries.history.photos = [
   { src:"images/history/13-golden-production-b.jpg", cap:"The gold-exterior Defender takes shape, one of a kind on the line." },
   { src:"images/history/14-golden-crew-full.jpg", cap:"The Williams Electronics crew, gathered around the finished Golden Defender." },
   { src:"images/history/15-golden-crew-closeup.jpg", cap:"A closer look at the team who built No. 50,001." }
+];
+
+/* =============================================================
+   GOLDEN INSPECTION
+   ============================================================= */
+SITE.galleries.inspection.photos = [
+  { src:"images/inspection/01-serial-front-middle-right.jpg", cap:"The new serial plate, mounted front and center-right of the cabinet." },
+  { src:"images/inspection/02-inspected-date-front-middle-left.jpg", cap:"The inspection date plate, placed front center-left." },
+  { src:"images/inspection/03-inspected-date-coin-door.jpg", cap:"An inspection date plate mounted on the coin door." },
+  { src:"images/inspection/04-inspected-date-under-control-panel.jpg", cap:"The inspection date plate, tucked beneath the control panel." },
+  { src:"images/inspection/05-serial-back-upper-right.jpg", cap:"The serial plate on the back of the cabinet, upper right." },
+  { src:"images/inspection/06-serial-back-bottom-right.jpg", cap:"A second serial plate on the back of the cabinet, lower right." },
+  { src:"images/inspection/07-inspected-date-power-supply.jpg", cap:"The inspection date plate inside the cabinet, near the power supply." },
+  { src:"images/inspection/08-tribute-rip-board-set.jpg", cap:"A tribute plate for the original board set — converted from serial 492,292 to 500,001." },
+  { src:"images/inspection/09-full-plate-set-overview.jpg", cap:"All the plates made for this build: five inspection dates, three serial tags, and one tribute to the original board set." },
+  { src:"images/inspection/10-williams-defender-decal.jpg", cap:"A custom gold-and-black Williams Defender decal, laminated and placed on the back center — just like the originals." },
+  { src:"images/inspection/11-inspection-sign-monitor-casing.jpg", cap:"The inspection plate mounted on the monitor casing." },
+  { src:"images/inspection/12-five-inspection-signs-purchased.jpg", cap:"The five inspection date plates, fresh from the engraver." },
+  { src:"images/inspection/13-closeup-serial-front-middle-right.jpg", cap:"A closer look at the front middle-right serial plate." },
+  { src:"images/inspection/14-closeup-serial-back-upper-right-a.jpg", cap:"Detail shot of the back upper-right serial plate." },
+  { src:"images/inspection/15-closeup-serial-back-upper-right-b.jpg", cap:"Another close-up of the back upper-right serial plate." },
+  { src:"images/inspection/16-inspection-sign-cover.jpg", cap:"One of the custom inspection plates, fresh off the engraver." },
+  { src:"images/inspection/17-inspection-sign-front-middle-left.jpg", cap:"Another look at the inspection plate, front middle-left." },
+  { src:"images/inspection/18-inspection-sign-monitor-casing-alt.jpg", cap:"The inspection plate on the monitor casing, another angle." }
 ];
 
 /* helper to rebuild Google-hosted image URLs from their ids */
