@@ -708,7 +708,23 @@ const SITE = {
    Each line: SITE.galleries.history.photos.push({src:"images/history/01.jpg", cap:"Caption here"});
    Or just build an array like the old demo block did. See instructions above.
    ============================================================= */
-SITE.galleries.history.photos = [];
+SITE.galleries.history.photos = [
+  { src:"images/history/01-golden-defender-cabinet.jpg", cap:"The Golden Defender — No. 50,001, trimmed in gold to mark the milestone." },
+  { src:"images/history/02-williams-manufacturing-plant.jpg", cap:"Williams Electronics' manufacturing plant in Gurnee, Illinois, where every Defender was built." },
+  { src:"images/history/03-eugene-jarvis.jpg", cap:"Eugene Jarvis, designer and creator of Defender." },
+  { src:"images/history/04-larry-demar.jpg", cap:"Larry DeMar, co-designer and programmer who brought Defender's world to life." },
+  { src:"images/history/05-sam-dicker.jpg", cap:"Sam Dicker, the sound engineer behind Defender's frantic effects and alerts." },
+  { src:"images/history/06-eugene-and-larry.jpg", cap:"Eugene Jarvis and Larry DeMar, the creative team behind the game." },
+  { src:"images/history/07-demar-jarvis.jpg", cap:"DeMar and Jarvis together again — the partnership that defined Defender." },
+  { src:"images/history/08-defender-production-a.jpg", cap:"On the production line: Defender cabinets taking shape at Williams Electronics." },
+  { src:"images/history/09-defender-production-b.jpg", cap:"Assembly in progress — wiring and components going into each cabinet." },
+  { src:"images/history/10-defender-production-c.jpg", cap:"Another stage of the line, as standard Defender units near completion." },
+  { src:"images/history/11-defender-row-shipment.jpg", cap:"A row of finished Defender cabinets, ready to ship out to arcades." },
+  { src:"images/history/12-golden-production-a.jpg", cap:"Building the Golden Defender — special gold trim work underway." },
+  { src:"images/history/13-golden-production-b.jpg", cap:"The gold-exterior Defender takes shape, one of a kind on the line." },
+  { src:"images/history/14-golden-crew-full.jpg", cap:"The Williams Electronics crew, gathered around the finished Golden Defender." },
+  { src:"images/history/15-golden-crew-closeup.jpg", cap:"A closer look at the team who built No. 50,001." }
+];
 
 /* helper to rebuild Google-hosted image URLs from their ids */
 function gURL(id){ return "https://lh3.googleusercontent.com/sitesv/"+id+"=w1280"; }
