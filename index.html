@@ -575,7 +575,7 @@ const SITE = {
      Each key is one gallery. Add/rename freely.
      `cover` is optional; if blank, the first photo is used as the cover. */
   galleries: {
-    beginnings:{ name:"Golden Beginnings", blurb:"Where the restoration started — the cabinet as found.", photos:[] },
+    history:{ name:"Golden History", blurb:"The story of the Golden Defender, told in photos.", photos:[] },
     inspection:{ name:"Golden Inspection", blurb:"A close look at every panel before the work began.", photos:[] },
     parts:{ name:"Golden Parts", blurb:"The components, hardware, and pieces sourced for the build.", photos:[] },
     paint:{ name:"Golden Paint", blurb:"Stripping, prepping, and laying down that signature gold.", photos:[] },
@@ -703,42 +703,12 @@ const SITE = {
 };
 
 /* =============================================================
-   DEMO CONTENT — images pulled from your existing site so the
-   galleries look full out of the box. Replace with your own
-   files anytime (see instructions at the top of this script).
+/* =============================================================
+   GOLDEN HISTORY — add your own photos here.
+   Each line: SITE.galleries.history.photos.push({src:"images/history/01.jpg", cap:"Caption here"});
+   Or just build an array like the old demo block did. See instructions above.
    ============================================================= */
-SITE.galleries.beginnings.photos = [
-"AA5AbUBfdVvfaGfuIAheSNC4OF9RhlWX-5sc-jjDFkhiVK-6S3wugyU-Aq45e9Li0SoSRsjwt4Kh1biEWBhYH-l7Rdjo2rB-Jp5_OfwNj-ZV7kSWXpJD5zAqjid7A9rJsVKQ4neLWuYXlVbHQu-nuKVhWNCTz8wKh79FvOVoJIfutNxiJS-RNcm2M1H1Dma5mXGyY2rdAYxm_L1a7MxOz5GSgk9xxSmmjIIooUbeF-C2",
-"AA5AbUC7-bNVRjF7nIPpq4F7v3_2N_9Xuuf-2t7C90JOY0q866kvX2UgyTvVWWNmWqjBlMlXjA0DvBFYrIvNPNkYWnLFGJuUI5BL9JJWoMw7sQAfU6gK68Qfji5vyUG2xS_OxpkI0O_aemrSsqAkHrVHDFO0_xUv0GOEhndqBDTl2vpdSZv9yIfPfmn6akfYx49NTikzUhGC1L63RmKyg25ceLlJUlJBiILc20QiwsTWEVw",
-"AA5AbUDXS0Z9VsP17hQGs5K-Rd5Y748kdx2koppKSBObenl5MCvo73fc3pVp5FT2zEVb0x8A58pyLJJbKUnCytHcx6Kh70KIrpLc_aVmnWGza6e63xb1mzpduLJRak9E45maEXjmUVXPPwivOzFFWw7YuQAwwYp_izIaxJDA2-qNZlvShByv37pU1Zx84SmAZmCFT0kJW5RGhiIgB854P-cTcLqPE_KIQWoykSAeYGckK_M",
-"AA5AbUC9VRszNJ4S217CYGuijxO_GdYeVc5XfRb3ueMY5V3AbhmnIKLkS1EPA46y77sRlAHcECmQ8Isq_2uT9HGJyVe70IWbQnSoCTbj7b_cwA0EP3a6igDXo-J1j3FvXYo9OUMn2JpTESSL7JPNIQ9f6vw6RL6YuUl_RFcWKJES83zxHAMZobKa7l7dw8tGJfQfp-ExigXIOTA29NnsId_2JmyaaDW0VoL4n7M4FH9E",
-"AA5AbUCL0_cx18tVU_dBM7wkFXM1R2RyrAkABOKQIRa0I2vlEzTXnyXMsIKIbm80kOhCmTFMyzfxFeTjrHiupVlSFJalRu3fUbWGzpPjQj4Ql2RoaEk8FOFR-lx7VEAp8atEXMDAM2WzWFgR1D31mJJtb0PWSEftqApu03SO8ooM3s3URKnNyXF1ziOE4gkq5YTzbV_34a_4CaINy3LyDlvYqYl01MBp8mBXgz3cPmcwQPY",
-"AA5AbUC7NW0j9MfoYu2OW2LRep0ij75cnnuG0r4ZKAzjIIFPtgOBq2GXVvCbqiFbZ3d6AnFqrOMwO4FLUwBo93QjjFiJ9aI09QR_F6argbWWyTQe2tYjMHuvfNO-EVepLCykQ8IGG7MYIcK_Qd3oHHO_a5c2i3qPmmom4ztYhAWTjXbnmspHkBwOthez_PXqzWogLRKi0OBnDYMlgBET0SncHWdiL_ducENVVFyhTkDHOlQ",
-"AA5AbUCCO0nlyCQq_H3VghsSVEPvw11Xv91gHOuQNy4Gf-wal_fAvj68oxl_GThh_5vHsvko41m2UiNYxAzB9AAxil6VZj20PXiTRp4PQfCdJEIVrMpeYNy5pLLnzozYRdkovxDTnoBKQJ08yXQhJlCtblBkW1d3Z5Yrm0WYFxVsXxOHBzHviEacipXDTQ3WcUfswv2f7UbrtJ0n3vXImeMYi5Ivx0qGqOtsPd9HcBjo7o8",
-"AA5AbUCFBI3ojrvvEldliRn2-dcKxcuB13zN_X9O1nsfNXA-MhF6vd0XappsWYmwVOtYYaVTtnV9-1pF2EF7loYSkIOEAjjq23IdlL3QcPsc4RHt22Rdexb9xPHrjX3y5UovtPpwuySmrb-MLUYD7knDwqFJK_pQncv9hkOYjRgy_K2o1w_OJM8oMwB187MWwdov68YgqNJGwwMF515hvddhIj9XsnibKvP7QvTFjvs3U1A",
-"AA5AbUB92TV3nbRzEBY_JEMm3B7Nhfv3oBiopgb_sy2BwK1iqWKeGK7EEoJaQOrmC2GboqGCCG9rVN8WhKFXKEOjbwt6oVtqnu6BJnF3RJqj6nHNPHb-Rbnobkq8G1FI0ljn_FjWGvOJVvEypQZy2dMZihUULuyrFojmhUhfoQwT25HcMWAx5emNGZeGA8bYVldUoaAVl8doHbKVsIxijLBXAkFw0G9QOBBL66Ujo0-PTSE",
-"AA5AbUD5J9WtJG0TwMusI-65X2Xa1q61TwX5WV8QfmQOzpQZEOinP2pDx4rpGY2yOeh88De9bRrpbQkMR5HG2g_5Q7DCHs0N5M_JVrF04uDYudkczG9xYqEZVp0UnNWREfpvMD4U7hVrejNGdMrgYW5o30cSjnKEWQdJhHkEIw2KQiMyI4sN6LwNhmAlDBQaPwZtwtY5idusGUCYB6Q-doQj0G3t2c1yOwyJ-1FESQDfJS8",
-"AA5AbUAUK3xVy5vfgRoSlxYqanl-oUepHZCHgUJ5WQ0lOodXSDWlqrUT1yuy61u8rCc3at7A3u2crRKPBpjB3q8PmS4_xKKVCiKgAYryCYJWQaYPfFgdfm1N6YmNzbp3G_ZU1vYy9Fj1j233pQw_4at5oLL4iGQJ1RYMmF1JnrdKQuGqSrrSog2aF46CP378Xtec8BkT_TlzGU9c4i9whj84vjXyG8AI79kpRPmKFkj0HlI",
-"AA5AbUBk-S6NGxIUqWyB6WdpLyVgcllPIddvFu9bA9ipZbZ-ccwOhbRWB99iLgQvfbO-Z3XOcDU1V3bMegFq-zBieUyPOOn-MyyzLGTeqnGczJ6MuWdDesiXWXEbdfMnyFQhGvNuf9-kTKNJhwQWxT_fRteXVn9K13caESw47i69yhfFRjXWLb8NbWIhpNFUM1j3cQ2mYOR_1aqy-AbAVZCRToZogDjb9arn5UbsB5cIAj8",
-"AA5AbUCYKbST5YItBnw7YqnSEuH4SMNc5ijhw3lyNoSLVXJC6p7R4bs9dgZwCTtwTTgLcXZrtIshE7agVfA0oa6sKUNo7DPXBBMdWjIRq559rczema6v0efrHF76z6sHWE9ldKqLSmlONOGmZJdkORvb-tifRNK4qL403gxL5ddnINAkRCA4iZ_pWUrQGESmFiOXe6y4jy8C7OtxufvRSMJTUaTNewZvIHxrdxwxecYJPLc",
-"AA5AbUBybcCd6NMAq-QD6m3aqayeLPrzD3Ta599Lbn27SWSIKnMZ3J8gylZ_Ekapkcu9i4xjJpeoCuzgrnke4rYP9ddur-alMBfXO5PfQ91Cl966afHpqtI956pfzfgsCDfk318oOwSf__jNwSXVUMIr5su3nucx8_7L7vg0YQt0P0kPBm18P6Fzc7eFrRRRNYN292Mgz1Up7gdUuajpXf_nefGKfoHdfzF5QEP9IXbqDXk",
-"AA5AbUAfAShMMAbscwKCF8DrEbTEe3xKizwY6DBd8xZSEFgS7bVJM9BYQDfew_8O-gM5hePJv4GZVD4juGV4DUeHuMSzAsE7IH71sH1D7QK_5TqwtJiSFdPefTEnBQXBIkPzH_QYPIq1uWpDox5rz8OeNGjB9jVgbzZxtfXorntlA14fN4RBVZ_H36raNdeITFhuEGHyKe6qe_Nbq4O-8q20luBRvRX9P1hEqA6yGXVeo6o",
-"AA5AbUDWlrdXBcgB0ZNwKwvDpO3EqyHlRj_w4j_-CLrO1pGP2pcGQ2CM0Oyfsh4VaUNNdiVo9jF89W39QRHlvY9YK1eXyR07gIbcdhUnj6dbKvNNPqTdHMAQL1k7j1sulIEuLlCZI1i0GI3bie0evIjNvxr1vRhd-S4_WtcuPdWxtkNz6NhNVimhkj0-dLVoJH9T3qUMEblqDYCSbE8ufQAd1COfIFvSeiHyIyDsc4uBu8o",
-"AA5AbUAOgQZTl4vA_L3AmsIZvb1ggiUG9hoZmWRw-GcUxJNs5RerSpropjMFR_SH1jxlsldfIbCOOWo0vZ0bjxMFdplwTWT2FSH6VrbJfjkbQIvMSIzacRSmqe70cT6v83STEdZFFll4VLMYD3dyaOVs454Vu3MNsjFrGQctoQajcLSX60-EHj557JGjpzvbVCVTrhOrba7cLsfo6os6ilqzccD36b2eohC72A3ERYLW0sg",
-"AA5AbUAoCYTIkWVvklD4yaVSNubd9B3WW9224INZ7Tm1wlBgoeLd9TpATWRSpXBt6lepTK8gcQxoacwvlNKiuLIFGr9OjAKIxw_wM0Toj79J33JtsWdXCgacEN7IZDGDg_2iNAK0rwfmTAR7dGE7ZC6WTLFnzFs6KG4l24r_mn9pJqzoKo2WZEUbnCaHDCwwRd4tGEmEu5yUfO2Ud5EOT9DeLTTreHdHHe9oK08ts_263Zw",
-"AA5AbUARbrOH3hErZQ8juQ-ahp0eqcG1KKhj-C7BhMu52LF-3phY3dHr_MzCb1X5qx_hdmpTSvmCLJXgFBjxVjanvQhSmSO890wS-seiQSM6uGKBA2xzldcpd6CTdc04sKXbCR5N2jOVZ2bgkEU_DRQS23YyWoSwJaGaB-XK0OLKS1wXWMps2dTDj0N4nblvKPkYxBdH1tfUFDvOzbUhrxcU--o8Bl5NCGZT2Atzfln4QsY",
-"AA5AbUC--dJQdZR-guOotlsJ-2p59aNTYwJ8m1hyxJYFodfgpk5_apK4z6AJIDyCT1DfEb51obNsVYPpFzLIWdDsy1uK5r1SOngwHIGilzv4j8RqU7laa2DLuMyx5p-OZHgHtJ2Sli4Y2ONJppJHmw0oJnYZdOX5gx8QK4ngW1gGcWC_qtC9085UilG_2fZF8HtE-PkSmUtM2FIlnhFCGeyFJFXTUQPpH4KqY0ru4MwaQxQ",
-"AA5AbUB7_cqUU4vxhLcKFtvfqvqrgdmVjjotfjlZ9uN8P9v6S-I2A1vGyuffkNFaN9j6r3HdjhS644B7d28qBcL1mCizUZQB8fDCGDb-7iRvy810fIMoNGmhacne4RJ2CJqeglWIf1TSDWzqrGexzwC2q2us9sEHOsRTLPW0zQ5ffSthmLx3BzeQE8TPr9kNWIcVHNN7oDFgJTtH2pV1nRaZggmXB3qYUlUGuYrhGg",
-"AA5AbUAxWpn8_VgRN_Wie9vXtiaAcd4X47-EWzSBFo9fM6NoPTKPYgHj63PRm0GLZ-rEhv6i2WYdqpmyvVVilrBDbUyM3F9nIbVaZo1gIq2MQEZR9BdarnhvutZcf0_hF6MG-TL6DuH5F_gmy_KPWVYcRjNtJ2hUUdyvW6cT15f_IB9PFbIxYMc4qcTmZZmLbL8seX_Hq-6_BDpmslspjqFwdCO4tqQoZEswT_n0RNuZ5aU",
-"AA5AbUDAlCPnmXcibOA6ymkrb3G9d_CB72nfs-Eny4ROo7_7-qSnBMA8NQQKflCNyNCJckUAkZYdEr4pPfFrqw8E9DTUIUopJG-D3-UcZz7rdAENTXDZzmq9XVcbyCKQm-clfnHnHtUA7aRlNRuQ-_a4337MAH_UEO7R6gvh27R70THuks2OAri7jnJursgGoP08XRlGJPDCcauJ9xJ_cx-SMmGmZpazZaxe_TQQlNlLeNc",
-"AA5AbUB0fBmSPjOU73UdoKH4be1azmDPMFmzuS1Nmvaq5BjGMQ8s6aSbke0ffWfMT7jeUaC-XvbkCKxKsbal00R606OdOmRuQK02rZNn0PrEbJhnOXIevXAy3NJlWi17TF8wCkAYAvaHlHlDrFxEfA5kBjoeAwLa18c1WLkr4AghS2sVlGTafGOa2XU3dSv8-N1zHyhTNBKCFyVoAVymPZIuIFjlh_Ass_mbbnSwtmmg",
-"AA5AbUDh3562hqxKiA1pXfNPIP7Y-Ixrm_KO8SVLgJu3MH_7YSeBq14QkcB4UhFsYQjMeCYUm3NMXRT553sMMqXCX25NV11fxABfp_tuFUyUgHDQ1xqgHfbx3K0CZcyH4WG7jbTCYnna5vlauF22nHXXdpUIdhU2dfMpVKpJ2ADSQc890-Fp8cHK6N1XvymXlAWalFzwS9oNyqS5JHurRewiY0xcH2DB2SngAvFOI_eQSok",
-"AA5AbUAvvlFV0aR_yItIAFFioRJc08c9L1L1QsQij-v7dSOMZePbvPpOZXEV6a_XMGJVzYNMSJEM95W9cWz8AsSLgheAbhgvjW_qVD-O3gQHpZOE5YP9YPYCBs-mAHo1Ei9VTvj4UbWKxtEoOlefG4FN2Canf8QX1IuWH34EChoX5sWHd4ix1VleW_gXHmEP1qy4JpvRAccQ0M9KWUDEkmYEVViGTHDREVxlEryo723A7xo",
-"AA5AbUAk8mNE-bnffU1vRxq9AERYYV4uf8JQzqZPLab88d3Swlw29sbTX0lkWxC_HbIdXQ5FNGy2wMIWbLFFOOLyPVhzTPvzzRjHAPbGWfVAjxi4I5L1z-prOtYuvt0Jbn2jrID5qoS-ojKy9DvuSSaFM3EMFGcySoCDNEy1Q-U5RJcye14AsMPwWxKBy4fdrzHRh7mjfyjd7u4xAqDOarel2SWT62jj8OTRzykLeUU6",
-"AA5AbUC4HBKde4zFr1bHOcyM653-01LqfBg6jtBjmgNn8zLJiYjmpdbo1J2Bm0dOHHMNmS-iNPhg5Ul9zyC-wvAHZ5j9ij1wDrWlPnJMVg2Ghvd4omtPiDcz5J3bvWopEbHdyLLZWKscrMk-sAKingTaa8x7JiV7YifPOd88QfKt0aD_tn2lc2aP9TZxr9MnUdldf_sryk2k6TWZT_duHsCBkixxCtTxa8AG3wA5lp59JK4",
-"AA5AbUAjRpC2rnAVYBH1FFnDqKkvxhrivHnTswG-GQfDMqp3awL01LozmN7dIjKGS82m3MvHKNp4VuOYRVbKiMH48grMc8J4d9sSEwz7BqvZCYjfIF00XqhfPe-gx5pNzWKSwvLQ5XCGa6HoEE_W39jN25nj0o4IJ52OGcHtOyj07yIHbzstikcl4dvFxi6vtPXb2KNzcNxpD0CncN8G1tkvw_S7loab5IX9OETtjhGakes",
-"AA5AbUD3OspiSTnxWIBMskKJTKWdFMC0v4k1jgX5bDCSddhgexfWEhXxenqAq2jXuYkF3DuFqkMxH8ahkd46jJP8flf_K7WVIqbQVgmneAYOpmznncg4OSQb1umnde3YuiOjqu2EHo7M1JvpfFXjulB_M0HOg4a-sWqO1jO1A0UDfZNqSUFyb3zAaaG8dNC3fMMwQMgygbg-1wn2csZNMeKlfUDvgqK2xrgv1UzbHInZGDU"
-].map((id,i)=>({src:gURL(id),cap:"Golden Beginnings · "+(i+1)}));
+SITE.galleries.history.photos = [];
 
 /* helper to rebuild Google-hosted image URLs from their ids */
 function gURL(id){ return "https://lh3.googleusercontent.com/sitesv/"+id+"=w1280"; }
@@ -1001,7 +971,7 @@ const pad=n=>String(n).padStart(2,'0');
 })();
 
 /* ============ data helpers ============ */
-const GAL_ORDER=['beginnings','inspection','parts','paint','bezel','controls','marquee','boards','monitor','coindoor','creator','extras','tribute','fullphotos'];
+const GAL_ORDER=['history','inspection','parts','paint','bezel','controls','marquee','boards','monitor','coindoor','creator','extras','tribute','fullphotos'];
 
 function radarBlips(){
   const pts=[[30,38],[68,30],[58,64],[40,72],[74,58],[24,58]];
