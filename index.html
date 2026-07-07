@@ -1500,48 +1500,58 @@ render();
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function rnd(a,b){return a+Math.random()*(b-a);}
   function rndInt(a,b){return Math.floor(rnd(a,b+1));}
-  // solo enemies (one at a time) with a natural size range per sprite
+  // solo enemies (one at a time) with a natural size range per sprite; each also has a gold recolor variant
   var SOLO=[
-    {name:'baiter',   w:[30,46]},
-    {name:'bomber',   w:[26,40]},
-    {name:'humanoid', w:[16,24]},
-    {name:'lander',   w:[26,40]},
-    {name:'mutant',   w:[26,40]},
-    {name:'pod',      w:[24,36]}
+    {name:'baiter',        w:[30,46]},
+    {name:'bomber',        w:[26,40]},
+    {name:'humanoid',      w:[16,24]},
+    {name:'lander',        w:[26,40]},
+    {name:'mutant',        w:[26,40]},
+    {name:'pod',           w:[24,36]},
+    {name:'defender-ship', w:[34,50]}
   ];
+  function folderFor(){ return Math.random()<0.5 ? 'sprites' : 'sprites-gold'; }
   function makeEl(name, widthPx, extraClass){
     var s=document.createElement('div'); s.className='etmark-fx'+(extraClass?' '+extraClass:'');
-    var right=Math.random()<0.5;
-    var lane=right?rnd(92,97.5):rnd(1.5,6);          // hug left/right margins
-    s.style.left=lane+'vw';
-    s.style.top=rnd(12,84)+'vh';
     s.style.width=widthPx.toFixed(0)+'px';
     s.style.setProperty('--rot',(rnd(-14,14)|0)+'deg');
     if(!reduce) s.style.animationDelay=rnd(0,4).toFixed(2)+'s';
-    s.innerHTML='<img src="images/sprites/'+name+'.png" alt="">';
+    s.innerHTML='<img src="images/'+folderFor()+'/'+name+'.png" alt="">';
     return s;
   }
   function sprinkle(){
     var old=document.getElementById('et-sprinkle'); if(old) old.remove();
     var wrap=document.createElement('div'); wrap.id='et-sprinkle';
     var groups=rndInt(4,6);
+    var used={L:[],R:[]};
+    function freeTop(side,gap){
+      for(var tries=0;tries<14;tries++){
+        var t=rnd(10,82);
+        var ok=true;
+        for(var j=0;j<used[side].length;j++){ if(Math.abs(t-used[side][j])<gap){ok=false;break;} }
+        if(ok){ used[side].push(t); return t; }
+      }
+      var t2=rnd(10,82); used[side].push(t2); return t2;
+    }
     for(var i=0;i<groups;i++){
+      var side=Math.random()<0.5?'R':'L';
+      var lane=side==='R'?rnd(90,96.5):rnd(1.5,7);
       var isSwarmerPack=Math.random()<0.28; // swarmers travel in packs, so rarer as a "slot" but denser when they show
       if(isSwarmerPack){
         var packSize=rndInt(3,7);
-        var right=Math.random()<0.5;
-        var baseLane=right?rnd(90,96):rnd(2,8);
-        var baseTop=rnd(14,80);
+        var baseTop=freeTop(side,20);
         for(var p=0;p<packSize;p++){
           var s=makeEl('swarmer', rnd(14,20), 'swarmer');
-          s.style.left=(baseLane+rnd(-2.2,2.2))+'vw';
+          s.style.left=(lane+rnd(-2.2,2.2))+'vw';
           s.style.top=(baseTop+rnd(-6,6))+'vh';
-          if(!reduce) s.style.animationDelay=rnd(0,4).toFixed(2)+'s';
           wrap.appendChild(s);
         }
       } else {
+        var top=freeTop(side,13);
         var pick=SOLO[Math.floor(Math.random()*SOLO.length)];
-        wrap.appendChild(makeEl(pick.name, rnd(pick.w[0],pick.w[1])));
+        var el=makeEl(pick.name, rnd(pick.w[0],pick.w[1]));
+        el.style.left=lane+'vw'; el.style.top=top+'vh';
+        wrap.appendChild(el);
       }
     }
     document.body.appendChild(wrap);
