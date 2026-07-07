@@ -575,7 +575,7 @@ const SITE = {
      Each key is one gallery. Add/rename freely.
      `cover` is optional; if blank, the first photo is used as the cover. */
   galleries: {
-    history:{ name:"Golden History", blurb:"The story of the Golden Defender, told in photos.", photos:[] },
+    history:{ name:"Golden History", blurb:"The story of the Golden Defender, told in photos.", cover:"images/history/03-eugene-jarvis.jpg", photos:[] },
     inspection:{ name:"Golden Inspection", blurb:"A close look at every panel before the work began.", cover:"images/inspection/16-inspection-sign-cover.jpg", photos:[] },
     parts:{ name:"Golden Parts", blurb:"The components, hardware, and pieces sourced for the build.", photos:[] },
     paint:{ name:"Golden Paint", blurb:"Stripping, prepping, and laying down that signature gold.", photos:[] },
@@ -829,21 +829,26 @@ const pad=n=>String(n).padStart(2,'0');
       x.fillStyle=col;x.beginPath();x.arc(px,py,(.8+1.4*heat)*dpr,0,6.2832);x.fill();
     }
     // accretion disk — multi-band, Saturn-style rings with subtle color variation
-    x.save();x.translate(bx,by);if(!reduce)bh.rot+=0.006;x.rotate(bh.rot);x.scale(1,0.4);
+    x.save();x.translate(bx,by);
+    if(!reduce)bh.t=(bh.t||0)+0.006;
+    bh.rot=Math.sin(bh.t||0)*0.30; // slow teeter-totter tilt instead of full rotation
+    x.rotate(bh.rot);x.scale(1,0.4);
     const bands=[
-      {rr:1.30,w:3.0,hue:'255,214,120',peak:.62},  // warm gold — innermost
-      {rr:1.60,w:4.6,hue:'255,236,190',peak:.95},  // bright cream — main ring
-      {rr:1.95,w:3.2,hue:'150,205,255',peak:.6},   // blue band
-      {rr:2.24,w:2.4,hue:'255,160,200',peak:.5},   // rose band
-      {rr:2.5, w:2.0,hue:'190,140,255',peak:.42},  // violet band
-      {rr:2.76,w:1.6,hue:'120,230,210',peak:.36},  // teal band
-      {rr:3.0, w:1.3,hue:'255,206,120',peak:.3},   // thin outer gold
+      {rr:1.30,w:5.4,hue:'255,214,120',peak:.72,ph:0.0},  // warm gold — innermost
+      {rr:1.66,w:8.0,hue:'255,236,190',peak:1.0,ph:0.9},  // bright cream — main ring
+      {rr:2.08,w:5.6,hue:'150,205,255',peak:.7,ph:1.8},   // blue band
+      {rr:2.44,w:4.2,hue:'255,160,200',peak:.6,ph:2.7},   // rose band
+      {rr:2.76, w:3.5,hue:'190,140,255',peak:.52,ph:3.6},  // violet band
+      {rr:3.06,w:2.8,hue:'120,230,210',peak:.46,ph:4.5},  // teal band
+      {rr:3.34, w:2.3,hue:'255,206,120',peak:.4,ph:5.4},   // thin outer gold
     ];
     for(const b of bands){
       const rr=R*b.rr;
+      const pulse=0.72+0.28*Math.sin((bh.t||0)*0.8+b.ph);
+      const peak=b.peak*pulse;
       const lg=x.createLinearGradient(-rr,0,rr,0);
-      lg.addColorStop(0,`rgba(${b.hue},0)`);lg.addColorStop(.35,`rgba(${b.hue},${b.peak*0.55})`);
-      lg.addColorStop(.5,`rgba(${b.hue},${b.peak})`);lg.addColorStop(.65,`rgba(${b.hue},${b.peak*0.55})`);lg.addColorStop(1,`rgba(${b.hue},0)`);
+      lg.addColorStop(0,`rgba(${b.hue},0)`);lg.addColorStop(.35,`rgba(${b.hue},${peak*0.55})`);
+      lg.addColorStop(.5,`rgba(${b.hue},${peak})`);lg.addColorStop(.65,`rgba(${b.hue},${peak*0.55})`);lg.addColorStop(1,`rgba(${b.hue},0)`);
       x.strokeStyle=lg;x.lineWidth=b.w*dpr;x.beginPath();x.arc(0,0,rr,0,6.2832);x.stroke();
     }
     x.restore();
