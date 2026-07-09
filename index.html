@@ -139,11 +139,11 @@ section.block.tight{padding:60px 0}
 .hero h1{margin:18px 0 0;font-family:'Sora';font-weight:800;color:var(--gold);
   text-shadow:0 0 46px rgba(255,206,77,.32),0 3px 0 rgba(0,0,0,.35);
   font-size:clamp(58px,10vw,138px);line-height:.86;letter-spacing:-2px;text-transform:uppercase}
-.hero .logo-lockup{margin:18px 0 0}
+.hero .logo-lockup{margin:18px 0 0;display:flex;flex-direction:column;align-items:center}
 .hero .logo-lockup .golden-word{display:block;font-family:'Sora';font-weight:800;color:var(--gold);
   text-shadow:0 0 46px rgba(255,206,77,.32),0 3px 0 rgba(0,0,0,.35);
   font-size:clamp(58px,10vw,138px);line-height:.86;letter-spacing:-2px;text-transform:uppercase}
-.hero .logo-lockup img{display:block;width:min(560px,88%);max-width:100%;height:auto;margin-top:6px;
+.hero .logo-lockup img{display:block;width:min(560px,88%);max-width:100%;height:auto;margin:6px auto 0;
   filter:drop-shadow(0 8px 30px rgba(0,0,0,.55)) drop-shadow(0 0 40px rgba(255,206,77,.18))}
 .tgold{color:var(--gold);text-shadow:0 0 30px rgba(255,206,77,.35)}
 .hero .sub{display:flex;align-items:center;gap:16px;margin-top:20px;
@@ -596,7 +596,7 @@ const SITE = {
     bezel:{ name:"Golden Bezel", blurb:"The monitor bezel, restored and gleaming.", photos:[] },
     controls:{ name:"Golden Controls", blurb:"Joysticks, buttons, and the player panel.", photos:[] },
     marquee:{ name:"Golden Marquee", blurb:"The lit crown of the cabinet.", photos:[] },
-    boards:{ name:"Golden Boards", blurb:"The brains — PCBs, wiring, and electronics.", cover:"images/boards/06-three-boards-overhead.jpg", photos:[] },
+    boards:{ name:"Golden Boards", blurb:"The brains — PCBs, wiring, and electronics.", cover:"images/boards/14-golden-rom-chips-macro-a.jpg", photos:[] },
     monitor:{ name:"Golden Monitor", blurb:"The CRT that brings the vectors to life.", photos:[] },
     coindoor:{ name:"Golden Coin Door", blurb:"Quarters welcome. The coin mechanism and door.", photos:[] },
     creator:{ name:"Golden Creator", blurb:"Behind the scenes with the restorer.", photos:[] },
@@ -892,13 +892,13 @@ const pad=n=>String(n).padStart(2,'0');
     bh.rot=Math.sin(bh.t||0)*0.30; // slow teeter-totter tilt instead of full rotation
     x.rotate(bh.rot);x.scale(1,0.4);
     const bands=[
-      {rr:1.30,w:5.4,hue:'255,214,120',peak:.72,ph:0.0},  // warm gold — innermost
-      {rr:1.66,w:8.0,hue:'255,236,190',peak:1.0,ph:0.9},  // bright cream — main ring
-      {rr:2.08,w:5.6,hue:'150,205,255',peak:.7,ph:1.8},   // blue band
-      {rr:2.44,w:4.2,hue:'255,160,200',peak:.6,ph:2.7},   // rose band
-      {rr:2.76, w:3.5,hue:'190,140,255',peak:.52,ph:3.6},  // violet band
-      {rr:3.06,w:2.8,hue:'120,230,210',peak:.46,ph:4.5},  // teal band
-      {rr:3.34, w:2.3,hue:'255,206,120',peak:.4,ph:5.4},   // thin outer gold
+      {rr:1.30,w:8.0,hue:'255,214,120',peak:.72,ph:0.0},  // warm gold — innermost
+      {rr:1.66,w:11.5,hue:'255,236,190',peak:1.0,ph:0.9},  // bright cream — main ring
+      {rr:2.08,w:8.2,hue:'150,205,255',peak:.7,ph:1.8},   // blue band
+      {rr:2.44,w:6.2,hue:'255,160,200',peak:.6,ph:2.7},   // rose band
+      {rr:2.76, w:5.1,hue:'190,140,255',peak:.52,ph:3.6},  // violet band
+      {rr:3.06,w:4.1,hue:'120,230,210',peak:.46,ph:4.5},  // teal band
+      {rr:3.34, w:3.4,hue:'255,206,120',peak:.4,ph:5.4},   // thin outer gold
     ];
     for(const b of bands){
       const rr=R*b.rr;
