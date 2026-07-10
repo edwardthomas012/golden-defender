@@ -603,7 +603,7 @@ const SITE = {
     extras:{ name:"Golden Extras", blurb:"Odds, ends, bonus footage, and the finishing touches.",
       videos:[{ title:"A Fan's Perspective", note:"A player's take on what makes Defender so brutal", file:"videos/british-man-talking-defender.mp4" }],
       photos:[] },
-    tribute:{ name:"Golden Tribute", blurb:"The plaque and the milestone honored.", photos:[] },
+    tribute:{ name:"Golden Tribute", blurb:"The plaque and the milestone honored.", cover:"images/tribute/03-tribute-plaque.jpg", photos:[] },
     enemies:{ name:"Golden Enemies", blurb:"Landers, Mutants, Baiters, Bombers, Pods & Swarmers.", photos:[] },
     fullphotos:{ name:"Golden Full Photos", blurb:"The finished machine, head to toe.", photos:[] }
   },
@@ -806,6 +806,16 @@ SITE.galleries.boards.photos = [
   { src:"images/boards/30-rom-cpu-board-side-angle.jpg", cap:"A side angle on the ROM and CPU daughter boards mounted in the cabinet, schematics pinned to the wall behind for reference." },
   { src:"images/boards/31-monitor-neck-board-overhead.jpg", cap:"An overhead view of the monitor's neck board sitting just above the crown cutout compartment." },
   { src:"images/boards/32-cabinet-interior-full-c.jpg", cap:"One more full shot of the open cabinet, home carpet and all — this is what 500,001 looks like with the back panel off." }
+];
+
+/* =============================================================
+   GOLDEN TRIBUTE
+   ============================================================= */
+SITE.galleries.tribute.photos = [
+  { src:"images/tribute/03-tribute-plaque.jpg", cap:"The tribute plaque — written and laser-engraved as a dedication to Defender players everywhere." },
+  { src:"images/tribute/01-sticker-comparison-collage.jpg", cap:"A side-by-side comparison, put together to check the new stickers against the worn originals pulled from the boards." },
+  { src:"images/tribute/02-abstract-serial-sticker-art.jpg", cap:"An original piece of art built around the new serial stickers, laminated in as part of the design." },
+  { src:"images/tribute/04-receipt-and-stickers-collage.jpg", cap:"A keepsake collage — the receipt for the gold paint job, the original board stickers, the old coin-door inserts, and the new stickers made for this build, all brought together in one piece." }
 ];
 
 /* helper to rebuild Google-hosted image URLs from their ids */
