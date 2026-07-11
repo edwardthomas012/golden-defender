@@ -235,7 +235,7 @@ section.block.tight{padding:60px 0}
 .grid .tile:hover img{transform:scale(1.05);filter:brightness(1.1)}
 .grid .tile:hover::after{box-shadow:inset 0 0 0 2px var(--gold)}
 .grid .tile .cap{position:absolute;left:0;right:0;bottom:0;padding:20px 13px 11px;font-family:'Space Mono';font-size:11px;
-  letter-spacing:.5px;color:#fff;opacity:0;transition:.2s;background:linear-gradient(transparent,rgba(4,5,13,.9))}
+  letter-spacing:.5px;color:#fff;opacity:0;transition:.2s;background:linear-gradient(transparent,rgba(4,5,13,.9));text-wrap:balance;line-height:1.5}
 .grid .tile:hover .cap{opacity:1}
 
 .empty-state{border:1px dashed var(--gold-deep);border-radius:18px;padding:56px 32px;text-align:center;
@@ -250,7 +250,7 @@ section.block.tight{padding:60px 0}
 .lb .stage{position:relative;max-width:92vw;max-height:80vh;border-radius:14px;overflow:hidden;
   border:1px solid var(--line-2);box-shadow:0 0 0 1px rgba(255,206,77,.15),0 40px 90px rgba(0,0,0,.7)}
 .lb .stage img{max-width:92vw;max-height:80vh;width:auto;height:auto;display:block;background:#000}
-.lb .cap{margin-top:18px;font-family:'Space Mono';color:var(--ink-dim);font-size:13px;letter-spacing:.5px;text-align:center;max-width:80vw}
+.lb .cap{margin-top:18px;font-family:'Space Mono';color:var(--ink-dim);font-size:13px;letter-spacing:.5px;text-align:center;max-width:min(600px,84vw);text-wrap:balance;line-height:1.6}
 .lb .counter{font-family:'Space Mono';font-size:11px;letter-spacing:2px;color:var(--gold);margin-top:9px}
 .lb-btn{position:absolute;background:var(--glass-2);border:1px solid var(--line-2);color:var(--ink);
   width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:22px;transition:.15s;backdrop-filter:blur(6px)}
@@ -850,7 +850,7 @@ SITE.galleries.marquee.photos = [
   { src:"images/marquee/23-robotron-marquee-angle.jpg", cap:"Another look down the length of the Robotron marquee, showing off the sharp geometric linework." },
   { src:"images/marquee/24-classic-defender-marquee.jpg", cap:"For comparison: my other Defender restoration, finished in the classic yellow-and-red colorway Williams shipped in 1980." },
   { src:"images/marquee/25-two-defenders-side-by-side.jpg", cap:"Side by side: two Defender cabinets, two different color stories — the gold tribute unit (left) next to the classic yellow-and-red original (right)." },
-  { src:"images/marquee/26-gold-vs-classic-marquee.jpg", cap:"Here's where it gets fun — my 50,000th-unit gold tribute marquee glowing next to a standard yellow Defender marquee. The difference in tone is unmistakable even at a glance." },
+  { src:"images/marquee/26-gold-vs-classic-marquee.jpg", cap:"Here's where it gets fun — my 50,001st-unit gold tribute marquee glowing next to a standard yellow Defender marquee. The difference in tone is unmistakable even at a glance." },
   { src:"images/marquee/27-gold-classic-side-by-side-screens.jpg", cap:"Same comparison, gameplay running on the gold cabinet's screen below — scanner and starfield glowing beneath that warm gold lettering." },
   { src:"images/marquee/28-gold-marquee-starfield-detail.jpg", cap:"A macro shot of the gold marquee's starfield background — you can really see how the gold pigment shifts the whole palette warmer than the original yellow." },
   { src:"images/marquee/29-gold-marquee-williams-logo-closeup.jpg", cap:"Up close on the Williams logo and the leading edge of \"DEFENDER\" in gold — every letter edge hand-finished to match the tribute concept." },
