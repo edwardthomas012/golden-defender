@@ -395,6 +395,23 @@ section.block.tight{padding:60px 0}
 .romperiod{font-family:'Space Mono';font-size:11px;letter-spacing:.5px;color:var(--ink-mute);text-transform:uppercase}
 .romcard p{color:var(--ink-dim);font-size:14.5px;line-height:1.6;margin:0}
 .romnote{margin-top:20px;font-family:'Space Mono';font-size:12px;color:var(--ink-mute);line-height:1.7;max-width:70ch}
+/* ---------------- HISTORY PAGE ---------------- */
+.hist-intro p{max-width:76ch;color:var(--ink-dim);font-size:16px;line-height:1.75;margin:0 0 18px}
+.histgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin-top:22px}
+.histcard{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:20px 22px}
+.histcard h4{font-family:'Sora';font-weight:700;font-size:16px;margin:0 0 8px;color:var(--gold)}
+.histcard p,.histcard div{color:var(--ink-dim);font-size:14.5px;line-height:1.6;margin:0}
+.spec-table{width:100%;border-collapse:collapse;margin-top:14px;font-family:'Space Mono';font-size:13px}
+.spec-table td{padding:9px 12px;border-bottom:1px solid var(--line)}
+.spec-table td:first-child{color:var(--ink-mute);letter-spacing:.5px}
+.spec-table td:last-child{color:var(--ink);text-align:right}
+.hist-list{max-width:78ch;color:var(--ink-dim);font-size:15px;line-height:1.75;padding-left:22px;margin:14px 0 0}
+.hist-list li{margin-bottom:10px}
+details.hist-ports{margin-top:34px;border-top:1px solid var(--line);padding-top:22px}
+details.hist-ports summary{cursor:pointer;font-family:'Space Mono';font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--plasma)}
+details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9;margin-top:16px}
+.hist-credit{margin-top:36px;font-family:'Space Mono';font-size:12px;color:var(--ink-mute)}
+.hist-credit a{color:var(--plasma)}
 .schcard{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
 .schcover{position:relative;border:0;padding:0;cursor:pointer;background:#0a0c16;display:block;aspect-ratio:4/3;overflow:hidden}
 .schcover img{width:100%;height:100%;object-fit:cover;object-position:top;opacity:.92;transition:.4s}
@@ -496,6 +513,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
     <nav class="main" id="nav">
       <a href="#home" data-nav>Home</a>
       <a href="#story" data-nav>The Story</a>
+      <a href="#history" data-nav>History</a>
       <a href="#poem" data-nav>Poem</a>
       <a href="#enemies" data-nav>Enemies</a>
       <a href="#galleries" data-nav>Galleries</a>
@@ -522,6 +540,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   <nav class="fnav" aria-label="Footer">
     <a href="#home" data-nav>Home</a>
     <a href="#story" data-nav>The Story</a>
+    <a href="#history" data-nav>History</a>
     <a href="#poem" data-nav>Poem</a>
     <a href="#enemies" data-nav>Enemies</a>
     <a href="#galleries" data-nav>Galleries</a>
@@ -1217,6 +1236,7 @@ function viewHome(){
           <div class="cta-row">
             <a class="btn primary" href="#galleries" data-nav>Explore the galleries →</a>
             <a class="btn ghost" href="#story" data-nav>Read the saga</a>
+            <a class="btn ghost" href="#history" data-nav>Full Game History</a>
           </div>
           <div class="chip">
             <span class="n tgold">#50,001</span>
@@ -1506,8 +1526,105 @@ function viewEnemies(){
   </section>`;
 }
 
+function viewHistory(){
+  return `<section class="block wrap">
+    <div class="sec-head"><div><span class="eyebrow">Arcade archive · est. 1980</span><h2>The Full History</h2>
+    <p class="lead">Everything on record about the original Defender cabinet — the machine that started it all, 46 years ago.</p></div></div>
+
+    <div class="hist-intro">
+      <p><strong class="tgold">Defender © 1980 Williams.</strong> Defender is a legendary sideways-scrolling shoot-em-up — the very first of its genre — in which the aim is to pilot a laser-firing spaceship and protect humanoids stranded on the planet's surface from swarms of alien abductors.</p>
+      <p>A long-range scanner at the top of the screen shows the positions of both the humanoids and the attacking aliens. The ideal strategy is to shoot down the alien ships before they reach the humanoids. If a humanoid is captured, the alien abductor can still be destroyed, but the player must then catch the falling humanoid and return it to the safety of the planet's surface before it falls to its death.</p>
+      <p>If an alien is allowed to carry its victim to the very top of the screen, the humanoid will mutate, becoming a permanent part of the alien that captured it. This new and deadly mutation will then immediately join in the alien attack.</p>
+      <p>The challenge becomes more intense as action progresses. Fighter ships and their mines will soon join the abductors. There are also mother ships that must be destroyed; a direct hit smashes one into a swarming mass of mini-ships that must also be wiped out. Throughout the mission, the player must act quickly or face possible destruction by the cosmic baiter, a fast and dangerous enemy.</p>
+      <p>Players have two escape options as a last resort: the "smart bomb," which destroys all on-screen enemies, and "hyperspace," which randomly teleports the ship elsewhere on the level — highly risky, as it may land you somewhere worse than where you started.</p>
+      <p>If all humanoids are successfully abducted, the planet explodes in a blinding flash, and the remaining waves before the next planet take place in outer space, consisting solely of destroying enemy waves.</p>
+    </div>
+
+    <div class="sec-head" style="margin-top:56px"><div><span class="eyebrow">Under the hood</span><h2>Technical Specs</h2></div></div>
+    <table class="spec-table">
+      <tr><td>Board Number</td><td>D75 (top), D71F (A)</td></tr>
+      <tr><td>Prom Stickers</td><td>DF</td></tr>
+      <tr><td>Main CPU</td><td>Motorola M6809 @ 1 MHz</td></tr>
+      <tr><td>Sound CPU</td><td>M6808 @ 894.75 KHz</td></tr>
+      <tr><td>Sound Chips</td><td>DAC</td></tr>
+      <tr><td>Players</td><td>2</td></tr>
+      <tr><td>Control</td><td>2-way joystick (vertical)</td></tr>
+      <tr><td>Buttons</td><td>5 — Thrust, Fire, Reverse, Smart Bomb, Hyperspace</td></tr>
+    </table>
+
+    <div class="sec-head" style="margin-top:56px"><div><span class="eyebrow">Behind the cabinet</span><h2>Trivia</h2></div></div>
+    <ul class="hist-list">
+      <li>Per development lead Eugene Jarvis, the game was shown at AMOA Chicago on October 31, 1980, and released a week or two later on November 15, 1980.</li>
+      <li>Along with Namco's Pac-Man, Defender shares the title of "Highest Grossing Video Game of All Time," earning more than one billion dollars — despite industry insiders initially predicting a flop due to its difficulty, tipping Namco's Rally-X as the next big hit instead.</li>
+      <li>The attract mode was programmed in just five hours.</li>
+      <li>Minutes after AMOA opened, Jarvis and his team had to burn new ROMs after plugging the first burn into the board backwards and frying it.</li>
+      <li>Defender was the first video game to feature an artificial "world," with events occurring outside the on-screen viewing area — a first for the medium.</li>
+      <li>Chris Hoffman holds the official Marathon-settings record: 79,976,975 points (January 1, 1984). Bill Jones holds the Tournament-settings record: 543,950 points (August 15, 2008).</li>
+      <li>Bootleg cabinets circulated under names like "Star Trek 1981," "Defence Command," "Defense Command," "Zero," and "Tornado."</li>
+      <li>Defender inspired the song "Defender" by Buckner &amp; Garcia, from the "Pac-Man Fever" album, and appeared on-screen in Terms of Endearment, Joysticks, and Koyaanisqatsi — all 1983.</li>
+      <li>Milton Bradley released a Defender board game in 1983, where players protect humanoids from alien waves using chance cards and a spinner.</li>
+    </ul>
+
+    <div class="sec-head" style="margin-top:56px"><div><span class="eyebrow">Production run</span><h2>ROM Editions</h2>
+    <p class="lead">Defender shipped in early and later ROM editions, distinguished by small attract-mode differences and cabinet support.</p></div></div>
+    <div class="histgrid">
+      <div class="histcard"><h4>Early Edition</h4><div>Upright cabinets only. Lander kills scored an erroneous 100 pts (attract mode) and high score PGD read 14185.<br><br>Sets: White, Green, and Blue Label.</div></div>
+      <div class="histcard"><h4>Later Edition</h4><div>Added support for the 1981 cocktail cabinet, flipping the display and a second control set. Lander value corrected to 150 pts; PGD high score read 14285.<br><br>Set: Red Label.</div></div>
+    </div>
+
+    <div class="sec-head" style="margin-top:56px"><div><span class="eyebrow">Point values</span><h2>Scoring</h2></div></div>
+    <table class="spec-table">
+      <tr><td>Lander</td><td>150 pts</td></tr>
+      <tr><td>Mutant</td><td>150 pts</td></tr>
+      <tr><td>Baiter</td><td>200 pts</td></tr>
+      <tr><td>Bomber</td><td>250 pts</td></tr>
+      <tr><td>Pod</td><td>1,000 pts</td></tr>
+      <tr><td>Swarmer</td><td>150 pts</td></tr>
+      <tr><td>Pod destroyed via smart bomb</td><td>1,150–2,050 pts (variable)</td></tr>
+      <tr><td>Hit by enemy bullet</td><td>25 pts</td></tr>
+      <tr><td>Saving a humanoid from a Lander</td><td>500 pts</td></tr>
+      <tr><td>Depositing a humanoid safely</td><td>500 pts</td></tr>
+      <tr><td>Humanoid lands safely on its own</td><td>250 pts</td></tr>
+    </table>
+
+    <div class="sec-head" style="margin-top:56px"><div><span class="eyebrow">Field notes</span><h2>Tips &amp; Tricks</h2></div></div>
+    <ul class="hist-list">
+      <li>Avoid hyperspace unless you're about to die — fighting off attacks, no matter the odds, makes you a better player.</li>
+      <li>Baiters can be handled by hitting reverse twice quickly; they'll fly past into range. Don't try to outrun them — they're faster than your ship.</li>
+      <li>Swarmers are easy — hit reverse as they pass and fly in behind them, where they can't shoot back.</li>
+      <li>Shooting a Pod releases 1–7 Swarmers, up to a max of 20 on-screen at once.</li>
+      <li>At higher levels, sacrificing a few humanoids yourself can preserve the rest of the population — the planet repopulates every fifth attack wave.</li>
+      <li>The "International Date Line" — invisible reverse lines for Swarmers and Mutants — determines which way they travel to reach you, and can be used to keep enemies pinned on one side of the planet.</li>
+      <li>The "Freeze" trick: collect all ten humanoids, stop all motion, and quiet the screen to freeze the game state entirely — a handy breather during marathon runs.</li>
+      <li>At Wave 255, a blank "Wave 0" plays with no enemies before the game effectively restarts at Wave 1 — keeping your score, ships, and smart bombs intact.</li>
+    </ul>
+
+    <details class="hist-ports">
+      <summary>▸ View the full 46-year port &amp; series history (consoles, handhelds, computers, and more)</summary>
+      <div class="portcol">
+        <strong class="tgold">Series</strong><br>
+        Defender (1980, Arcade) · Stargate (1981, Arcade) · Strikeforce (1991, Arcade) · Defender 2000 (1996, Atari Jaguar)
+        <br><br>
+        <strong class="tgold">Staff</strong><br>
+        Eugene Jarvis · Sam Dicker · Larry DeMar · Paul Dussault · Mike Stroll · Steve Ritchie
+        <br><br>
+        <strong class="tgold">Consoles &amp; Handhelds</strong><br>
+        Atari 2600 (1981) · Atari 5200 (1982) · Entex Adventure Vision (1982) · Emerson Arcadia "Space Squadron" (1982) · Colecovision (1983) · Mattel Intellivision (1983) · Game Boy "Arcade Classic No. 4" (1995) · Game Boy Color "Arcade Hits" (1999) · Sega Genesis/Saturn, PlayStation, SNES "Williams Arcade's Greatest Hits" (1996) · Game Boy Advance / Dreamcast / N64 "Midway's Greatest Arcade Hits" (2000–2001) · PS2 / Xbox / GameCube / PSP "Midway Arcade Treasures" (2003–2006) · Xbox 360 [XBLA] (2006, retired 2010) · Xbox 360 / PS3 "Midway Arcade Origins" (2012)
+        <br><br>
+        <strong class="tgold">Home Computers</strong><br>
+        Tandy Color Computer "Starfire" (1982) · Atari 800 (1982) · BBC B by Acornsoft (1982–83) · ZX Spectrum "Orbiter" by Silversoft (1982) · TI99/4a (1983) · Commodore 64 (1983) · Apple II (1983) · Oric-1 "Defence Force" (1983) · Commodore VIC-20 (1983) · Acorn Electron "Guardian"/"Gauntlet" (1984) · ZX Spectrum "Starblitz"/"Defenda" (1984–86) · Amstrad CPC "Defend or Die"/"Gauntlet" (1985) · Atari ST &amp; Amiga "Defender II" (1990) · Amiga "Zeron" (1991) · Sam Coupe (1998) · Windows CD-ROM "Midway Arcade Treasures" (2004)
+        <br><br>
+        <strong class="tgold">Others</strong><br>
+        Entex &amp; Gakken VFD handhelds (1982) · Palm OS "Midway Arcade Classic" · Tiger Game.com "Williams Arcade Classics" (1997) · THQ Wireless mobile port (2003) · Apple App Store "Midway Arcade" (2012)
+      </div>
+    </details>
+
+    <p class="hist-credit">Source: <a href="https://www.arcade-history.com/?&page=detail&id=614&o=2" target="_blank" rel="noopener">arcade-history.com</a></p>
+  </section>`;
+}
+
 /* ============ ROUTER ============ */
-const ROUTES={home:viewHome,story:viewStory,galleries:viewGalleries,enemies:viewEnemies,poem:viewPoem,songs:viewSongs,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
+const ROUTES={home:viewHome,story:viewStory,history:viewHistory,galleries:viewGalleries,enemies:viewEnemies,poem:viewPoem,songs:viewSongs,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
 function render(){
   const hash=(location.hash||'#home').slice(1);
   const [base,arg]=hash.split('/');
