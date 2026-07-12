@@ -591,7 +591,6 @@ const SITE = {
   galleries: {
     history:{ name:"Golden History", blurb:"The story of the Golden Defender, told in photos.", cover:"images/history/03-eugene-jarvis.jpg", photos:[] },
     inspection:{ name:"Golden Inspection", blurb:"A close look at every panel before the work began.", cover:"images/inspection/16-inspection-sign-cover.jpg", photos:[] },
-    parts:{ name:"Golden Parts", blurb:"The components, hardware, and pieces sourced for the build.", photos:[] },
     paint:{ name:"Golden Paint", blurb:"Stripping, prepping, and laying down that signature gold.", photos:[
   { src:"images/paint/01-heading-to-drop-off.jpg", cap:"Heading out to drop off the cabinet at the paint shop — the start of the gold transformation." },
   { src:"images/paint/02-base-coat-side-panel.jpg", cap:"Back at the shop: the side panel in its base coat, a flat khaki-gold laid down before the sparkle topcoat." },
@@ -1162,7 +1161,7 @@ const pad=n=>String(n).padStart(2,'0');
 })();
 
 /* ============ data helpers ============ */
-const GAL_ORDER=['history','inspection','parts','paint','bezel','controls','marquee','boards','monitor','coindoor','creator','tribute','fullphotos'];
+const GAL_ORDER=['history','inspection','paint','bezel','controls','marquee','boards','monitor','coindoor','creator','tribute','fullphotos'];
 
 function radarBlips(){
   const pts=[[30,38],[68,30],[58,64],[40,72],[74,58],[24,58]];
