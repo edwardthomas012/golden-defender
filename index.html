@@ -482,6 +482,21 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .f .sig::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
 @media (prefers-reduced-motion: no-preference){.f .sig::before{animation:pulse2 1.6s ease-in-out infinite}}
 @keyframes pulse2{50%{opacity:.3}}
+
+/* ---------------- BIRTHDAY COUNTDOWN ---------------- */
+.countdown-wrap{margin:22px 0 8px;padding:22px 26px;border:1px solid var(--line);border-radius:14px;
+  background:rgba(7,10,24,.5);backdrop-filter:blur(8px)}
+.countdown-title{font-family:'Space Mono';font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--ink-mute);margin:0 0 14px}
+.countdown-box{display:flex;gap:14px;flex-wrap:wrap}
+.cd-item{flex:1;min-width:70px;text-align:center;border:1px solid var(--gold-deep);border-radius:10px;
+  padding:12px 8px;background:rgba(0,0,0,.25)}
+.cd-num{display:block;font-family:'Space Mono';font-size:clamp(22px,4vw,34px);font-weight:700;
+  color:var(--gold);line-height:1;text-shadow:0 0 12px rgba(212,175,55,.35)}
+.cd-label{display:block;font-family:'Space Mono';font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--ink-mute);margin-top:6px}
+.countdown-caption{font-size:13px;color:var(--ink-dim);margin:14px 0 0}
+@media(max-width:600px){.countdown-box{gap:8px}.cd-item{min-width:60px;padding:10px 4px}}
 </style>
 </head>
 <body>
@@ -1650,6 +1665,17 @@ function viewHistory(){
     <div class="sec-head"><div><span class="eyebrow">Arcade archive · est. 1980</span><h2>The Full History</h2>
     <p class="lead">Everything on record about the original Defender cabinet — the machine that started it all, ${defenderAge()} years ago.</p></div></div>
 
+    <div class="countdown-wrap">
+      <p class="countdown-title">Countdown to Defender's next birthday — October 31</p>
+      <div class="countdown-box" id="birthday-countdown">
+        <div class="cd-item"><span class="cd-num" id="cd-days">--</span><span class="cd-label">Days</span></div>
+        <div class="cd-item"><span class="cd-num" id="cd-hrs">--</span><span class="cd-label">Hours</span></div>
+        <div class="cd-item"><span class="cd-num" id="cd-mins">--</span><span class="cd-label">Minutes</span></div>
+        <div class="cd-item"><span class="cd-num" id="cd-secs">--</span><span class="cd-label">Seconds</span></div>
+      </div>
+      <p class="countdown-caption">Turns ${defenderAge()+1} on October 31 — this counter and the age above both update on their own, no edits needed.</p>
+    </div>
+
     <div class="hist-intro">
       <p><strong class="tgold">Defender © 1980 Williams.</strong> Defender is a legendary sideways-scrolling shoot-em-up — the very first of its genre — in which the aim is to pilot a laser-firing spaceship and protect humanoids stranded on the planet's surface from swarms of alien abductors.</p>
       <p>A long-range scanner at the top of the screen shows the positions of both the humanoids and the attacking aliens. The ideal strategy is to shoot down the alien ships before they reach the humanoids. If a humanoid is captured, the alien abductor can still be destroyed, but the player must then catch the falling humanoid and return it to the safety of the planet's surface before it falls to its death.</p>
@@ -1754,6 +1780,36 @@ function defenderAge(){
   if(!hadBirthdayThisYear) age--;
   return age;
 }
+// Countdown to Defender's next birthday (Oct 31). Finds whichever Oct 31
+// is still ahead of right now, so it automatically rolls to the following
+// year's date the moment this year's birthday passes -- nothing to update by hand.
+let _birthdayCountdownTimer=null;
+function nextDefenderBirthday(now){
+  let next=new Date(now.getFullYear(),9,31,0,0,0,0);
+  if(next<=now) next=new Date(now.getFullYear()+1,9,31,0,0,0,0);
+  return next;
+}
+function tickBirthdayCountdown(){
+  const daysEl=$('#cd-days'), hrsEl=$('#cd-hrs'), minsEl=$('#cd-mins'), secsEl=$('#cd-secs');
+  if(!daysEl){ clearInterval(_birthdayCountdownTimer); _birthdayCountdownTimer=null; return; }
+  const now=new Date();
+  const target=nextDefenderBirthday(now);
+  let diff=Math.max(0,target-now);
+  const days=Math.floor(diff/86400000); diff-=days*86400000;
+  const hrs=Math.floor(diff/3600000); diff-=hrs*3600000;
+  const mins=Math.floor(diff/60000); diff-=mins*60000;
+  const secs=Math.floor(diff/1000);
+  daysEl.textContent=String(days);
+  hrsEl.textContent=String(hrs).padStart(2,'0');
+  minsEl.textContent=String(mins).padStart(2,'0');
+  secsEl.textContent=String(secs).padStart(2,'0');
+}
+function startBirthdayCountdown(){
+  if(_birthdayCountdownTimer) clearInterval(_birthdayCountdownTimer);
+  tickBirthdayCountdown();
+  _birthdayCountdownTimer=setInterval(tickBirthdayCountdown,1000);
+}
+
 const ROUTES={home:viewHome,story:viewStory,history:viewHistory,galleries:viewGalleries,enemies:viewEnemies,poem:viewPoem,songs:viewSongs,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
 function render(){
   const hash=(location.hash||'#home').slice(1);
@@ -1766,6 +1822,8 @@ function render(){
   $$('[data-lb]').forEach(b=>b.addEventListener('click',()=>openLightbox(b.dataset.lb,+b.dataset.i)));
   $$('[data-img]').forEach(im=>im.addEventListener('click',()=>openSolo(im.src,im.alt)));
   wireVideoControls(app);
+  if(base==='history'){ startBirthdayCountdown(); }
+  else if(_birthdayCountdownTimer){ clearInterval(_birthdayCountdownTimer); _birthdayCountdownTimer=null; }
   $('#nav').classList.remove('open');
   window.scrollTo({top:0});
 }
