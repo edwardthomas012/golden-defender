@@ -1648,7 +1648,7 @@ function viewEnemies(){
 function viewHistory(){
   return `<section class="block wrap">
     <div class="sec-head"><div><span class="eyebrow">Arcade archive · est. 1980</span><h2>The Full History</h2>
-    <p class="lead">Everything on record about the original Defender cabinet — the machine that started it all, 46 years ago.</p></div></div>
+    <p class="lead">Everything on record about the original Defender cabinet — the machine that started it all, ${defenderAge()} years ago.</p></div></div>
 
     <div class="hist-intro">
       <p><strong class="tgold">Defender © 1980 Williams.</strong> Defender is a legendary sideways-scrolling shoot-em-up — the very first of its genre — in which the aim is to pilot a laser-firing spaceship and protect humanoids stranded on the planet's surface from swarms of alien abductors.</p>
@@ -1743,6 +1743,17 @@ function viewHistory(){
 }
 
 /* ============ ROUTER ============ */
+function defenderAge(){
+  // Defender's birthday: AMOA debut, Chicago, October 31, 1980.
+  // Recalculated every time this is called, so the number rolls over
+  // automatically on October 31 each year -- no manual updates needed.
+  const birth = new Date(1980, 9, 31); // month is 0-indexed: 9 = October
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const hadBirthdayThisYear = (now.getMonth() > 9) || (now.getMonth() === 9 && now.getDate() >= 31);
+  if(!hadBirthdayThisYear) age--;
+  return age;
+}
 const ROUTES={home:viewHome,story:viewStory,history:viewHistory,galleries:viewGalleries,enemies:viewEnemies,poem:viewPoem,songs:viewSongs,sounds:viewSounds,schematics:viewSchematics,contact:viewContact};
 function render(){
   const hash=(location.hash||'#home').slice(1);
