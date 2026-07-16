@@ -249,7 +249,19 @@ section.block.tight{padding:60px 0}
 .lb.open{display:flex}
 .lb .stage{position:relative;max-width:92vw;max-height:80vh;border-radius:14px;overflow:hidden;
   border:1px solid var(--line-2);box-shadow:0 0 0 1px rgba(255,206,77,.15),0 40px 90px rgba(0,0,0,.7)}
-.lb .stage img{max-width:92vw;max-height:80vh;width:auto;height:auto;display:block;background:#000}
+.lb .stage img{max-width:92vw;max-height:80vh;width:auto;height:auto;display:block;background:#000;
+  cursor:zoom-in;transition:transform .18s ease;touch-action:none;user-select:none}
+.lb .stage img.zoomed{cursor:grab}
+.lb .stage img.zoomed:active{cursor:grabbing}
+.lb-zoom{position:fixed;top:20px;left:20px;z-index:5;display:flex;align-items:center;gap:2px;
+  background:var(--glass-2);border:1px solid var(--line-2);border-radius:999px;padding:5px;backdrop-filter:blur(6px)}
+.lb-zoom button{background:transparent;border:none;color:var(--ink);font-size:17px;width:32px;height:32px;
+  border-radius:50%;cursor:pointer;display:grid;place-items:center;transition:.15s;line-height:1}
+.lb-zoom button:hover:not(:disabled){background:rgba(255,206,77,.12);color:var(--gold)}
+.lb-zoom button:disabled{opacity:.3;cursor:default}
+.lb-zoom #lbZoomReset{font-size:14px}
+#lbZoomPct{font-family:'Space Mono';font-size:11px;color:var(--ink-mute);min-width:38px;text-align:center;user-select:none}
+@media(max-width:640px){.lb-zoom{top:auto;bottom:20px;left:50%;transform:translateX(-50%)}}
 .lb .cap{margin-top:18px;font-family:'Space Mono';color:#ffffff;font-size:13px;letter-spacing:.5px;text-align:center;max-width:min(600px,84vw);text-wrap:balance;line-height:1.6;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .lb .counter{font-family:'Space Mono';font-size:11px;letter-spacing:2px;color:var(--gold);margin-top:9px}
 .lb-btn{position:absolute;background:var(--glass-2);border:1px solid var(--line-2);color:var(--ink);
@@ -544,8 +556,14 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 
 <div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
   <button class="lb-btn close" id="lbClose" aria-label="Close">✕</button>
+  <div class="lb-zoom" id="lbZoom">
+    <button id="lbZoomOut" aria-label="Zoom out" title="Zoom out">−</button>
+    <span id="lbZoomPct">100%</span>
+    <button id="lbZoomIn" aria-label="Zoom in" title="Zoom in">+</button>
+    <button id="lbZoomReset" aria-label="Reset zoom" title="Reset zoom">⤢</button>
+  </div>
   <button class="lb-btn prev" id="lbPrev" aria-label="Previous">‹</button>
-  <div class="stage"><img id="lbImg" alt="" /></div>
+  <div class="stage" id="lbStage"><img id="lbImg" alt="" /></div>
   <button class="lb-btn next" id="lbNext" aria-label="Next">›</button>
   <div class="cap" id="lbCap"></div>
   <div class="counter" id="lbCount"></div>
@@ -1992,6 +2010,7 @@ function showLB(){
   $('#lbPrev').style.display=multi?'grid':'none';
   $('#lbNext').style.display=multi?'grid':'none';
   $('#lightbox').classList.add('open'); document.body.style.overflow='hidden';
+  resetZoom();
 }
 function closeLB(){ $('#lightbox').classList.remove('open'); document.body.style.overflow=''; }
 function step(d){ LB.i=(LB.i+d+LB.list.length)%LB.list.length; showLB(); }
@@ -1999,15 +2018,119 @@ $('#lbClose').addEventListener('click',closeLB);
 $('#lbPrev').addEventListener('click',()=>step(-1));
 $('#lbNext').addEventListener('click',()=>step(1));
 $('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLB();});
+
+/* ---- zoom / pan ---- */
+const ZOOM_MIN=1, ZOOM_MAX=4, ZOOM_STEP=.6;
+let zoomState={scale:1,x:0,y:0};
+function applyZoomTransform(instant){
+  const img=$('#lbImg'); if(!img) return;
+  img.style.transition=instant?'none':'transform .18s ease';
+  img.style.transform=`translate(${zoomState.x}px, ${zoomState.y}px) scale(${zoomState.scale})`;
+  img.classList.toggle('zoomed',zoomState.scale>1);
+  const pct=$('#lbZoomPct'); if(pct) pct.textContent=Math.round(zoomState.scale*100)+'%';
+  const zi=$('#lbZoomIn'), zo=$('#lbZoomOut');
+  if(zi) zi.disabled=zoomState.scale>=ZOOM_MAX-.01;
+  if(zo) zo.disabled=zoomState.scale<=ZOOM_MIN+.01;
+}
+function clampPan(){
+  if(zoomState.scale<=1){ zoomState.x=0; zoomState.y=0; return; }
+  const stage=$('#lbStage'); if(!stage) return;
+  const r=stage.getBoundingClientRect();
+  const maxX=(r.width*(zoomState.scale-1))/2, maxY=(r.height*(zoomState.scale-1))/2;
+  zoomState.x=Math.min(maxX,Math.max(-maxX,zoomState.x));
+  zoomState.y=Math.min(maxY,Math.max(-maxY,zoomState.y));
+}
+function resetZoom(){ zoomState={scale:1,x:0,y:0}; applyZoomTransform(true); }
+function setZoom(newScale,clientX,clientY){
+  newScale=Math.min(ZOOM_MAX,Math.max(ZOOM_MIN,newScale));
+  const prevScale=zoomState.scale;
+  if(newScale===prevScale) return;
+  if(clientX!=null&&clientY!=null){
+    const rect=$('#lbImg').getBoundingClientRect();
+    const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    const dx=clientX-cx, dy=clientY-cy;
+    const ratio=newScale/prevScale;
+    zoomState.x-=dx*(ratio-1); zoomState.y-=dy*(ratio-1);
+  }
+  zoomState.scale=newScale;
+  if(zoomState.scale<=1){ zoomState.x=0; zoomState.y=0; }
+  clampPan(); applyZoomTransform();
+}
+$('#lbZoomIn').addEventListener('click',()=>setZoom(zoomState.scale+ZOOM_STEP));
+$('#lbZoomOut').addEventListener('click',()=>setZoom(zoomState.scale-ZOOM_STEP));
+$('#lbZoomReset').addEventListener('click',resetZoom);
+$('#lbStage').addEventListener('wheel',e=>{
+  if(!$('#lightbox').classList.contains('open'))return;
+  e.preventDefault();
+  setZoom(zoomState.scale+(e.deltaY>0?-ZOOM_STEP/2:ZOOM_STEP/2),e.clientX,e.clientY);
+},{passive:false});
+$('#lbImg').addEventListener('dblclick',e=>{
+  if(zoomState.scale>1) resetZoom(); else setZoom(2.5,e.clientX,e.clientY);
+});
+let dragging=false, dragStart={x:0,y:0}, panStart={x:0,y:0};
+$('#lbImg').addEventListener('mousedown',e=>{
+  if(zoomState.scale<=1) return;
+  dragging=true; dragStart={x:e.clientX,y:e.clientY}; panStart={x:zoomState.x,y:zoomState.y};
+  e.preventDefault();
+});
+addEventListener('mousemove',e=>{
+  if(!dragging) return;
+  zoomState.x=panStart.x+(e.clientX-dragStart.x);
+  zoomState.y=panStart.y+(e.clientY-dragStart.y);
+  clampPan(); applyZoomTransform(true);
+});
+addEventListener('mouseup',()=>{ dragging=false; });
+
 addEventListener('keydown',e=>{
   if(!$('#lightbox').classList.contains('open'))return;
   if(e.key==='Escape')closeLB();
-  if(e.key==='ArrowLeft')step(-1);
-  if(e.key==='ArrowRight')step(1);
+  if(e.key==='ArrowLeft'&&zoomState.scale<=1)step(-1);
+  if(e.key==='ArrowRight'&&zoomState.scale<=1)step(1);
+  if(e.key==='+'||e.key==='=')setZoom(zoomState.scale+ZOOM_STEP);
+  if(e.key==='-'||e.key==='_')setZoom(zoomState.scale-ZOOM_STEP);
+  if(e.key==='0')resetZoom();
 });
-let tx=0;
-$('#lightbox').addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
-$('#lightbox').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50&&LB.list.length>1)step(dx<0?1:-1);});
+
+/* ---- touch: pinch-to-zoom, single-finger pan when zoomed, swipe to navigate when not ---- */
+let tx=0, touchMode=null, pinchStartDist=0, pinchStartScale=1, pinchMid={x:0,y:0}, panTouchStart={x:0,y:0}, panOrigin={x:0,y:0};
+$('#lightbox').addEventListener('touchstart',e=>{
+  if(e.touches.length===2){
+    touchMode='pinch';
+    const [t1,t2]=e.touches;
+    pinchStartDist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
+    pinchStartScale=zoomState.scale;
+    pinchMid={x:(t1.clientX+t2.clientX)/2,y:(t1.clientY+t2.clientY)/2};
+  } else if(e.touches.length===1){
+    if(zoomState.scale>1){
+      touchMode='pan';
+      panOrigin={x:zoomState.x,y:zoomState.y};
+      panTouchStart={x:e.touches[0].clientX,y:e.touches[0].clientY};
+    } else {
+      touchMode='swipe';
+      tx=e.touches[0].clientX;
+    }
+  }
+},{passive:true});
+$('#lightbox').addEventListener('touchmove',e=>{
+  if(touchMode==='pinch'&&e.touches.length===2){
+    e.preventDefault();
+    const [t1,t2]=e.touches;
+    const dist=Math.hypot(t2.clientX-t1.clientX,t2.clientY-t1.clientY);
+    setZoom(pinchStartScale*(dist/pinchStartDist),pinchMid.x,pinchMid.y);
+  } else if(touchMode==='pan'&&e.touches.length===1){
+    e.preventDefault();
+    zoomState.x=panOrigin.x+(e.touches[0].clientX-panTouchStart.x);
+    zoomState.y=panOrigin.y+(e.touches[0].clientY-panTouchStart.y);
+    clampPan(); applyZoomTransform(true);
+  }
+},{passive:false});
+$('#lightbox').addEventListener('touchend',e=>{
+  if(touchMode==='swipe'&&e.changedTouches.length){
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>50&&LB.list.length>1)step(dx<0?1:-1);
+  }
+  touchMode=null;
+});
 
 render();
 
