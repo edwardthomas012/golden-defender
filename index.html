@@ -1390,16 +1390,21 @@ const pad=n=>String(n).padStart(2,'0');
       const Hx=cm.x,Hy=cm.y,L=cm.len,w0=cm.wd;
       const cax=Hx-ux*L*0.5, cay=Hy-uy*L*0.5;
       x.globalCompositeOperation='lighter';
-      // broad diffuse dust tail: white-gold near head fading to red at the tip
-      tail(Hx,Hy,Hx-ux*L,Hy-uy*L,pxp,pyp,w0*2.4,cax+pxp*cm.bend,cay+pyp*cm.bend,
-        [[0,'rgba(255,242,214,.55)'],[.28,'rgba(255,184,96,.34)'],[.62,'rgba(255,96,44,.18)'],[1,'rgba(255,60,30,0)']]);
-      // bright inner streak (hot core)
-      tail(Hx,Hy,Hx-ux*L*0.72,Hy-uy*L*0.72,pxp,pyp,w0*0.85,cax+pxp*cm.bend*.6,cay+pyp*cm.bend*.6,
-        [[0,'rgba(255,255,250,.95)'],[.45,'rgba(255,228,176,.55)'],[1,'rgba(255,180,110,0)']]);
-      // glowing head (coma)
-      const hg=x.createRadialGradient(Hx,Hy,0,Hx,Hy,w0*3.2);
-      hg.addColorStop(0,'rgba(255,255,252,1)');hg.addColorStop(.35,'rgba(255,238,200,.85)');hg.addColorStop(1,'rgba(255,200,120,0)');
-      x.fillStyle=hg;x.beginPath();x.arc(Hx,Hy,w0*3.2,0,6.2832);x.fill();
+      // ion tail — thin, straighter, pale blue (real comets show this alongside the dust tail)
+      const ionL=L*1.18, ionBend=cm.bend*0.22;
+      const iax=Hx-ux*ionL*0.5, iay=Hy-uy*ionL*0.5;
+      tail(Hx,Hy,Hx-ux*ionL,Hy-uy*ionL,pxp,pyp,w0*0.42,iax+pxp*ionBend,iay+pyp*ionBend,
+        [[0,'rgba(205,228,255,.4)'],[.4,'rgba(165,205,255,.2)'],[1,'rgba(140,190,255,0)']]);
+      // broad diffuse dust tail: pale gold-white, gently curved, fading out — no fire colors
+      tail(Hx,Hy,Hx-ux*L,Hy-uy*L,pxp,pyp,w0*2.3,cax+pxp*cm.bend,cay+pyp*cm.bend,
+        [[0,'rgba(255,250,235,.5)'],[.3,'rgba(255,241,214,.32)'],[.65,'rgba(232,224,232,.15)'],[1,'rgba(210,220,255,0)']]);
+      // bright inner streak (hot core), warm white near the head
+      tail(Hx,Hy,Hx-ux*L*0.68,Hy-uy*L*0.68,pxp,pyp,w0*0.8,cax+pxp*cm.bend*.6,cay+pyp*cm.bend*.6,
+        [[0,'rgba(255,255,252,.92)'],[.45,'rgba(255,244,224,.48)'],[1,'rgba(255,235,210,0)']]);
+      // glowing head (coma) — soft white-gold, no orange/red
+      const hg=x.createRadialGradient(Hx,Hy,0,Hx,Hy,w0*3.0);
+      hg.addColorStop(0,'rgba(255,255,255,1)');hg.addColorStop(.4,'rgba(255,246,224,.78)');hg.addColorStop(1,'rgba(255,230,190,0)');
+      x.fillStyle=hg;x.beginPath();x.arc(Hx,Hy,w0*3.0,0,6.2832);x.fill();
       x.globalCompositeOperation='source-over';
       if(cm.x<-180*dpr||cm.x>w+180*dpr||cm.y>h+180*dpr)comets.splice(i,1);
     }
