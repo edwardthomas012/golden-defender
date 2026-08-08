@@ -382,6 +382,39 @@ section.block.tight{padding:60px 0}
 .track audio{height:36px}
 .track .soon{font-family:'Space Mono';font-size:10px;letter-spacing:1px;color:var(--ink-mute)}
 
+/* ---------------- SOUND GRID (square contact cards) ---------------- */
+.sound-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;max-width:var(--maxw)}
+.sound-card{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:var(--r);
+  background:var(--glass);backdrop-filter:blur(6px);padding:18px;display:flex;flex-direction:column;
+  justify-content:space-between;transition:.22s;overflow:hidden}
+.sound-card::before{content:"";position:absolute;top:0;left:0;width:30px;height:2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.sound-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 20px 44px rgba(0,0,0,.5),0 0 26px rgba(255,206,77,.14)}
+.sound-card .sc-idx{position:absolute;top:14px;right:16px;font-family:'Space Mono';font-size:10px;letter-spacing:1px;color:var(--plasma);opacity:.75}
+.sound-card .sc-wave{flex:1;display:flex;align-items:center;justify-content:center;gap:3px;margin:10px 0}
+.sound-card .sc-wave span{display:block;width:4px;border-radius:2px;background:linear-gradient(180deg,var(--gold-bri),var(--gold-deep));opacity:.55}
+.sound-card:hover .sc-wave span{opacity:.95}
+.sound-card .sc-text{text-align:center}
+.sound-card .sc-title{font-family:'Sora';font-weight:700;font-size:13.5px;line-height:1.28;text-transform:uppercase;
+  letter-spacing:.2px;color:var(--ink);display:block}
+.sound-card .sc-note{font-family:'Space Mono';font-size:10.5px;color:var(--ink-mute);display:block;margin-top:5px;line-height:1.4}
+.sound-card audio{width:100%;height:32px;margin-top:12px}
+.sound-card .sc-soon{font-family:'Space Mono';font-size:10px;letter-spacing:1px;color:var(--ink-mute);text-align:center;margin-top:12px}
+
+/* ---------------- SOUND CREDIT / TEAM SPOTLIGHT ---------------- */
+.sound-credit{display:grid;grid-template-columns:150px 1fr;gap:26px;align-items:center;
+  background:var(--glass);border:1px solid var(--line);border-radius:var(--r);padding:26px;
+  max-width:var(--maxw);margin:0 0 44px;backdrop-filter:blur(6px);position:relative;overflow:hidden}
+.sound-credit::before{content:"";position:absolute;top:0;left:0;width:36px;height:2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.sound-credit .sc-photo{width:150px;height:150px;border-radius:12px;overflow:hidden;border:1px solid var(--line-2);flex-shrink:0}
+.sound-credit .sc-photo img{width:100%;height:100%;object-fit:cover;filter:saturate(1.05) brightness(.96)}
+.sound-credit h3{margin:0 0 4px;font-family:'Sora';font-weight:800;font-size:clamp(20px,2.6vw,28px);
+  color:var(--gold);text-transform:uppercase;letter-spacing:-.3px}
+.sound-credit .sc-role{font-family:'Space Mono';font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--plasma);margin-bottom:12px;display:block}
+.sound-credit p{margin:0 0 10px;color:var(--ink-dim);max-width:70ch}
+.sound-credit p:last-child{margin-bottom:0}
+@media(max-width:640px){.sound-credit{grid-template-columns:1fr;text-align:center}
+  .sound-credit .sc-photo{margin:0 auto}}
+
 /* ---------------- CONTACT / FAQ ---------------- */
 .panel-card{background:var(--glass);border:1px solid var(--line-2);border-radius:20px;padding:clamp(28px,4vw,46px);backdrop-filter:blur(8px)}
 .faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 40px}
@@ -1817,12 +1850,39 @@ function viewSongs(){
     <div class="audio-list">${SITE.songs.map(trackRow).join('')}</div>
   </section>`;
 }
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0;}return h;}
+function waveBars(seed){
+  let bars='';
+  for(let i=0;i<9;i++){
+    const h=30+Math.abs(Math.sin(seed*12.9898+i*4.1414))*70;
+    bars+=`<span style="height:${h.toFixed(0)}%"></span>`;
+  }
+  return bars;
+}
+function soundCard(t,i){
+  const seed=hashStr(t.title)+i;
+  return `<div class="sound-card">
+    <span class="sc-idx">${String(i+1).padStart(2,'0')}</span>
+    <div class="sc-wave">${waveBars(seed)}</div>
+    <div class="sc-text"><span class="sc-title">${esc(t.title)}</span>${t.note?`<span class="sc-note">${esc(t.note)}</span>`:''}</div>
+    ${t.audio?`<audio controls preload="none" src="${esc(t.audio)}"></audio>`:`<span class="sc-soon">ADD FILE</span>`}
+  </div>`;
+}
 function viewSounds(){
   return `<section class="block wrap">
     <div class="sec-head"><div><span class="eyebrow">From the cabinet</span><h2>Classic Sounds</h2>
     <p class="lead">The unmistakable effects of Defender — smart bombs, hyperspace, laser fire, and the cries of the invasion itself.</p>
     <p class="credit">Sound design by <b>Jarvis · DeMar · Dicker</b> — Williams Electronics, 1981</p></div></div>
-    <div class="audio-list">${SITE.sounds.map(trackRow).join('')}</div>
+    <div class="sound-credit">
+      <div class="sc-photo"><img src="images/history/05-sam-dicker.jpg" alt="Sam Dicker, sound and effects programmer on Defender"/></div>
+      <div>
+        <span class="sc-role">Sound &amp; Effects Programmer</span>
+        <h3>Sam Dicker</h3>
+        <p>When Eugene Jarvis started building Defender at Williams in 1980, Sam Dicker joined partway through as a programmer and quickly became the one who gave the game its voice. Beyond the sound effects, he wrote a particle-based algorithm that generated each enemy's unique explosion — a small technical touch that made every kill feel distinct. He's credited alongside Jarvis, Larry DeMar, and Paul Dussault as one of Defender's four programmers, and stayed at Williams to work on Sinistar a few years later.</p>
+        <p>Dicker went on to a long career in game and audio engineering — contributing to Amiga's sound hardware and driver design, building 3D audio and graphics tools at studios including Crystal Dynamics and LucasArts (where he worked on sound for <i>Star Wars: The Force Unleashed</i>), and continuing in audio programming roles since. In May 2025, Defender was inducted into the World Video Game Hall of Fame — a milestone he marked publicly as a highlight of a career that started with this cabinet.</p>
+      </div>
+    </div>
+    <div class="sound-grid">${SITE.sounds.map(soundCard).join('')}</div>
   </section>`;
 }
 
