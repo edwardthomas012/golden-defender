@@ -400,15 +400,15 @@ section.block.tight{padding:60px 0}
 
 /* ---------------- CUSTOM AUDIO PLAYER (used on Songs + Sounds) ---------------- */
 .aplayer{display:flex;flex-direction:column;background:rgba(6,9,22,.55);border:1px solid var(--line-2);
-  border-radius:14px;padding:10px 12px;backdrop-filter:blur(4px)}
-.aplayer .ap-row{display:flex;align-items:center;gap:10px}
+  border-radius:14px;padding:10px 12px;backdrop-filter:blur(4px);width:100%;min-width:0;box-sizing:border-box}
+.aplayer .ap-row{display:flex;align-items:center;gap:10px;min-width:0;width:100%}
 .aplayer button{background:none;border:0;color:var(--gold);cursor:pointer;display:grid;place-items:center;
   flex:0 0 auto;border-radius:50%;transition:.15s;width:38px;height:38px}
 .aplayer button:hover{background:rgba(255,206,77,.16)}
 .aplayer button svg{width:19px;height:19px;fill:currentColor;display:block}
 .aplayer .ap-play{width:42px;height:42px;background:rgba(255,206,77,.10);border:1px solid rgba(255,206,77,.28)}
 .aplayer .ap-play svg{width:22px;height:22px}
-.aplayer .ap-bar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.12);position:relative;cursor:pointer}
+.aplayer .ap-bar{flex:1;min-width:0;height:6px;border-radius:3px;background:rgba(255,255,255,.12);position:relative;cursor:pointer}
 .aplayer .ap-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,var(--plasma),var(--gold));width:0%;pointer-events:none}
 .aplayer .ap-fill::after{content:"";position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:12px;height:12px;
   border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(255,206,77,.85)}
@@ -2280,15 +2280,16 @@ function wireAudioControls(root){
     audio.addEventListener('ended',()=>{ playBtn.innerHTML=ICON_PLAY; wrap.classList.remove('playing'); });
 
     audio.addEventListener('loadedmetadata',()=>{ timeEl.textContent=fmt(0)+' / '+fmt(audio.duration); });
+    audio.addEventListener('durationchange',()=>{ timeEl.textContent=fmt(audio.currentTime)+' / '+fmt(audio.duration); });
     audio.addEventListener('timeupdate',()=>{
-      if(audio.duration) fill.style.width=(audio.currentTime/audio.duration*100)+'%';
+      if(isFinite(audio.duration)&&audio.duration>0) fill.style.width=(audio.currentTime/audio.duration*100)+'%';
       timeEl.textContent=fmt(audio.currentTime)+' / '+fmt(audio.duration);
     });
 
     const seek=e=>{
       const r=bar.getBoundingClientRect();
       const pct=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width));
-      if(audio.duration) audio.currentTime=pct*audio.duration;
+      if(isFinite(audio.duration)&&audio.duration>0) audio.currentTime=pct*audio.duration;
     };
     bar.addEventListener('click',seek);
 
