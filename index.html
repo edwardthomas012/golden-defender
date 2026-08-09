@@ -401,7 +401,7 @@ section.block.tight{padding:60px 0}
 /* ---------------- CUSTOM AUDIO PLAYER (used on Songs + Sounds) ---------------- */
 .aplayer{display:flex;flex-direction:column;background:rgba(6,9,22,.55);border:1px solid var(--line-2);
   border-radius:14px;padding:10px 12px;backdrop-filter:blur(4px);width:100%;min-width:0;box-sizing:border-box}
-.aplayer .ap-row{display:flex;align-items:center;gap:10px;min-width:0;width:100%}
+.aplayer .ap-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;min-width:0;width:100%}
 .aplayer button{background:none;border:0;color:var(--gold);cursor:pointer;display:grid;place-items:center;
   flex:0 0 auto;border-radius:50%;transition:.15s;width:38px;height:38px}
 .aplayer button:hover{background:rgba(255,206,77,.16)}
@@ -424,9 +424,9 @@ section.block.tight{padding:60px 0}
 .aplayer .ap-extra a:hover,.aplayer .ap-extra button:hover{color:var(--gold);border-color:var(--gold-deep)}
 
 /* ---------------- SOUND GRID (square contact cards) ---------------- */
-.sound-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px;max-width:var(--maxw)}
+.sound-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;max-width:var(--maxw)}
 .sound-card{position:relative;min-height:230px;border:1px solid var(--line);border-radius:var(--r);
-  background:var(--glass);backdrop-filter:blur(6px);padding:26px 24px 22px;display:flex;flex-direction:column;
+  background:var(--glass);backdrop-filter:blur(6px);padding:26px 18px 22px;display:flex;flex-direction:column;
   justify-content:space-between;transition:.22s;overflow:hidden}
 .sound-card::before{content:"";position:absolute;top:0;left:0;width:34px;height:2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
 .sound-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 20px 44px rgba(0,0,0,.5),0 0 26px rgba(255,206,77,.14)}
@@ -439,6 +439,13 @@ section.block.tight{padding:60px 0}
   letter-spacing:.2px;color:var(--ink);display:block}
 .sound-card .sc-note{font-family:'Space Mono';font-size:11px;color:var(--ink-mute);display:block;margin-top:7px;line-height:1.45}
 .sound-card audio{display:none}
+.sound-card .aplayer{padding:8px 10px}
+.sound-card .aplayer .ap-play{width:36px;height:36px}
+.sound-card .aplayer .ap-play svg{width:18px;height:18px}
+.sound-card .aplayer .ap-mute,.sound-card .aplayer .ap-more{width:32px;height:32px}
+.sound-card .aplayer .ap-mute svg,.sound-card .aplayer .ap-more svg{width:16px;height:16px}
+.sound-card .aplayer .ap-bar{min-width:44px}
+.sound-card .aplayer .ap-time{min-width:66px;font-size:10px}
 .sound-card .sc-soon{font-family:'Space Mono';font-size:10.5px;letter-spacing:1px;color:var(--ink-mute);text-align:center;margin-top:16px;
   border:1px dashed var(--line-2);border-radius:8px;padding:10px 0}
 
@@ -1154,7 +1161,7 @@ const SITE = {
     { title:"Smart Bomb", note:"Standard single smart bomb blast", audio:"" },
     { title:"Hyperspace", note:"Warp/teleport sound", audio:"" },
     { title:"Bomber Destroyed", note:"Enemy type sound", audio:"sounds/bomber-destroyed.mp3" },
-    { title:"Coin Insert", note:"Credit / coin-drop sound", audio:"sounds/Coin%20Credit.mp3" },
+    { title:"Coin Insert", note:"Credit / coin-drop sound", audio:"sounds/coin-credit.mp3" },
     { title:"Humanoid Destroyed", note:"A Humanoid is killed — e.g. shot by the player or falls from a high distance.", audio:"sounds/humanoid-destroyed-lander-mutation.mp3" },
     { title:"Lander Mutation", note:"A Lander carries a Humanoid to the top and becomes a Mutant, destroying the Humanoid", audio:"sounds/humanoid-destroyed-lander-mutation.mp3" }
   ],
