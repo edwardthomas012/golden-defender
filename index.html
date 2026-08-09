@@ -415,7 +415,7 @@ section.block.tight{padding:60px 0}
 .aplayer .ap-time{font-family:'Space Mono';font-size:11px;color:var(--ink-mute);white-space:nowrap;flex:0 0 auto;min-width:84px;text-align:right}
 .aplayer.playing{border-color:var(--gold-deep)}
 .aplayer.playing .ap-bar{background:rgba(255,255,255,.2)}
-.aplayer .ap-extra{display:none;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line-2)}
+.aplayer .ap-extra{display:none;flex-wrap:wrap;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line-2)}
 .aplayer .ap-extra.open{display:flex}
 .aplayer .ap-extra a,.aplayer .ap-extra button{width:auto;height:auto;border-radius:8px;padding:7px 12px;
   font-family:'Space Mono';font-size:11px;letter-spacing:.3px;color:var(--ink-dim);text-decoration:none;
@@ -424,7 +424,7 @@ section.block.tight{padding:60px 0}
 .aplayer .ap-extra a:hover,.aplayer .ap-extra button:hover{color:var(--gold);border-color:var(--gold-deep)}
 
 /* ---------------- SOUND GRID (square contact cards) ---------------- */
-.sound-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px;max-width:var(--maxw)}
+.sound-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px;max-width:var(--maxw)}
 .sound-card{position:relative;min-height:230px;border:1px solid var(--line);border-radius:var(--r);
   background:var(--glass);backdrop-filter:blur(6px);padding:26px 18px 22px;display:flex;flex-direction:column;
   justify-content:space-between;transition:.22s;overflow:hidden}
@@ -1920,16 +1920,17 @@ function viewPoem(){
   </section>`;
 }
 
-function aplayer(src){
-  return `<div class="aplayer"><audio preload="metadata" src="${esc(src)}"></audio>
+function aplayer(src,compact){
+  return `<div class="aplayer${compact?' ap-compact':''}"><audio preload="metadata" src="${esc(src)}"></audio>
     <div class="ap-row">
       <button class="ap-play" type="button" aria-label="Play">${ICON_PLAY}</button>
       <div class="ap-bar"><div class="ap-fill"></div></div>
       <span class="ap-time">0:00</span>
-      <button class="ap-mute" type="button" aria-label="Mute">${ICON_VOL}</button>
+      ${compact?'':`<button class="ap-mute" type="button" aria-label="Mute">${ICON_VOL}</button>`}
       <button class="ap-more" type="button" aria-label="More options">${ICON_MORE}</button>
     </div>
     <div class="ap-extra">
+      ${compact?`<button class="ap-mute" type="button" aria-label="Mute">${ICON_VOL}Mute</button>`:''}
       <a class="ap-download" href="${esc(src)}" download>${ICON_DOWNLOAD}Download</a>
       <button class="ap-speed" type="button">${ICON_SPEED}Speed: 1x</button>
     </div>
@@ -1966,7 +1967,7 @@ function soundCard(t){
     <span class="sc-idx">${String(t.num).padStart(2,'0')}</span>
     <div class="sc-wave">${waveBars(seed)}</div>
     <div class="sc-text"><span class="sc-title">${esc(t.title)}</span>${t.note?`<span class="sc-note">${esc(t.note)}</span>`:''}</div>
-    ${t.audio?aplayer(t.audio):`<span class="sc-soon">ADD FILE</span>`}
+    ${t.audio?aplayer(t.audio,true):`<span class="sc-soon">ADD FILE</span>`}
   </div>`;
 }
 function viewSounds(){
