@@ -399,19 +399,29 @@ section.block.tight{padding:60px 0}
 .track .soon{font-family:'Space Mono';font-size:10px;letter-spacing:1px;color:var(--ink-mute)}
 
 /* ---------------- CUSTOM AUDIO PLAYER (used on Songs + Sounds) ---------------- */
-.aplayer{display:flex;align-items:center;gap:10px;background:rgba(6,9,22,.55);border:1px solid var(--line-2);
-  border-radius:11px;padding:7px 12px;backdrop-filter:blur(4px)}
-.aplayer button{background:none;border:0;padding:4px;color:var(--gold);cursor:pointer;display:grid;place-items:center;
-  flex:0 0 auto;border-radius:50%;transition:.15s}
-.aplayer button:hover{background:rgba(255,206,77,.14)}
-.aplayer button svg{width:15px;height:15px;fill:currentColor;display:block}
-.aplayer .ap-bar{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.12);position:relative;cursor:pointer}
+.aplayer{display:flex;flex-direction:column;background:rgba(6,9,22,.55);border:1px solid var(--line-2);
+  border-radius:14px;padding:10px 12px;backdrop-filter:blur(4px)}
+.aplayer .ap-row{display:flex;align-items:center;gap:10px}
+.aplayer button{background:none;border:0;color:var(--gold);cursor:pointer;display:grid;place-items:center;
+  flex:0 0 auto;border-radius:50%;transition:.15s;width:38px;height:38px}
+.aplayer button:hover{background:rgba(255,206,77,.16)}
+.aplayer button svg{width:19px;height:19px;fill:currentColor;display:block}
+.aplayer .ap-play{width:42px;height:42px;background:rgba(255,206,77,.10);border:1px solid rgba(255,206,77,.28)}
+.aplayer .ap-play svg{width:22px;height:22px}
+.aplayer .ap-bar{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.12);position:relative;cursor:pointer}
 .aplayer .ap-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,var(--plasma),var(--gold));width:0%;pointer-events:none}
-.aplayer .ap-fill::after{content:"";position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:9px;height:9px;
-  border-radius:50%;background:var(--gold);box-shadow:0 0 6px rgba(255,206,77,.8)}
-.aplayer .ap-time{font-family:'Space Mono';font-size:10.5px;color:var(--ink-mute);white-space:nowrap;flex:0 0 auto;min-width:80px;text-align:right}
+.aplayer .ap-fill::after{content:"";position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:12px;height:12px;
+  border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(255,206,77,.85)}
+.aplayer .ap-time{font-family:'Space Mono';font-size:11px;color:var(--ink-mute);white-space:nowrap;flex:0 0 auto;min-width:84px;text-align:right}
 .aplayer.playing{border-color:var(--gold-deep)}
 .aplayer.playing .ap-bar{background:rgba(255,255,255,.2)}
+.aplayer .ap-extra{display:none;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line-2)}
+.aplayer .ap-extra.open{display:flex}
+.aplayer .ap-extra a,.aplayer .ap-extra button{width:auto;height:auto;border-radius:8px;padding:7px 12px;
+  font-family:'Space Mono';font-size:11px;letter-spacing:.3px;color:var(--ink-dim);text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid var(--line-2)}
+.aplayer .ap-extra svg{width:13px;height:13px}
+.aplayer .ap-extra a:hover,.aplayer .ap-extra button:hover{color:var(--gold);border-color:var(--gold-deep)}
 
 /* ---------------- SOUND GRID (square contact cards) ---------------- */
 .sound-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px;max-width:var(--maxw)}
@@ -1143,9 +1153,9 @@ const SITE = {
     { title:"Thrust — High", note:"Acceleration thrust sound", audio:"" },
     { title:"Smart Bomb", note:"Standard single smart bomb blast", audio:"" },
     { title:"Hyperspace", note:"Warp/teleport sound", audio:"" },
-    { title:"Bomber", note:"Enemy type sound", audio:"" },
+    { title:"Bomber Destroyed", note:"Enemy type sound", audio:"sounds/bomber-destroyed.mp3" },
     { title:"Coin Insert", note:"Credit / coin-drop sound", audio:"sounds/coin-credit.mp3" },
-    { title:"Humanoid Destroyed", note:"A Humanoid is killed — e.g. shot by the player", audio:"sounds/humanoid-destroyed-lander-mutation.mp3" },
+    { title:"Humanoid Destroyed", note:"A Humanoid is killed — e.g. shot by the player or falls from a high distance.", audio:"sounds/humanoid-destroyed-lander-mutation.mp3" },
     { title:"Lander Mutation", note:"A Lander carries a Humanoid to the top and becomes a Mutant, destroying the Humanoid", audio:"sounds/humanoid-destroyed-lander-mutation.mp3" }
   ],
 
@@ -1785,6 +1795,9 @@ const ICON_PAUSE='<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/>
 const ICON_PLAY_BIG='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,.45)" stroke="rgba(255,255,255,.6)" stroke-width="1"/><path d="M10 7.5v9l7-4.5z" fill="currentColor"/></svg>';
 const ICON_VOL='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const ICON_VOL_OFF='<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 9l5 5m0-5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_MORE='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="12" cy="19" r="1.9"/></svg>';
+const ICON_DOWNLOAD='<svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_SPEED='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 12l4-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const ICON_FULL='<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5m11-5v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_FULL_EXIT='<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4m11 5v-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -1902,10 +1915,17 @@ function viewPoem(){
 
 function aplayer(src){
   return `<div class="aplayer"><audio preload="metadata" src="${esc(src)}"></audio>
-    <button class="ap-play" type="button" aria-label="Play">${ICON_PLAY}</button>
-    <div class="ap-bar"><div class="ap-fill"></div></div>
-    <span class="ap-time">0:00</span>
-    <button class="ap-mute" type="button" aria-label="Mute">${ICON_VOL}</button>
+    <div class="ap-row">
+      <button class="ap-play" type="button" aria-label="Play">${ICON_PLAY}</button>
+      <div class="ap-bar"><div class="ap-fill"></div></div>
+      <span class="ap-time">0:00</span>
+      <button class="ap-mute" type="button" aria-label="Mute">${ICON_VOL}</button>
+      <button class="ap-more" type="button" aria-label="More options">${ICON_MORE}</button>
+    </div>
+    <div class="ap-extra">
+      <a class="ap-download" href="${esc(src)}" download>${ICON_DOWNLOAD}Download</a>
+      <button class="ap-speed" type="button">${ICON_SPEED}Speed: 1x</button>
+    </div>
   </div>`;
 }
 function trackRow(t){
@@ -1945,7 +1965,9 @@ function soundCard(t){
 function viewSounds(){
   const numbered=SITE.sounds.map((s,i)=>Object.assign({},s,{num:i+1}));
   const highlights=numbered.slice(17,20).map((s,i)=>Object.assign({},s,{num:i+1}));
-  const effects=numbered.slice(0,17).concat(numbered.slice(20)).map((s,i)=>Object.assign({},s,{num:i+4}));
+  const effects=numbered.slice(0,17).concat(numbered.slice(20))
+    .sort((a,b)=>a.title.localeCompare(b.title))
+    .map((s,i)=>Object.assign({},s,{num:i+4}));
   return `<section class="block wrap">
     <div class="sec-head"><div><span class="eyebrow">From the cabinet</span><h2>Classic Sounds</h2>
     <p class="lead">The unmistakable effects of Defender — smart bombs, hyperspace, laser fire, and the cries of the invasion itself.</p>
@@ -2233,6 +2255,10 @@ addEventListener('hashchange',render);
 
 function wireAudioControls(root){
   const fmt=s=>{ if(!isFinite(s)||s<0) return '0:00'; const m=Math.floor(s/60), sec=Math.floor(s%60); return m+':'+String(sec).padStart(2,'0'); };
+  if(!window._apOutsideBound){
+    document.addEventListener('click',()=>{ document.querySelectorAll('.ap-extra.open').forEach(x=>x.classList.remove('open')); });
+    window._apOutsideBound=true;
+  }
   root.querySelectorAll('.aplayer').forEach(wrap=>{
     const audio=wrap.querySelector('audio');
     const src=audio&&audio.getAttribute('src');
@@ -2267,6 +2293,25 @@ function wireAudioControls(root){
     bar.addEventListener('click',seek);
 
     muteBtn.addEventListener('click',()=>{ audio.muted=!audio.muted; muteBtn.innerHTML=audio.muted?ICON_VOL_OFF:ICON_VOL; });
+
+    const moreBtn=wrap.querySelector('.ap-more');
+    const extra=wrap.querySelector('.ap-extra');
+    extra.addEventListener('click',e=>e.stopPropagation());
+    moreBtn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const willOpen=!extra.classList.contains('open');
+      root.querySelectorAll('.aplayer .ap-extra.open').forEach(x=>x.classList.remove('open'));
+      if(willOpen) extra.classList.add('open');
+    });
+
+    const speedBtn=wrap.querySelector('.ap-speed');
+    const speeds=[1,1.25,1.5,2,0.5,0.75];
+    let speedIdx=0;
+    speedBtn.addEventListener('click',()=>{
+      speedIdx=(speedIdx+1)%speeds.length;
+      audio.playbackRate=speeds[speedIdx];
+      speedBtn.innerHTML=ICON_SPEED+'Speed: '+speeds[speedIdx]+'x';
+    });
   });
 }
 function wireVideoControls(root){
