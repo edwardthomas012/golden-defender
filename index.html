@@ -668,6 +668,15 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
   opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;
   box-shadow:0 12px 30px rgba(0,0,0,.5);white-space:nowrap;max-width:88vw;text-overflow:ellipsis;overflow:hidden}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.bh-tip{position:fixed;z-index:6;transform:translate(-50%,-140%);
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold-bri);
+  background:var(--glass-2);border:1px solid rgba(255,206,77,.5);border-radius:999px;
+  padding:7px 14px;white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .35s ease,transform .35s ease;
+  box-shadow:0 8px 20px rgba(0,0,0,.5),0 0 16px rgba(255,206,77,.15)}
+.bh-tip.show{opacity:1;transform:translate(-50%,-160%)}
+@media(max-width:640px){.bh-tip{display:none}}
 .et-emblem{width:132px;height:132px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
 .et-emblem .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
 .et-emblem .et-stars circle:nth-child(2){animation-delay:.4s}
@@ -732,6 +741,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 <body>
 <div class="cosmos"></div>
 <canvas id="stars"></canvas>
+<div class="bh-tip" id="bhTip">GD-50,001 · SINGULARITY</div>
 
 <!-- reusable ET alien graphic -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -1693,7 +1703,7 @@ const pad=n=>String(n).padStart(2,'0');
       r:(Math.random()*1.6+.8)*dpr,a:Math.random()*.5+.2,tw:Math.random()*6.28}));
     // black hole — distant, upper-right, with golden accretion disk
     const R=Math.max(20*dpr,Math.min(54*dpr,Math.min(w,h)*0.05));
-    bh={x:w*0.85,y:h*0.19,R,rot:0,
+    bh={x:w*0.85,y:h*0.19,R,rot:0,flashes:[],flashCooldown:0,
       parts:Array.from({length:46},()=>({ang:Math.random()*6.28,rad:rnd(R*1.35,R*5.2),
         sp:rnd(.005,.015),vr:rnd(.07,.22)*dpr}))};
   }
@@ -1706,13 +1716,34 @@ const pad=n=>String(n).padStart(2,'0');
     x.fillStyle=g;x.beginPath();x.arc(bx,by,R*6,0,6.2832);x.fill();
     // infalling matter (spiraling particles)
     x.globalCompositeOperation='lighter';
+    if(bh.flashCooldown>0) bh.flashCooldown--;
     for(const p of bh.parts){
       if(!reduce){ p.ang+=p.sp*(1+ (R*2/p.rad)); p.rad-=p.vr*(R/p.rad); }
-      if(p.rad<R*1.12){ p.rad=rnd(R*4.4,R*5.4); p.ang=Math.random()*6.28; }
+      if(p.rad<R*1.12){
+        if(!reduce && bh.flashCooldown<=0){
+          const fx=bx+Math.cos(p.ang)*R*1.06, fy=by+Math.sin(p.ang)*R*1.06*0.42;
+          bh.flashes.push({x:fx,y:fy,life:0,max:16});
+          bh.flashCooldown=rnd(140,320); // keeps it rare -- a spark every several seconds, not constant
+        }
+        p.rad=rnd(R*4.4,R*5.4); p.ang=Math.random()*6.28;
+      }
       const px=bx+Math.cos(p.ang)*p.rad, py=by+Math.sin(p.ang)*p.rad*0.42; // flattened disk
       const heat=Math.max(0,Math.min(1,(R*5-p.rad)/(R*4)));
       const col=`rgba(255,${Math.round(150+95*heat)},${Math.round(40+30*(1-heat))},${.5+.5*heat})`;
       x.fillStyle=col;x.beginPath();x.arc(px,py,(.8+1.4*heat)*dpr,0,6.2832);x.fill();
+    }
+    // the sparks themselves -- a brief warm flare, gone in well under half a second
+    for(let i=bh.flashes.length-1;i>=0;i--){
+      const f=bh.flashes[i]; f.life++;
+      const p=f.life/f.max;
+      if(p>=1){ bh.flashes.splice(i,1); continue; }
+      const a=Math.sin(p*Math.PI);
+      const rad=R*0.22*(0.55+p*0.9);
+      const fg=x.createRadialGradient(f.x,f.y,0,f.x,f.y,rad);
+      fg.addColorStop(0,`rgba(255,246,220,${.9*a})`);
+      fg.addColorStop(.45,`rgba(255,206,120,${.55*a})`);
+      fg.addColorStop(1,'rgba(255,180,80,0)');
+      x.fillStyle=fg;x.beginPath();x.arc(f.x,f.y,rad,0,6.2832);x.fill();
     }
     // accretion disk — multi-band, Saturn-style rings with subtle color variation
     x.save();x.translate(bx,by);
@@ -1956,6 +1987,21 @@ const pad=n=>String(n).padStart(2,'0');
   }
   size();frame();
   let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{size();if(reduce)frame();},200)});
+
+  // ---- black hole hover tooltip (canvas has pointer-events:none, so we
+  // track the cursor globally and check proximity to the black hole) ----
+  const bhTip=document.getElementById('bhTip');
+  if(bhTip){
+    let bhHover=false;
+    addEventListener('mousemove',e=>{
+      if(!bh) return;
+      const bx=bh.x/dpr, by=bh.y/dpr, br=bh.R/dpr;
+      const near=Math.hypot(e.clientX-bx,e.clientY-by) < br*3.6;
+      if(near&&!bhHover){ bhTip.style.left=bx+'px'; bhTip.style.top=by+'px'; bhTip.classList.add('show'); }
+      else if(!near&&bhHover){ bhTip.classList.remove('show'); }
+      bhHover=near;
+    },{passive:true});
+  }
 })();
 
 /* ============ data helpers ============ */
