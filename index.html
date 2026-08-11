@@ -635,11 +635,18 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
 
 .social{max-width:var(--maxw);margin:0 auto;padding:22px 26px 0;display:flex;gap:10px;
   justify-content:center;flex-wrap:wrap}
-.social a{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--ink-mute);
-  border:1px solid var(--line-2);background:var(--glass-2);transition:.15s}
-.social a[hidden]{display:none}
-.social a svg{width:18px;height:18px;fill:currentColor}
-.social a:hover{color:var(--gold);border-color:var(--gold);background:rgba(255,206,77,.1)}
+.social button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--ink-mute);
+  border:1px solid var(--line-2);background:var(--glass-2);transition:.15s;cursor:pointer;font:inherit}
+.social button svg{width:18px;height:18px;fill:currentColor;pointer-events:none}
+.social button:hover{color:var(--gold);border-color:var(--gold);background:rgba(255,206,77,.1)}
+.social button:active{transform:scale(.92)}
+
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);z-index:200;
+  background:var(--glass-2);border:1px solid var(--gold);color:var(--gold-bri);
+  font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.5px;padding:12px 20px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;
+  box-shadow:0 12px 30px rgba(0,0,0,.5);white-space:nowrap;max-width:88vw;text-overflow:ellipsis;overflow:hidden}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .et-emblem{width:132px;height:132px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
 .et-emblem .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
 .et-emblem .et-stars circle:nth-child(2){animation-delay:.4s}
@@ -779,23 +786,27 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
     <a href="#schematics" data-nav>Schematics</a>
     <a href="#contact" data-nav>Contact</a>
   </nav>
-  <div class="social" id="socialLinks" aria-label="Follow">
-    <a href="#" target="_blank" rel="noopener" data-platform="facebook" aria-label="Facebook" hidden>
+  <div class="social" id="shareLinks" aria-label="Share this page">
+    <button type="button" data-share="facebook" aria-label="Share on Facebook" title="Share on Facebook">
       <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12Z"/></svg>
-    </a>
-    <a href="#" target="_blank" rel="noopener" data-platform="instagram" aria-label="Instagram" hidden>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>
-    </a>
-    <a href="#" target="_blank" rel="noopener" data-platform="tiktok" aria-label="TikTok" hidden>
-      <svg viewBox="0 0 24 24"><path d="M16.5 3c.4 2.2 1.9 3.8 4 4.1v2.9c-1.5 0-2.9-.5-4-1.3v6.6c0 3.2-2.6 5.7-5.8 5.7A5.7 5.7 0 0 1 5 15.3a5.7 5.7 0 0 1 8.4-5v3.1a2.7 2.7 0 1 0 1.9 2.6V3h1.2Z"/></svg>
-    </a>
-    <a href="#" target="_blank" rel="noopener" data-platform="youtube" aria-label="YouTube" hidden>
-      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 9.3 15 12l-4.5 2.7V9.3Z"/></svg>
-    </a>
-    <a href="#" target="_blank" rel="noopener" data-platform="x" aria-label="X (Twitter)" hidden>
+    </button>
+    <button type="button" data-share="x" aria-label="Share on X" title="Share on X">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 4l16 16M20 4 4 20"/></svg>
-    </a>
+    </button>
+    <button type="button" data-share="instagram" aria-label="Share to Instagram" title="Share to Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button type="button" data-share="tiktok" aria-label="Share to TikTok" title="Share to TikTok">
+      <svg viewBox="0 0 24 24"><path d="M16.5 3c.4 2.2 1.9 3.8 4 4.1v2.9c-1.5 0-2.9-.5-4-1.3v6.6c0 3.2-2.6 5.7-5.8 5.7A5.7 5.7 0 0 1 5 15.3a5.7 5.7 0 0 1 8.4-5v3.1a2.7 2.7 0 1 0 1.9 2.6V3h1.2Z"/></svg>
+    </button>
+    <button type="button" data-share="youtube" aria-label="Share to YouTube" title="Share to YouTube">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 9.3 15 12l-4.5 2.7V9.3Z"/></svg>
+    </button>
+    <button type="button" data-share="copy" aria-label="Copy link" title="Copy link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+    </button>
   </div>
+  <div class="toast" id="shareToast"></div>
   <div class="f">
     <div class="left">© <span id="yr"></span> Golden Defender · No. 50,001<br>A tribute to the 50,000th machine · Williams Electronics, 1981
       <div class="sig">SYSTEMS NOMINAL · INSERT COIN</div>
@@ -1293,18 +1304,6 @@ const SITE = {
     ]
   },
 
-  /* ---- SOCIAL / FOLLOW LINKS ----
-     Paste your profile URLs below. Leave a value blank ("") and that
-     icon simply won't show in the footer -- nothing links anywhere
-     until you fill it in. */
-  social:{
-    facebook:"",
-    instagram:"",
-    tiktok:"",
-    youtube:"",
-    x:""
-  },
-
   /* ---- CONTACT ---- */
   contact:{
     intro:"Questions about the restoration, the milestone, or the machine? Drop a line.",
@@ -1530,19 +1529,68 @@ const app=$('#app');
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
 
-/* ============ FOLLOW LINKS ============
-   Reveals a footer icon only for platforms that have a URL set in
-   SITE.social — nothing links anywhere until it's filled in. */
-(function socialLinks(){
-  const wrap=$('#socialLinks'); if(!wrap) return;
-  const social=SITE.social||{};
-  let any=false;
-  $$('a[data-platform]',wrap).forEach(a=>{
-    const url=social[a.dataset.platform];
-    if(url){ a.href=url; a.hidden=false; any=true; }
-    else a.hidden=true;
+/* ============ SHARE ============
+   Facebook and X have real "share this link" web dialogs, so those open
+   directly. Instagram, TikTok, and YouTube don't offer that for websites --
+   there's no official way for a page to hand them a link to post. So for
+   those three (and the general Copy Link button) we copy the URL to the
+   clipboard and, on phones/tablets that support it, trigger the OS-level
+   share sheet instead -- which does list Instagram/TikTok/etc. as targets. */
+(function shareLinks(){
+  const wrap=$('#shareLinks'), toastEl=$('#shareToast');
+  if(!wrap||!toastEl) return;
+
+  let toastTimer=null;
+  function toast(msg){
+    toastEl.textContent=msg;
+    toastEl.classList.add('show');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>toastEl.classList.remove('show'),2600);
+  }
+
+  async function copyLink(){
+    const url=location.href;
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(url); }
+      else{
+        const ta=document.createElement('textarea');
+        ta.value=url; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      return true;
+    }catch(e){ return false; }
+  }
+
+  function openPopup(url){
+    window.open(url,'share','width=560,height=520,noopener,noreferrer');
+  }
+
+  async function shareOrCopy(label){
+    const url=location.href, title=document.title;
+    if(navigator.share){
+      try{ await navigator.share({title,url}); return; }
+      catch(e){ if(e&&e.name==='AbortError') return; } // user backed out of native sheet; fall through to copy
+    }
+    const ok=await copyLink();
+    toast(ok?`Link copied — paste it into ${label}`:'Could not copy the link');
+  }
+
+  wrap.addEventListener('click',async e=>{
+    const btn=e.target.closest('[data-share]'); if(!btn) return;
+    const platform=btn.dataset.share, url=encodeURIComponent(location.href), text=encodeURIComponent(document.title);
+    if(platform==='facebook'){
+      openPopup(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
+    } else if(platform==='x'){
+      openPopup(`https://twitter.com/intent/tweet?url=${url}&text=${text}`);
+    } else if(platform==='copy'){
+      const ok=await copyLink();
+      toast(ok?'Link copied to clipboard':'Could not copy the link');
+    } else {
+      const labels={instagram:'Instagram',tiktok:'TikTok',youtube:'YouTube'};
+      shareOrCopy(labels[platform]||platform);
+    }
   });
-  wrap.style.display=any?'':'none';
 })();
 
 /* ============ ATTRACT MODE ============
