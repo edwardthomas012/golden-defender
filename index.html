@@ -669,13 +669,13 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
   box-shadow:0 12px 30px rgba(0,0,0,.5);white-space:nowrap;max-width:88vw;text-overflow:ellipsis;overflow:hidden}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-.bh-tip{position:fixed;z-index:6;transform:translate(-50%,-140%);
-  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold-bri);
-  background:var(--glass-2);border:1px solid rgba(255,206,77,.5);border-radius:999px;
-  padding:7px 14px;white-space:nowrap;pointer-events:none;
-  opacity:0;transition:opacity .35s ease,transform .35s ease;
-  box-shadow:0 8px 20px rgba(0,0,0,.5),0 0 16px rgba(255,206,77,.15)}
-.bh-tip.show{opacity:1;transform:translate(-50%,-160%)}
+.bh-tip{position:fixed;z-index:6;transform:translate(-50%,-100%) translateY(-12px);
+  font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;letter-spacing:.2px;color:var(--gold-bri);
+  background:var(--glass-2);border:1px solid rgba(255,206,77,.5);border-radius:14px;
+  padding:12px 16px;text-align:center;white-space:normal;width:max-content;max-width:260px;
+  pointer-events:none;opacity:0;transition:opacity .3s ease,transform .3s ease;
+  box-shadow:0 10px 26px rgba(0,0,0,.55),0 0 18px rgba(255,206,77,.15)}
+.bh-tip.show{opacity:1;transform:translate(-50%,-100%) translateY(-20px)}
 @media(max-width:640px){.bh-tip{display:none}}
 .et-emblem{width:132px;height:132px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
 .et-emblem .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
@@ -741,7 +741,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 <body>
 <div class="cosmos"></div>
 <canvas id="stars"></canvas>
-<div class="bh-tip" id="bhTip">GD-50,001 · SINGULARITY</div>
+<div class="bh-tip" id="bhTip"></div>
 
 <!-- reusable ET alien graphic -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -1563,6 +1563,69 @@ const app=$('#app');
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
 
+/* ============ BLACK HOLE NUGGETS ============
+   55 short facts -- real Defender/Williams history mixed with the Golden
+   Defender's own restoration story. One is served at random on each
+   hover of the black hole (see the spacefield IIFE below). Add more any
+   time -- just drop another string in the array. */
+const BH_FACTS=[
+  "Defender was designed by Eugene Jarvis and programmed alongside Larry DeMar at Williams Electronics.",
+  "Sam Dicker composed the frantic sound effects that made Defender's alarms instantly recognizable.",
+  "Defender debuted at the AMOA trade show in Chicago on October 31, 1980.",
+  "It reached arcade operators about two weeks after its Chicago debut.",
+  "The earliest \u201cWhite Label\u201d ROM boards are the rarest Defender boards still in existence.",
+  "White Label boards shipped with a bug \u2014 Landers displayed 100 points instead of 150.",
+  "That scoring bug later surfaced as evidence in Williams' real court case against a bootleg clone.",
+  "\u201cBlue Label\u201d boards ran on just 10 EPROMs and were missing the chip at position IC5.",
+  "\u201cGreen Label\u201d boards fixed the Lander scoring bug and were the last upright-only revision.",
+  "\u201cRed Label\u201d boards launched alongside Williams' two-player cocktail cabinet in 1981.",
+  "Red Label is the most common revision still in circulation \u2014 and MAME's default parent ROM set.",
+  "Defender's default high-score initials weren't random. They were the real Williams development team.",
+  "DRJ, the game's top default score, stands for designer Eugene Jarvis.",
+  "SAM belonged to sound engineer Sam Dicker; LED to programmer Larry DeMar.",
+  "PGD, CRB, MRS, SSR, and TMH round out the rest of Williams' crew immortalized in the score table.",
+  "Defender reached the Atari 2600 in 1981, the same year the arcade original spread nationwide.",
+  "It reached the Atari 5200 and the Emerson Arcadia the following year, 1982.",
+  "ColecoVision and Mattel Intellivision both received Defender ports in 1983.",
+  "Defender reached Game Boy twice \u2014 1995's Arcade Classic No. 4, then 1999's Game Boy Color Arcade Hits.",
+  "The game has been ported to home computers for over four decades \u2014 Atari 800 in '82 to Windows CD-ROM in '04.",
+  "Defender even reached Palm OS, and later, the Apple App Store in 2012.",
+  "Eugene Jarvis went on to create Robotron: 2084 and Stargate at Williams after Defender's success.",
+  "In 2013, Eugene Jarvis was inducted into the Pinball Expo Hall of Fame.",
+  "Larry DeMar was inducted into that same Hall of Fame back in 1999.",
+  "Twin Galaxies once honored Eugene Jarvis and his wife, Sasha Gerritson, as Patrons of the Arts.",
+  "Twin Galaxies founder Walter Day once personally presented Eugene Jarvis with an award.",
+  "Gary Whittingham of Brisbane has been a Defender master since 1980 and an early MAME contributor.",
+  "Landers are worth 150 points \u2014 destroy one carrying a Humanoid and you save a life instead.",
+  "Baiters are worth 200 points and fly straight at the player's ship.",
+  "Bombers are worth 250 points and leave a trail of live mines behind them.",
+  "Pods are worth 1,000 points alone \u2014 but shoot one and it scatters into a swarm of smaller threats.",
+  "Swarmers, born from a broken Pod, are worth 150 points each and rarely travel alone.",
+  "Losing every Humanoid on a level turns the terrain hostile and the enemies more aggressive.",
+  "A Lander that reaches the top of the screen with a captured Humanoid mutates into something worse.",
+  "The smart bomb clears the screen of enemies \u2014 but it won't save a falling Humanoid.",
+  "Hyperspace teleports the ship to safety at random \u2014 sometimes into worse danger than it left.",
+  "Defender's world scrolls in both directions, tracked by a radar strip most 1980 games never attempted.",
+  "The radar isn't decoration \u2014 it's how players track threats off-screen in either direction.",
+  "The Golden Defender is numbered 50,001 \u2014 a tribute to the 50,000th Defender ever manufactured.",
+  "That gold-trimmed 50,000th machine was built to celebrate Defender's runaway success on the arcade floor.",
+  "Long before it wore gold trim, this cabinet was found stripped down and forgotten in a garage.",
+  "Its restoration began with a full teardown \u2014 every panel, wire, and board pulled and catalogued.",
+  "The monitor bezel was rebuilt and polished to bring the CRT's glow back to life.",
+  "Every button and joystick on the control panel was restored by hand, piece by piece.",
+  "The coin door and mechanism were fully rebuilt \u2014 this machine still runs on real quarters.",
+  "A young boy discovered Defender in a game room in 1981, at just twelve years old.",
+  "That same boy grew up to find, and rebuild, this very cabinet decades later.",
+  "The Golden Defender's full restoration story lives on the Story page, start to finish.",
+  "There's a tribute plaque mounted on the machine, dedicated to every player who ever fed it a quarter.",
+  "The Golden Defender ships with its own original poem, written as a tribute to the build.",
+  "Somewhere on this site, a Lander is waiting to \u201ccapture\u201d any link that doesn't exist. Try one.",
+  "The complete Williams service manual for Defender has been preserved across two enhanced document sets.",
+  "Two musical tributes exist for this cabinet \u2014 a parody track, and a nod to a 1950s doo-wop classic.",
+  "Bach's Toccata and Fugue in D minor plays whenever a new name takes the #1 spot on the boards.",
+  "Every classic sound effect from the original cabinet \u2014 fire, thrust, hyperspace \u2014 lives on the Sounds page."
+];
+
 /* ============ SHARE ============
    Facebook and X have real "share this link" web dialogs, so those open
    directly. Instagram, TikTok, and YouTube don't offer that for websites --
@@ -1989,16 +2052,23 @@ const pad=n=>String(n).padStart(2,'0');
   let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{size();if(reduce)frame();},200)});
 
   // ---- black hole hover tooltip (canvas has pointer-events:none, so we
-  // track the cursor globally and check proximity to the black hole) ----
+  // track the cursor globally and check proximity to the black hole).
+  // Each new hover-in picks a random nugget from BH_FACTS -- never the
+  // same one twice in a row. ----
   const bhTip=document.getElementById('bhTip');
   if(bhTip){
-    let bhHover=false;
+    let bhHover=false, lastFact=-1;
     addEventListener('mousemove',e=>{
       if(!bh) return;
       const bx=bh.x/dpr, by=bh.y/dpr, br=bh.R/dpr;
       const near=Math.hypot(e.clientX-bx,e.clientY-by) < br*3.6;
-      if(near&&!bhHover){ bhTip.style.left=bx+'px'; bhTip.style.top=by+'px'; bhTip.classList.add('show'); }
-      else if(!near&&bhHover){ bhTip.classList.remove('show'); }
+      if(near&&!bhHover){
+        let i=Math.floor(Math.random()*BH_FACTS.length);
+        if(BH_FACTS.length>1 && i===lastFact) i=(i+1)%BH_FACTS.length;
+        lastFact=i;
+        bhTip.textContent=BH_FACTS[i];
+        bhTip.style.left=bx+'px'; bhTip.style.top=by+'px'; bhTip.classList.add('show');
+      } else if(!near&&bhHover){ bhTip.classList.remove('show'); }
       bhHover=near;
     },{passive:true});
   }
