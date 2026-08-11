@@ -669,14 +669,14 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
   box-shadow:0 12px 30px rgba(0,0,0,.5);white-space:nowrap;max-width:88vw;text-overflow:ellipsis;overflow:hidden}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-.bh-tip{position:fixed;z-index:6;transform:translate(-50%,-100%) translateY(-12px);
+.bh-tip{position:fixed;z-index:6;
   font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;letter-spacing:.2px;color:var(--gold-bri);
   background:var(--glass-2);border:1px solid rgba(255,206,77,.5);border-radius:14px;
-  padding:12px 16px;text-align:center;white-space:normal;width:max-content;max-width:260px;
-  pointer-events:none;opacity:0;transition:opacity .3s ease,transform .3s ease;
+  padding:12px 16px;text-align:center;white-space:normal;width:max-content;
+  max-width:min(260px,calc(100vw - 32px));
+  pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .3s ease,transform .3s ease;
   box-shadow:0 10px 26px rgba(0,0,0,.55),0 0 18px rgba(255,206,77,.15)}
-.bh-tip.show{opacity:1;transform:translate(-50%,-100%) translateY(-20px)}
-@media(max-width:640px){.bh-tip{display:none}}
+.bh-tip.show{opacity:1;transform:translateY(0)}
 .et-emblem{width:132px;height:132px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
 .et-emblem .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
 .et-emblem .et-stars circle:nth-child(2){animation-delay:.4s}
@@ -2051,26 +2051,64 @@ const BH_FACTS=[
   size();frame();
   let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{size();if(reduce)frame();},200)});
 
-  // ---- black hole hover tooltip (canvas has pointer-events:none, so we
-  // track the cursor globally and check proximity to the black hole).
-  // Each new hover-in picks a random nugget from BH_FACTS -- never the
-  // same one twice in a row. ----
+  // ---- black hole trivia tooltip ----
+  // Canvas has pointer-events:none, so mouse position is tracked globally
+  // and checked for proximity to the black hole. Touch devices don't have
+  // real hover, so a tap near it works the same way and auto-hides after
+  // a few seconds. Position is always computed fresh and clamped to stay
+  // fully on-screen -- flips below the black hole if there's no room
+  // above, and never runs off the left/right edges either.
   const bhTip=document.getElementById('bhTip');
   if(bhTip){
-    let bhHover=false, lastFact=-1;
-    addEventListener('mousemove',e=>{
-      if(!bh) return;
+    let bhHover=false, lastFact=-1, bhTapTimer=null;
+
+    function nearBH(clientX,clientY){
+      if(!bh) return null;
       const bx=bh.x/dpr, by=bh.y/dpr, br=bh.R/dpr;
-      const near=Math.hypot(e.clientX-bx,e.clientY-by) < br*3.6;
-      if(near&&!bhHover){
-        let i=Math.floor(Math.random()*BH_FACTS.length);
-        if(BH_FACTS.length>1 && i===lastFact) i=(i+1)%BH_FACTS.length;
-        lastFact=i;
-        bhTip.textContent=BH_FACTS[i];
-        bhTip.style.left=bx+'px'; bhTip.style.top=by+'px'; bhTip.classList.add('show');
-      } else if(!near&&bhHover){ bhTip.classList.remove('show'); }
-      bhHover=near;
+      return Math.hypot(clientX-bx,clientY-by) < br*3.6 ? {bx,by,br} : null;
+    }
+
+    function positionTip(bx,by,br){
+      const margin=14, gap=18, ringV=br*1.55; // ringV clears the flattened rings vertically
+      const rect=bhTip.getBoundingClientRect();
+      const tw=rect.width, th=rect.height;
+      let left=bx-tw/2;
+      let top=by-ringV-gap-th; // prefer placing it above the rings
+      if(top<margin) top=by+ringV+gap; // not enough room above -> place below instead
+      if(left<margin) left=margin;
+      if(left+tw>innerWidth-margin) left=innerWidth-margin-tw;
+      if(top+th>innerHeight-margin) top=innerHeight-margin-th;
+      if(top<margin) top=margin;
+      bhTip.style.left=left+'px';
+      bhTip.style.top=top+'px';
+    }
+
+    function revealFact(bx,by,br){
+      let i=Math.floor(Math.random()*BH_FACTS.length);
+      if(BH_FACTS.length>1 && i===lastFact) i=(i+1)%BH_FACTS.length;
+      lastFact=i;
+      bhTip.textContent=BH_FACTS[i];
+      positionTip(bx,by,br);
+      bhTip.classList.add('show');
+    }
+
+    addEventListener('mousemove',e=>{
+      const hit=nearBH(e.clientX,e.clientY);
+      if(hit&&!bhHover) revealFact(hit.bx,hit.by,hit.br);
+      else if(!hit&&bhHover) bhTip.classList.remove('show');
+      bhHover=!!hit;
     },{passive:true});
+
+    addEventListener('click',e=>{
+      const hit=nearBH(e.clientX,e.clientY);
+      clearTimeout(bhTapTimer);
+      if(hit){
+        revealFact(hit.bx,hit.by,hit.br);
+        bhTapTimer=setTimeout(()=>bhTip.classList.remove('show'),4200);
+      } else if(bhTip.classList.contains('show')){
+        bhTip.classList.remove('show');
+      }
+    });
   }
 })();
 
