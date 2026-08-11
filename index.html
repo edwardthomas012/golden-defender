@@ -633,13 +633,34 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
 .fnav a:hover{color:var(--gold);background:rgba(255,206,77,.08)}
 @media(max-width:640px){.fnav{gap:4px 2px}.fnav a{padding:6px 10px;font-size:10px}}
 
-.social{max-width:var(--maxw);margin:0 auto;padding:22px 26px 0;display:flex;gap:10px;
-  justify-content:center;flex-wrap:wrap}
-.social button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--ink-mute);
-  border:1px solid var(--line-2);background:var(--glass-2);transition:.15s;cursor:pointer;font:inherit}
-.social button svg{width:18px;height:18px;fill:currentColor;pointer-events:none}
-.social button:hover{color:var(--gold);border-color:var(--gold);background:rgba(255,206,77,.1)}
-.social button:active{transform:scale(.92)}
+.share-wrap{max-width:var(--maxw);margin:0 auto;padding:28px 26px 0;display:flex;flex-direction:column;
+  align-items:center;gap:16px}
+.share-label{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--gold-bri);display:inline-flex;align-items:center;gap:12px}
+.share-label::before,.share-label::after{content:"";width:26px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+
+.social{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.social button{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--gold-bri);
+  border:1px solid rgba(255,206,77,.5);background:linear-gradient(150deg,rgba(255,206,77,.18),rgba(255,206,77,.04));
+  transition:.2s;cursor:pointer;font:inherit;position:relative;
+  animation:sharePulse 2.8s ease-in-out infinite}
+.social button:nth-child(1){animation-delay:0s}
+.social button:nth-child(2){animation-delay:.35s}
+.social button:nth-child(3){animation-delay:.7s}
+.social button:nth-child(4){animation-delay:1.05s}
+.social button:nth-child(5){animation-delay:1.4s}
+.social button:nth-child(6){animation-delay:1.75s}
+.social button svg{width:19px;height:19px;fill:currentColor;pointer-events:none}
+.social button:hover{color:#04050d;background:var(--gold);border-color:var(--gold);
+  transform:translateY(-3px) scale(1.05);animation-play-state:paused;
+  box-shadow:0 10px 24px rgba(255,206,77,.4)}
+.social button:active{transform:translateY(-1px) scale(.96)}
+@keyframes sharePulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,206,77,.4)}
+  50%{box-shadow:0 0 0 8px rgba(255,206,77,0)}
+}
+@media(prefers-reduced-motion:reduce){.social button{animation:none}}
 
 .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);z-index:200;
   background:var(--glass-2);border:1px solid var(--gold);color:var(--gold-bri);
@@ -786,7 +807,9 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
     <a href="#schematics" data-nav>Schematics</a>
     <a href="#contact" data-nav>Contact</a>
   </nav>
-  <div class="social" id="shareLinks" aria-label="Share this page">
+  <div class="share-wrap">
+    <span class="share-label">Enjoyed the machine? Share it</span>
+    <div class="social" id="shareLinks" aria-label="Share this page">
     <button type="button" data-share="facebook" aria-label="Share on Facebook" title="Share on Facebook">
       <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12Z"/></svg>
     </button>
@@ -805,6 +828,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
     <button type="button" data-share="copy" aria-label="Copy link" title="Copy link">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
     </button>
+    </div>
   </div>
   <div class="toast" id="shareToast"></div>
   <div class="f">
@@ -1936,6 +1960,9 @@ const pad=n=>String(n).padStart(2,'0');
 
 /* ============ data helpers ============ */
 const GAL_ORDER=['beginnings','history','inspection','paint','bezel','controls','marquee','boards','monitor','coindoor','tribute','fullphotos','raiderroom'];
+// Which 8 galleries the Home page teaser shows (2 rows of 4). Full order/
+// numbering on the Galleries page still comes from GAL_ORDER above.
+const HOME_GAL_PREVIEW=['beginnings','history','inspection','paint','bezel','controls','fullphotos','raiderroom'];
 
 function radarBlips(){
   const pts=[[30,38],[68,30],[58,64],[40,72],[74,58],[24,58]];
@@ -2000,7 +2027,7 @@ function viewHome(){
       <p class="lead">Every part of the build, catalogued. Select a set to open its grid and full-screen viewer.</p></div>
       <a class="back" href="#galleries" data-nav>View all ${GAL_ORDER.length} →</a>
     </div>
-    <div class="cards">${GAL_ORDER.slice(0,6).map(galCard).join('')}</div>
+    <div class="cards">${HOME_GAL_PREVIEW.map(galCard).join('')}</div>
   </section>
 
   <hr class="rule"/>
