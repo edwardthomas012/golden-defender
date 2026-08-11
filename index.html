@@ -1410,6 +1410,49 @@ const app=$('#app');
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
 
+/* ============ NAV TAB SOUNDS ============
+   Short (<3s) cabinet SFX from the Classic Sounds page, played at random
+   whenever a nav tab (header, footer, or in-page "data-nav" link) is clicked. */
+(function navTabSounds(){
+  const CLIPS=[
+    'sounds/baiter-busted.mp3',
+    'sounds/enemy-fire.mp3',
+    'sounds/enemy-formation.mp3',
+    'sounds/extra-life.mp3',
+    'sounds/humanoid-landing.mp3',
+    'sounds/humanoid-capture.mp3',
+    'sounds/humanoid-fall.mp3',
+    'sounds/humanoid-save.mp3',
+    'sounds/lander-destroyed.mp3',
+    'sounds/mutant.mp3',
+    'sounds/player-fire.mp3',
+    'sounds/pod.mp3',
+    'sounds/swarmers.mp3',
+    'sounds/bomber-destroyed.mp3',
+    'sounds/coin-insert.mp3',
+    'sounds/humanoid-destroyed.mp3',
+    'sounds/lander-mutation.mp3',
+    'sounds/mutant-destroyed.mp3',
+    'sounds/thrust.mp3',
+    'sounds/smart-bomb.mp3',
+    'sounds/hyperspace.mp3',
+    'sounds/hyperspace-destroyed.mp3'
+  ];
+  let last=-1;
+  function playRandom(){
+    let i=Math.floor(Math.random()*CLIPS.length);
+    if(CLIPS.length>1 && i===last) i=(i+1)%CLIPS.length; // avoid same clip twice in a row
+    last=i;
+    const a=new Audio(CLIPS[i]);
+    a.volume=0.55;
+    a.play().catch(()=>{}); // ignore autoplay-policy rejections
+  }
+  document.addEventListener('click',e=>{
+    const link=e.target.closest('[data-nav]');
+    if(link) playRandom();
+  });
+})();
+
 /* ============ STARFIELD ============ */
 (function spacefield(){
   const c=$('#stars'),x=c.getContext('2d');
