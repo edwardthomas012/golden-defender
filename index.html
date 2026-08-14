@@ -1891,20 +1891,21 @@ const BH_FACTS=[
     x.fillStyle=eg;x.beginPath();x.arc(bx,by,R,0,6.2832);x.fill();
     // Goldie the Defender's own ship, hiding in the void -- invisible at
     // rest, fades in while the trivia tooltip is showing (see the hover/tap
-    // handlers below)
+    // handlers below). The sprite's canvas is mostly transparent padding,
+    // so we crop to just the ship art itself before sizing it.
     bh.shipAlphaCur=(bh.shipAlphaCur||0)+((bh.shipAlpha||0)-(bh.shipAlphaCur||0))*(reduce?1:0.09);
     if(bh.shipAlphaCur>0.01 && shipImg.complete && shipImg.naturalWidth>0){
       const a=bh.shipAlphaCur;
-      const iw=shipImg.naturalWidth, ih=shipImg.naturalHeight;
-      const scale=(R*1.2)/Math.max(iw,ih);
-      const dw=iw*scale, dh=ih*scale;
+      const sx=364,sy=182,sw=164,sh=110; // ship's opaque bounding box within the sprite
+      const scale=(R*1.6)/Math.max(sw,sh);
+      const dw=sw*scale, dh=sh*scale;
       x.save();
       x.translate(bx,by);
       x.globalCompositeOperation='lighter';
       x.globalAlpha=a;
       x.shadowColor='rgba(255,214,120,.9)';
       x.shadowBlur=R*0.5;
-      x.drawImage(shipImg,-dw/2,-dh/2,dw,dh);
+      x.drawImage(shipImg,sx,sy,sw,sh,-dw/2,-dh/2,dw,dh);
       x.restore();
       x.globalCompositeOperation='source-over';
     }
