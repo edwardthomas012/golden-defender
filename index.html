@@ -1799,6 +1799,10 @@ const BH_FACTS=[
   const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let w,h,dpr,t=0,stars=[],dust=[],shoots=[],comets=[],novas=[],bh=null;
   const rnd=(a,b)=>a+Math.random()*(b-a);
+  // the actual "Goldie" ship sprite, reused from SITE.enemies (no duplicate image data)
+  const shipImg=new Image();
+  const shipEnemy=(SITE.enemies||[]).find(e=>e.key==='ship');
+  if(shipEnemy&&shipEnemy.img) shipImg.src=shipEnemy.img;
 
   function size(){
     dpr=Math.min(window.devicePixelRatio||1,2);
@@ -1811,7 +1815,7 @@ const BH_FACTS=[
       r:(Math.random()*1.6+.8)*dpr,a:Math.random()*.5+.2,tw:Math.random()*6.28}));
     // black hole — distant, upper-right, with golden accretion disk
     const R=Math.max(20*dpr,Math.min(54*dpr,Math.min(w,h)*0.05));
-    bh={x:w*0.85,y:h*0.19,R,rot:0,flashes:[],flashCooldown:0,
+    bh={x:w*0.85,y:h*0.19,R,rot:0,flashes:[],flashCooldown:0,shipAlpha:0,shipAlphaCur:0,
       parts:Array.from({length:46},()=>({ang:Math.random()*6.28,rad:rnd(R*1.35,R*5.2),
         sp:rnd(.005,.015),vr:rnd(.07,.22)*dpr}))};
   }
@@ -1885,6 +1889,25 @@ const BH_FACTS=[
     const eg=x.createRadialGradient(bx,by,R*0.2,bx,by,R);
     eg.addColorStop(0,'#000');eg.addColorStop(.82,'#000');eg.addColorStop(1,'rgba(0,0,0,.2)');
     x.fillStyle=eg;x.beginPath();x.arc(bx,by,R,0,6.2832);x.fill();
+    // Goldie the Defender's own ship, hiding in the void -- invisible at
+    // rest, fades in while the trivia tooltip is showing (see the hover/tap
+    // handlers below)
+    bh.shipAlphaCur=(bh.shipAlphaCur||0)+((bh.shipAlpha||0)-(bh.shipAlphaCur||0))*(reduce?1:0.09);
+    if(bh.shipAlphaCur>0.01 && shipImg.complete && shipImg.naturalWidth>0){
+      const a=bh.shipAlphaCur;
+      const iw=shipImg.naturalWidth, ih=shipImg.naturalHeight;
+      const scale=(R*1.2)/Math.max(iw,ih);
+      const dw=iw*scale, dh=ih*scale;
+      x.save();
+      x.translate(bx,by);
+      x.globalCompositeOperation='lighter';
+      x.globalAlpha=a;
+      x.shadowColor='rgba(255,214,120,.9)';
+      x.shadowBlur=R*0.5;
+      x.drawImage(shipImg,-dw/2,-dh/2,dw,dh);
+      x.restore();
+      x.globalCompositeOperation='source-over';
+    }
   }
 
   function spawnShoot(){
@@ -2142,6 +2165,7 @@ const BH_FACTS=[
       if(hit&&!bhHover) revealFact(hit.bx,hit.by,hit.br);
       else if(!hit&&bhHover) bhTip.classList.remove('show');
       bhHover=!!hit;
+      if(bh) bh.shipAlpha=bhHover?1:0;
     },{passive:true});
 
     addEventListener('click',e=>{
@@ -2149,9 +2173,11 @@ const BH_FACTS=[
       clearTimeout(bhTapTimer);
       if(hit){
         revealFact(hit.bx,hit.by,hit.br);
-        bhTapTimer=setTimeout(()=>bhTip.classList.remove('show'),4200);
+        if(bh) bh.shipAlpha=1;
+        bhTapTimer=setTimeout(()=>{ bhTip.classList.remove('show'); if(bh) bh.shipAlpha=0; },4200);
       } else if(bhTip.classList.contains('show')){
         bhTip.classList.remove('show');
+        if(bh) bh.shipAlpha=0;
       }
     });
   }
