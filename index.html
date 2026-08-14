@@ -1803,6 +1803,25 @@ const BH_FACTS=[
   const shipImg=new Image();
   const shipEnemy=(SITE.enemies||[]).find(e=>e.key==='ship');
   if(shipEnemy&&shipEnemy.img) shipImg.src=shipEnemy.img;
+  // full cast for the void reveal -- ship, every enemy type, and the Humanoids --
+  // each with its real opaque-art crop rect (their sprite canvases are mostly
+  // transparent padding) so every one sizes correctly, not just the ship.
+  const BH_SPRITE_CROPS={
+    ship:{sx:364,sy:182,sw:164,sh:110},
+    lander:{sx:58,sy:131,sw:678,sh:328},
+    mutant:{sx:15,sy:133,sw:682,sh:318},
+    baiter:{sx:230,sy:13,sw:615,sh:465},
+    bomber:{sx:208,sy:151,sw:508,sh:297},
+    pod:{sx:275,sy:187,sw:334,sh:311},
+    swarmer:{sx:0,sy:0,sw:881,sh:632},
+    humanoids:{sx:0,sy:7,sw:900,sh:215}
+  };
+  const BH_SPRITES=Object.keys(BH_SPRITE_CROPS).map(key=>{
+    const en=(SITE.enemies||[]).find(e=>e.key===key);
+    const img=new Image();
+    if(en&&en.img) img.src=en.img;
+    return {key,img,...BH_SPRITE_CROPS[key]};
+  }).filter(s=>s.img.src);
 
   function size(){
     dpr=Math.min(window.devicePixelRatio||1,2);
@@ -1889,15 +1908,15 @@ const BH_FACTS=[
     const eg=x.createRadialGradient(bx,by,R*0.2,bx,by,R);
     eg.addColorStop(0,'#000');eg.addColorStop(.82,'#000');eg.addColorStop(1,'rgba(0,0,0,.2)');
     x.fillStyle=eg;x.beginPath();x.arc(bx,by,R,0,6.2832);x.fill();
-    // Goldie the Defender's own ship, hiding in the void -- invisible at
-    // rest, fades in while the trivia tooltip is showing (see the hover/tap
-    // handlers below). The sprite's canvas is mostly transparent padding,
-    // so we crop to just the ship art itself before sizing it.
+    // The current cast member hiding in the void -- invisible at rest, fades
+    // in while the trivia tooltip is showing (see the hover/tap handlers
+    // below), and a new random one is picked each time it's revealed.
     bh.shipAlphaCur=(bh.shipAlphaCur||0)+((bh.shipAlpha||0)-(bh.shipAlphaCur||0))*(reduce?1:0.09);
-    if(bh.shipAlphaCur>0.01 && shipImg.complete && shipImg.naturalWidth>0){
+    const sp=bh.sprite||BH_SPRITES.find(s=>s.key==='ship');
+    if(bh.shipAlphaCur>0.01 && sp && sp.img.complete && sp.img.naturalWidth>0){
       const a=bh.shipAlphaCur;
-      const sx=364,sy=182,sw=164,sh=110; // ship's opaque bounding box within the sprite
-      const scale=(R*1.6)/Math.max(sw,sh);
+      const {sx,sy,sw,sh}=sp;
+      const scale=(R*1.35)/Math.max(sw,sh);
       const dw=sw*scale, dh=sh*scale;
       x.save();
       x.translate(bx,by);
@@ -1905,7 +1924,7 @@ const BH_FACTS=[
       x.globalAlpha=a;
       x.shadowColor='rgba(255,214,120,.9)';
       x.shadowBlur=R*0.5;
-      x.drawImage(shipImg,sx,sy,sw,sh,-dw/2,-dh/2,dw,dh);
+      x.drawImage(sp.img,sx,sy,sw,sh,-dw/2,-dh/2,dw,dh);
       x.restore();
       x.globalCompositeOperation='source-over';
     }
@@ -2152,6 +2171,16 @@ const BH_FACTS=[
       bhTip.style.top=top+'px';
     }
 
+    let lastSpriteIdx=-1;
+
+    function pickSprite(){
+      if(!BH_SPRITES.length) return;
+      let i=Math.floor(Math.random()*BH_SPRITES.length);
+      if(BH_SPRITES.length>1 && i===lastSpriteIdx) i=(i+1)%BH_SPRITES.length;
+      lastSpriteIdx=i;
+      bh.sprite=BH_SPRITES[i];
+    }
+
     function revealFact(bx,by,br){
       let i=Math.floor(Math.random()*BH_FACTS.length);
       if(BH_FACTS.length>1 && i===lastFact) i=(i+1)%BH_FACTS.length;
@@ -2159,6 +2188,7 @@ const BH_FACTS=[
       bhTip.textContent=BH_FACTS[i];
       positionTip(bx,by,br);
       bhTip.classList.add('show');
+      pickSprite();
     }
 
     addEventListener('mousemove',e=>{
