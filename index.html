@@ -1803,18 +1803,21 @@ const BH_FACTS=[
   const shipImg=new Image();
   const shipEnemy=(SITE.enemies||[]).find(e=>e.key==='ship');
   if(shipEnemy&&shipEnemy.img) shipImg.src=shipEnemy.img;
-  // full cast for the void reveal -- ship, every enemy type, and the Humanoids --
-  // each with its real opaque-art crop rect (their sprite canvases are mostly
-  // transparent padding) so every one sizes correctly, not just the ship.
+  // full cast for the void reveal -- ship, every enemy type (minus the
+  // Swarmer, whose sprite is a scattered multi-figure group shot that
+  // reads as noise at this size), and a single Humanoid (its sprite is a
+  // strip of three figures side by side, so we crop to just one). Each
+  // crop rect is centered on the sprite's actual visual mass rather than
+  // its raw transparent bounding box, since several are drawn at an
+  // angle and were sitting off-center in their own canvas.
   const BH_SPRITE_CROPS={
-    ship:{sx:364,sy:182,sw:164,sh:110},
-    lander:{sx:58,sy:131,sw:678,sh:328},
-    mutant:{sx:15,sy:133,sw:682,sh:318},
-    baiter:{sx:230,sy:13,sw:615,sh:465},
-    bomber:{sx:208,sy:151,sw:508,sh:297},
-    pod:{sx:275,sy:187,sw:334,sh:311},
-    swarmer:{sx:0,sy:0,sw:881,sh:632},
-    humanoids:{sx:0,sy:7,sw:900,sh:215}
+    ship:{sx:323,sy:144,sw:204,sh:147},
+    lander:{sx:58,sy:131,sw:769,sh:373},
+    mutant:{sx:15,sy:133,sw:816,sh:362},
+    baiter:{sx:65,sy:13,sw:779,sh:586},
+    bomber:{sx:190,sy:151,sw:525,sh:353},
+    pod:{sx:275,sy:187,sw:343,sh:426},
+    humanoids:{sx:285,sy:5,sw:321,sh:222}
   };
   const BH_SPRITES=Object.keys(BH_SPRITE_CROPS).map(key=>{
     const en=(SITE.enemies||[]).find(e=>e.key===key);
