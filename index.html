@@ -1805,19 +1805,18 @@ const BH_FACTS=[
   if(shipEnemy&&shipEnemy.img) shipImg.src=shipEnemy.img;
   // full cast for the void reveal -- ship, every enemy type (minus the
   // Swarmer, whose sprite is a scattered multi-figure group shot that
-  // reads as noise at this size), and a single Humanoid (its sprite is a
-  // strip of three figures side by side, so we crop to just one). Each
-  // crop rect is centered on the sprite's actual visual mass rather than
-  // its raw transparent bounding box, since several are drawn at an
-  // angle and were sitting off-center in their own canvas.
+  // reads as noise at this size), and a single Humanoid figure. Every one
+  // of these source sprites has a big pixel-art "NAME / SCORE" label baked
+  // in below the little glyph, so each crop rect below is trimmed tightly
+  // to just the glyph itself -- no text, no stray background dots.
   const BH_SPRITE_CROPS={
-    ship:{sx:323,sy:144,sw:204,sh:147},
-    lander:{sx:58,sy:131,sw:769,sh:373},
-    mutant:{sx:15,sy:133,sw:816,sh:362},
-    baiter:{sx:65,sy:13,sw:779,sh:586},
-    bomber:{sx:190,sy:151,sw:525,sh:353},
-    pod:{sx:275,sy:187,sw:343,sh:426},
-    humanoids:{sx:285,sy:5,sw:321,sh:222}
+    ship:{sx:338,sy:173,sw:215,sh:73},
+    lander:{sx:342,sy:119,sw:132,sh:96},
+    mutant:{sx:331,sy:121,sw:128,sh:95},
+    baiter:{sx:347,sy:145,sw:152,sh:48},
+    bomber:{sx:392,sy:141,sw:86,sh:83},
+    pod:{sx:375,sy:176,sw:104,sh:87},
+    humanoids:{sx:39,sy:100,sw:32,sh:58}
   };
   const BH_SPRITES=Object.keys(BH_SPRITE_CROPS).map(key=>{
     const en=(SITE.enemies||[]).find(e=>e.key===key);
