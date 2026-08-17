@@ -721,6 +721,8 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .f .sig::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
 @media (prefers-reduced-motion: no-preference){.f .sig::before{animation:pulse2 1.6s ease-in-out infinite}}
 @keyframes pulse2{50%{opacity:.3}}
+.f .visit-ctr{display:flex;align-items:center;gap:8px;margin-top:8px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--ink-mute);text-transform:uppercase}
+.f .visit-ctr .vc-num{color:var(--gold);font-weight:700;font-size:13px;letter-spacing:1px;text-shadow:0 0 8px rgba(212,175,55,.35);min-width:34px;display:inline-block}
 
 /* ---------------- BIRTHDAY COUNTDOWN ---------------- */
 .countdown-wrap{margin:22px 0 8px;padding:22px 26px;border:1px solid var(--line);border-radius:14px;
@@ -844,6 +846,9 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   <div class="f">
     <div class="left">© <span id="yr"></span> Golden Defender · No. 50,001<br>A tribute to the 50,000th machine · Williams Electronics, 1981
       <div class="sig">SYSTEMS NOMINAL · INSERT COIN</div>
+      <div class="visit-ctr">Visitor No.
+        <div class="counterapi vc-num" ns="golden-defender.com" key="site-visits" action="view" noCss="true" noIcon="true" noLink="true" style="min-height:16px"></div>
+      </div>
     </div>
     <div class="et-sig">
     <svg class="et-emblem" viewBox="0 0 220 220" role="img" aria-label="Enhanced by ET — Edward Thomas">
@@ -3279,5 +3284,7 @@ render();
 })();
 
 </script>
+<!-- Footer visitor counter — free, no-signup service (counterapi.com) -->
+<script src="https://counterapi.com/c.js" async></script>
 </body>
 </html>
