@@ -624,13 +624,26 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
 .pdfx:hover{background:rgba(255,255,255,.15)}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 /* ET alien emblem + sprinkle */
-.et-sig{display:flex;justify-content:center;flex-shrink:0}
+.et-sig{display:flex;flex-direction:column;align-items:center;gap:10px;flex-shrink:0}
 .f .sig{margin-top:8px}
 .fnav{max-width:var(--maxw);margin:0 auto;padding:26px 26px 0;display:flex;flex-wrap:wrap;
   justify-content:center;gap:6px 4px;border-bottom:1px solid var(--line);padding-bottom:22px}
 .fnav a{font-family:'Space Mono';font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--ink-mute);padding:7px 14px;border-radius:20px;transition:.2s}
-.fnav a:hover{color:var(--gold);background:rgba(255,206,77,.08)}
+  color:var(--ink-mute);padding:7px 14px;border-radius:20px;transition:.2s;
+  animation:navPulse 4.5s ease-in-out infinite}
+.fnav a:nth-child(1){animation-delay:0s}
+.fnav a:nth-child(2){animation-delay:.45s}
+.fnav a:nth-child(3){animation-delay:.9s}
+.fnav a:nth-child(4){animation-delay:1.35s}
+.fnav a:nth-child(5){animation-delay:1.8s}
+.fnav a:nth-child(6){animation-delay:2.25s}
+.fnav a:nth-child(7){animation-delay:2.7s}
+.fnav a:nth-child(8){animation-delay:3.15s}
+.fnav a:nth-child(9){animation-delay:3.6s}
+.fnav a:nth-child(10){animation-delay:4.05s}
+.fnav a:hover{color:var(--gold);background:rgba(255,206,77,.08);animation-play-state:paused}
+@keyframes navPulse{0%,100%{color:var(--ink-mute);text-shadow:none}50%{color:var(--gold-bri);text-shadow:0 0 10px rgba(255,206,77,.35)}}
+@media(prefers-reduced-motion:reduce){.fnav a{animation:none}}
 @media(max-width:640px){.fnav{gap:4px 2px}.fnav a{padding:6px 10px;font-size:10px}}
 
 .share-wrap{max-width:var(--maxw);margin:0 auto;padding:28px 26px 0;display:flex;flex-direction:column;
@@ -721,7 +734,8 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .f .sig::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
 @media (prefers-reduced-motion: no-preference){.f .sig::before{animation:pulse2 1.6s ease-in-out infinite}}
 @keyframes pulse2{50%{opacity:.3}}
-.f .visit-ctr{display:flex;align-items:center;gap:8px;margin-top:8px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--ink-mute);text-transform:uppercase}
+.f .left{text-align:center}
+.f .visit-ctr{display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--ink-mute);text-transform:uppercase}
 .f .visit-ctr .vc-num{color:var(--gold);font-weight:700;font-size:13px;letter-spacing:1px;text-shadow:0 0 8px rgba(212,175,55,.35);min-width:34px;display:inline-block}
 
 /* ---------------- BIRTHDAY COUNTDOWN ---------------- */
@@ -846,9 +860,6 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   <div class="f">
     <div class="left">© <span id="yr"></span> Golden Defender · No. 50,001<br>A tribute to the 50,000th machine · Williams Electronics, 1981
       <div class="sig">SYSTEMS NOMINAL · INSERT COIN</div>
-      <div class="visit-ctr">Visitor No.
-        <div class="counterapi vc-num" ns="golden-defender.com" key="site-visits" action="view" noCss="true" noIcon="true" noLink="true" style="min-height:16px"></div>
-      </div>
     </div>
     <div class="et-sig">
     <svg class="et-emblem" viewBox="0 0 220 220" role="img" aria-label="Enhanced by ET — Edward Thomas">
@@ -870,6 +881,9 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
       <g class="et-face" transform="translate(110 108) scale(0.62) translate(-60 -74)"><use href="#sym-alien"/></g>
       <text class="et-arc-text" text-anchor="middle" font-family="'Space Mono',monospace" font-size="14" letter-spacing="4" fill="#ffce4d"><textPath href="#et-arc-top" startOffset="50%">ENHANCED BY ET</textPath></text>
     </svg>
+    <div class="visit-ctr">Visitor No.
+      <div class="counterapi vc-num" ns="golden-defender.com" key="site-visits" action="view" noCss="true" noIcon="true" noLink="true" style="min-height:16px"></div>
+    </div>
     </div>
   </div>
 </footer>
