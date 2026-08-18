@@ -741,9 +741,8 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 @media (prefers-reduced-motion: no-preference){.f .sig::before{animation:pulse2 1.6s ease-in-out infinite}}
 @keyframes pulse2{50%{opacity:.3}}
 .f .left{text-align:center}
-.f .visit-ctr{display:flex;align-items:center;justify-content:center;gap:8px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--ink-mute);text-transform:uppercase}
-.f .visit-ctr .vc-num{color:var(--gold);font-weight:700;font-size:13px;letter-spacing:1px;text-shadow:0 0 8px rgba(212,175,55,.35);min-width:34px;display:inline-block}
-
+.share-wrap .visit-ctr{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--ink-mute);text-transform:uppercase}
+.share-wrap .visit-ctr .vc-num{color:var(--gold);font-weight:700;font-size:13px;letter-spacing:1px;text-shadow:0 0 8px rgba(212,175,55,.35);min-width:34px;display:inline-block}
 /* ---------------- BIRTHDAY COUNTDOWN ---------------- */
 .countdown-wrap{margin:22px 0 8px;padding:22px 26px;border:1px solid var(--line);border-radius:14px;
   background:rgba(7,10,24,.5);backdrop-filter:blur(8px)}
@@ -861,6 +860,9 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
     </button>
     </div>
+    <div class="visit-ctr">Visitor No.
+      <div class="counterapi vc-num" ns="golden-defender.com" key="site-visits" action="view" noCss="true" noIcon="true" noLink="true" style="min-height:16px"></div>
+    </div>
   </div>
   <div class="toast" id="shareToast"></div>
   <div class="f">
@@ -887,9 +889,6 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
       <g class="et-face" transform="translate(110 108) scale(0.62) translate(-60 -74)"><use href="#sym-alien"/></g>
       <text class="et-arc-text" text-anchor="middle" font-family="'Space Mono',monospace" font-size="14" letter-spacing="4" fill="#ffce4d"><textPath href="#et-arc-top" startOffset="50%">ENHANCED BY ET</textPath></text>
     </svg>
-    <div class="visit-ctr">Visitor No.
-      <div class="counterapi vc-num" ns="golden-defender.com" key="site-visits" action="view" noCss="true" noIcon="true" noLink="true" style="min-height:16px"></div>
-    </div>
     </div>
   </div>
 </footer>
