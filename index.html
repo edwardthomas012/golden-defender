@@ -728,7 +728,13 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
 
 /* ---------------- FOOTER ---------------- */
 footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:30px;position:relative;z-index:5;backdrop-filter:blur(8px)}
-.f{max-width:var(--maxw);margin:0 auto;padding:44px 26px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.f{max-width:var(--maxw);margin:0 auto;padding:44px 26px;position:relative}
+.f .left{text-align:center;width:100%}
+.f .et-sig{position:absolute;right:26px;top:50%;transform:translateY(-50%)}
+@media(max-width:760px){
+  .f{display:flex;flex-direction:column;align-items:center;gap:24px}
+  .f .et-sig{position:static;transform:none}
+}
 .f .left{font-family:'Space Mono';font-size:12px;letter-spacing:1px;color:var(--ink-mute);line-height:2}
 .f .sig{font-family:'Space Mono';font-size:12px;letter-spacing:2px;color:var(--gold);display:inline-flex;align-items:center;gap:9px}
 .f .sig::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
