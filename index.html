@@ -1987,11 +1987,16 @@ const BH_FACTS=[
   function spawnComet(){
     const fromLeft=Math.random()<.5, sp=rnd(2.2,3.0)*dpr;
     const ang=rnd(0.10,0.30)*(fromLeft?1:-1);
+    // real comet comae range from warm gold-white (dusty, like Hale-Bopp) to a faint
+    // green-cyan cast (cyanogen/C2 emission, like Halley or NEOWISE) — vary it per comet
+    const huePick=Math.random();
+    const coma = huePick<.65 ? {r:255,g:246,b:224} : huePick<.88 ? {r:236,g:250,b:236} : {r:224,g:245,b:250};
     comets.push({x:fromLeft?-90*dpr:w+90*dpr, y:rnd(h*.08,h*.5),
       vx:(fromLeft?1:-1)*sp*Math.cos(ang), vy:sp*Math.sin(ang)+0.32*dpr,
       len:rnd(160,250)*dpr, wd:rnd(3.4,5.4)*dpr, bend:rnd(-1,1)*9*dpr, life:0,
-      seed:rnd(0,100),
-      fibers:Array.from({length:6},()=>({off:rnd(-1,1),len:rnd(.55,.95),op:rnd(.10,.24),seed:rnd(0,100)}))});
+      seed:rnd(0,100), coma, spikeRot:rnd(0,6.2832), twinklePhase:rnd(0,6.2832),
+      fibers:Array.from({length:6},()=>({off:rnd(-1,1),len:rnd(.55,.95),op:rnd(.10,.24),seed:rnd(0,100)})),
+      grains:Array.from({length:14},()=>({t:rnd(.05,.9),off:rnd(-1,1),sz:rnd(.5,1.6),op:rnd(.15,.5),tw:rnd(0,6.2832)}))});
   }
   // smooth tapered tail (teardrop) with a gentle curve, filled by a gradient
   function tail(Hx,Hy,Tx,Ty,pxp,pyp,wHalf,cx,cy,stops){
@@ -2044,6 +2049,35 @@ const BH_FACTS=[
       x.stroke();
     }
   }
+  // scattered dust-mote particles drifting along the tail — the grainy, particulate
+  // texture visible in real long-exposure comet photos, rather than smooth gradients only
+  function drawGrains(cm,Hx,Hy,ux,uy,pxp,pyp,L,w0){
+    for(const g of cm.grains){
+      const pt=g.t, px=Hx-ux*L*pt, py=Hy-uy*L*pt;
+      const curve=cm.bend*Math.sin(pt*Math.PI*0.5);
+      const wob=Math.sin((pt*11+g.tw)*1.7)*w0*0.5;
+      const gx=px+pxp*(curve+g.off*w0*1.8+wob), gy=py+pyp*(curve+g.off*w0*1.8+wob);
+      const tw=0.55+0.45*Math.sin(t*0.16+g.tw);
+      const r=g.sz*dpr*(1-pt*0.4);
+      const gg=x.createRadialGradient(gx,gy,0,gx,gy,r*2.2);
+      gg.addColorStop(0,`rgba(255,250,235,${g.op*tw})`);gg.addColorStop(1,'rgba(255,250,235,0)');
+      x.fillStyle=gg;x.beginPath();x.arc(gx,gy,r*2.2,0,6.2832);x.fill();
+    }
+  }
+  // faint 4-point diffraction spikes off the nucleus — the star-like flare seen when
+  // a bright point is photographed through a telescope/camera, a strong "real photo" cue
+  function drawSpikes(cm,Hx,Hy,w0){
+    const len=w0*7.5, rot=cm.spikeRot;
+    x.save();x.translate(Hx,Hy);x.rotate(rot);
+    for(let k=0;k<2;k++){
+      const g=x.createLinearGradient(-len,0,len,0);
+      g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(255,255,255,0)');
+      x.strokeStyle=g;x.lineWidth=(k===0?1.1:0.7)*dpr;
+      x.beginPath();x.moveTo(-len,0);x.lineTo(len,0);x.stroke();
+      x.rotate(Math.PI/2);
+    }
+    x.restore();
+  }
   function drawComets(){
     for(let i=comets.length-1;i>=0;i--){
       const cm=comets[i];cm.life++;cm.x+=cm.vx;cm.y+=cm.vy;
@@ -2061,20 +2095,29 @@ const BH_FACTS=[
         [[0,'rgba(255,250,235,.5)'],[.3,'rgba(255,241,214,.32)'],[.65,'rgba(232,224,232,.15)'],[1,'rgba(210,220,255,0)']]);
       // faint fibrous streaks for texture, like the striations in real long-exposure photos
       drawFibers(cm,Hx,Hy,ux,uy,pxp,pyp,L,w0);
+      // scattered dust motes drifting in the tail — grainy particulate texture
+      drawGrains(cm,Hx,Hy,ux,uy,pxp,pyp,L,w0);
       // bright inner streak (hot core), warm white near the head
       tail(Hx,Hy,Hx-ux*L*0.68,Hy-uy*L*0.68,pxp,pyp,w0*0.8,cax+pxp*cm.bend*.6,cay+pyp*cm.bend*.6,
         [[0,'rgba(255,255,252,.92)'],[.45,'rgba(255,244,224,.48)'],[1,'rgba(255,235,210,0)']]);
-      // glowing head (coma) — soft white-gold, slightly elongated toward the tail
+      // glowing head (coma) — hue varies per comet (gold-white to faint cyanogen green),
+      // slightly elongated toward the tail, with a gentle brightness twinkle
+      const {r:cr,g:cg,b:cb}=cm.coma;
+      const twinkle=0.88+0.12*Math.sin(t*0.09+cm.twinklePhase);
       x.save();x.translate(Hx,Hy);x.rotate(Math.atan2(uy,ux));x.scale(1.3,0.85);
       const hg=x.createRadialGradient(0,0,0,0,0,w0*3.0);
-      hg.addColorStop(0,'rgba(255,255,255,1)');hg.addColorStop(.4,'rgba(255,246,224,.78)');hg.addColorStop(1,'rgba(255,230,190,0)');
+      hg.addColorStop(0,`rgba(255,255,255,${twinkle})`);hg.addColorStop(.4,`rgba(${cr},${cg},${cb},${.78*twinkle})`);hg.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
       x.fillStyle=hg;x.beginPath();x.arc(0,0,w0*3.0,0,6.2832);x.fill();
       x.restore();
+      // faint diffraction spikes off the nucleus — a telescope/long-exposure photo cue
+      x.globalAlpha=twinkle;
+      drawSpikes(cm,Hx,Hy,w0);
+      x.globalAlpha=1;
       // sharp bright pinpoint at the very head — the crisp nucleus glint seen in real photos
-      const coreR=w0*0.85;
-      const cg=x.createRadialGradient(Hx,Hy,0,Hx,Hy,coreR);
-      cg.addColorStop(0,'rgba(255,255,255,1)');cg.addColorStop(1,'rgba(255,255,255,0)');
-      x.fillStyle=cg;x.beginPath();x.arc(Hx,Hy,coreR,0,6.2832);x.fill();
+      const coreR=w0*0.85*twinkle;
+      const cgr=x.createRadialGradient(Hx,Hy,0,Hx,Hy,coreR);
+      cgr.addColorStop(0,'rgba(255,255,255,1)');cgr.addColorStop(1,'rgba(255,255,255,0)');
+      x.fillStyle=cgr;x.beginPath();x.arc(Hx,Hy,coreR,0,6.2832);x.fill();
       x.globalCompositeOperation='source-over';
       if(cm.x<-180*dpr||cm.x>w+180*dpr||cm.y>h+180*dpr)comets.splice(i,1);
     }
