@@ -710,6 +710,14 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
 .etmark-fx.swarmer img{filter:brightness(1.4) saturate(1.5) drop-shadow(0 0 7px rgba(255,90,90,.55))}
 @keyframes etbob{0%,100%{transform:translate(0,0) rotate(var(--rot,0deg))}50%{transform:translate(var(--sway,6px),-24px) rotate(var(--rot,0deg))}}
 @media(prefers-reduced-motion:reduce){.et-emblem .et-stars circle,.et-emblem .et-face,.etmark-fx{animation:none!important}}
+#swarmer-chaser{position:fixed;left:0;top:0;width:28px;height:28px;z-index:60;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform}
+#swarmer-chaser.sc-visible{opacity:.88}
+#swarmer-chaser img{width:100%;height:100%;display:block;filter:brightness(1.3) saturate(1.4) drop-shadow(0 0 8px rgba(255,70,70,.65))}
+.sc-boom{position:fixed;left:0;top:0;width:0;height:0;z-index:60;pointer-events:none}
+.sc-boom i{position:absolute;left:0;top:0;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px 2px rgba(255,90,60,.9);animation:sc-boom-part .65s ease-out forwards}
+@keyframes sc-boom-part{to{transform:translate(var(--dx),var(--dy)) scale(.15);opacity:0}}
+@media(prefers-reduced-motion:reduce){#swarmer-chaser,.sc-boom{display:none!important}}
+@media(max-width:899px),(pointer:coarse){#swarmer-chaser,.sc-boom{display:none!important}}
 .escan svg{width:56%;height:56%;color:var(--gold);filter:drop-shadow(0 0 16px rgba(255,206,77,.5));position:relative;z-index:1}
 .escan svg [fill]{fill:none}
 .escan svg path,.escan svg circle,.escan svg rect,.escan svg line,.escan svg polygon{
@@ -3326,6 +3334,97 @@ render();
   }
   sprinkle();
   window.addEventListener('hashchange', sprinkle);   // re-scatter as you browse
+})();
+
+/* ---- background swarmer that slowly chases the cursor (non-interactive) ---- */
+(function(){
+  if (window.innerWidth < 900) return;
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var el = document.createElement('div');
+  el.id = 'swarmer-chaser';
+  el.innerHTML = '<img src="images/sprites/swarmer.png" alt="">';
+  document.body.appendChild(el);
+
+  var mx = null, my = null;   // last known cursor position
+  var x = window.innerWidth * (0.2 + Math.random()*0.6);
+  var y = window.innerHeight * (0.2 + Math.random()*0.6);
+  var SPEED = 95;             // px/sec — deliberately slow, a lazy pursuit
+  var CATCH_R = 20;           // px — how close counts as "caught"
+  var exploding = false;
+  var lastT = null;
+  var wobblePhase = Math.random() * Math.PI * 2;
+
+  function place(px, py){
+    el.style.transform = 'translate3d('+(px-14)+'px,'+(py-14)+'px,0)';
+  }
+  place(x, y);
+
+  window.addEventListener('mousemove', function(e){
+    mx = e.clientX; my = e.clientY;
+    el.classList.add('sc-visible');
+  }, {passive:true});
+
+  function spawnBoom(px, py){
+    var boom = document.createElement('div');
+    boom.className = 'sc-boom';
+    boom.style.transform = 'translate3d('+px+'px,'+py+'px,0)';
+    var n = 10;
+    for (var i=0;i<n;i++){
+      var span = document.createElement('i');
+      var ang = (Math.PI*2*i/n) + Math.random()*0.4;
+      var dist = 24 + Math.random()*22;
+      span.style.setProperty('--dx', (Math.cos(ang)*dist).toFixed(1)+'px');
+      span.style.setProperty('--dy', (Math.sin(ang)*dist).toFixed(1)+'px');
+      span.style.animationDelay = (Math.random()*0.05).toFixed(2)+'s';
+      boom.appendChild(span);
+    }
+    document.body.appendChild(boom);
+    setTimeout(function(){ boom.remove(); }, 800);
+  }
+
+  function respawn(){
+    // reappear somewhere well clear of the current cursor position
+    var tries = 0, nx, ny;
+    do {
+      nx = Math.random() * window.innerWidth;
+      ny = Math.random() * window.innerHeight;
+      tries++;
+    } while (mx != null && Math.hypot(nx-mx, ny-my) < 260 && tries < 12);
+    x = nx; y = ny;
+    place(x, y);
+    exploding = false;
+    el.classList.add('sc-visible');
+  }
+
+  function frame(t){
+    requestAnimationFrame(frame);
+    if (document.hidden){ lastT = t; return; }
+    if (lastT == null){ lastT = t; return; }
+    var dt = Math.min(0.05, (t - lastT) / 1000);
+    lastT = t;
+    if (exploding || mx == null) return;
+
+    var dx = mx - x, dy = my - y;
+    var dist = Math.hypot(dx, dy);
+
+    if (dist < CATCH_R){
+      exploding = true;
+      el.classList.remove('sc-visible');
+      spawnBoom(x, y);
+      setTimeout(respawn, 900 + Math.random()*400);
+      return;
+    }
+
+    wobblePhase += dt * 2.2;
+    var ux = dx/dist, uy = dy/dist;
+    var wob = Math.sin(wobblePhase) * 14;   // gentle sideways drift, not a straight beeline
+    x += ux*SPEED*dt + (-uy)*wob*dt;
+    y += uy*SPEED*dt + ( ux)*wob*dt;
+    place(x, y);
+  }
+  requestAnimationFrame(frame);
 })();
 
 </script>
