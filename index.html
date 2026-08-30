@@ -3391,7 +3391,7 @@ render();
 
   window.addEventListener('mousemove', function(e){
     mx = e.clientX; my = e.clientY;
-    el.classList.add('sc-visible');
+    if (!exploding) el.classList.add('sc-visible');
   }, {passive:true});
 
   function spawnBoom(px, py){
