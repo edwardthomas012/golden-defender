@@ -712,7 +712,9 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
 @media(prefers-reduced-motion:reduce){.et-emblem .et-stars circle,.et-emblem .et-face,.etmark-fx{animation:none!important}}
 #swarmer-chaser{position:fixed;left:0;top:0;width:18px;height:18px;z-index:60;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform}
 #swarmer-chaser.sc-visible{opacity:.6}
-#swarmer-chaser img{width:100%;height:100%;display:block;filter:brightness(.95) saturate(1.05) drop-shadow(0 0 4px rgba(255,70,70,.35))}
+#swarmer-chaser img{width:100%;height:100%;display:block;object-fit:contain}
+#swarmer-chaser.sc-red img{filter:brightness(.95) saturate(1.05) drop-shadow(0 0 4px rgba(255,70,70,.35))}
+#swarmer-chaser.sc-green img{filter:brightness(.95) saturate(1.05) drop-shadow(0 0 4px rgba(120,255,140,.35))}
 .sc-boom{position:fixed;left:0;top:0;width:0;height:0;z-index:60;pointer-events:none}
 .sc-boom i{position:absolute;left:0;top:0;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px 3px rgba(255,90,60,.9);animation:sc-boom-part .75s ease-out forwards}
 @keyframes sc-boom-part{to{transform:translate(var(--dx),var(--dy)) scale(.15);opacity:0}}
@@ -3336,21 +3338,47 @@ render();
   window.addEventListener('hashchange', sprinkle);   // re-scatter as you browse
 })();
 
-/* ---- background swarmer that slowly chases the cursor (non-interactive) ---- */
+/* ---- background enemy that slowly chases the cursor (non-interactive) ---- */
 (function(){
   if (window.innerWidth < 900) return;
   if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
+  var ENEMY_TYPES = [
+    {img:'images/sprites/swarmer.png', tint:'red'},
+    {img:'images/sprites/baiter.png',  tint:'green'},
+    {img:'images/sprites/lander.png',  tint:'green'},
+    {img:'images/sprites/mutant.png',  tint:'green'},
+    {img:'images/sprites/pod.png',     tint:'green'},
+    {img:'images/sprites/bomber.png',  tint:'green'}
+  ];
+  var lastType = null;
+  function pickEnemy(){
+    var t;
+    do { t = ENEMY_TYPES[Math.floor(Math.random()*ENEMY_TYPES.length)]; }
+    while (ENEMY_TYPES.length > 1 && t === lastType);
+    lastType = t;
+    return t;
+  }
+
   var el = document.createElement('div');
   el.id = 'swarmer-chaser';
-  el.innerHTML = '<img src="images/sprites/swarmer.png" alt="">';
+  var img = document.createElement('img');
+  img.alt = '';
+  el.appendChild(img);
   document.body.appendChild(el);
+
+  function setEnemy(type){
+    img.src = type.img;
+    el.classList.remove('sc-red','sc-green');
+    el.classList.add('sc-'+type.tint);
+  }
+  setEnemy(pickEnemy());
 
   var mx = null, my = null;   // last known cursor position
   var x = window.innerWidth * (0.2 + Math.random()*0.6);
   var y = window.innerHeight * (0.2 + Math.random()*0.6);
-  var SPEED = 95;             // px/sec — deliberately slow, a lazy pursuit
+  var SPEED = 55;             // px/sec — deliberately slow, a lazy pursuit
   var CATCH_R = 15;           // px — how close counts as "caught"
   var exploding = false;
   var lastT = null;
@@ -3384,8 +3412,18 @@ render();
     setTimeout(function(){ boom.remove(); }, 800);
   }
 
+  function hideInstantly(){
+    // kill the fade-out transition for this one change so the sprite vanishes
+    // the instant it's caught, instead of lingering through the usual fade
+    el.style.transitionDuration = '0s';
+    el.classList.remove('sc-visible');
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ el.style.transitionDuration = ''; });
+    });
+  }
+
   function respawn(){
-    // reappear somewhere well clear of the current cursor position
+    // reappear somewhere well clear of the current cursor position, as a new random enemy
     var tries = 0, nx, ny;
     do {
       nx = Math.random() * window.innerWidth;
@@ -3394,6 +3432,7 @@ render();
     } while (mx != null && Math.hypot(nx-mx, ny-my) < 260 && tries < 12);
     x = nx; y = ny;
     place(x, y);
+    setEnemy(pickEnemy());
     exploding = false;
     el.classList.add('sc-visible');
   }
@@ -3411,7 +3450,7 @@ render();
 
     if (dist < CATCH_R){
       exploding = true;
-      el.classList.remove('sc-visible');
+      hideInstantly();
       spawnBoom(x, y);
       setTimeout(respawn, 900 + Math.random()*400);
       return;
