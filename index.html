@@ -262,9 +262,10 @@ section.block.tight{padding:60px 0}
 .back{font-family:'Space Mono';font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-dim);
   border:1px solid var(--line);background:var(--glass);padding:10px 15px;border-radius:10px;display:inline-flex;gap:8px}
 .back:hover{color:var(--gold);border-color:var(--gold)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:18px}
 .grid .tile{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:4/3;
-  border:1px solid var(--line);background:var(--glass);cursor:pointer;display:block;width:100%;padding:0}
+  border:1px solid var(--line);background:var(--glass);cursor:pointer;display:block;padding:0;
+  flex:1 1 230px;max-width:320px}
 .grid .tile img{width:100%;height:100%;object-fit:cover;display:block;transition:.4s}
 .grid .tile::after{content:"";position:absolute;inset:0;border-radius:12px;pointer-events:none;
   box-shadow:inset 0 0 0 0 var(--gold);transition:.2s}
@@ -1265,59 +1266,60 @@ const SITE = {
   { src:"images/fullphotos/56-detail-shot-golden-defender.jpg", cap:"Tight close-up on the \"DEFENDER\" marquee art, the dim boot and copyright screen glowing on the monitor below" },
   { src:"images/fullphotos/57-detail-shot-golden-defender.jpg", cap:"Same marquee close-up, this time with the Hall of Fame leaderboard — Today's Greatest and All Time Greatest — fully lit on the monitor" },
 ] },
-    flyers:{ name:"Golden Flyers", blurb:"Original promotional artwork and advertising flyers for Williams\u2019 Defender, gathered from arcade operators and collectors across different markets and editions.", cover:"images/flyers/01-defender-flyer.jpg", photos:[
-  { src:"images/flyers/01-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/02-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/03-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/04-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/05-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/06-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/07-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/08-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/09-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/10-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/11-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/12-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/13-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/14-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/15-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/16-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/17-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/18-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/19-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/20-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/21-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/22-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/23-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/24-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/25-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/26-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/27-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/28-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/29-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/30-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/31-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/32-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/33-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/34-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/35-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/36-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/37-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/38-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/39-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/40-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/41-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/42-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/43-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/44-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/45-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/46-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/47-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/48-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/49-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/50-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/51-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
-  { src:"images/flyers/52-defender-flyer.jpg", cap:"Original Defender promotional flyer artwork." },
+    flyers:{ name:"Golden Flyers", blurb:"Original promotional artwork and advertising flyers for Williams\u2019 Defender, gathered from arcade operators and collectors across different markets and editions.", cover:"images/flyers/01-defender-flyer.jpg", videos:[
+  { title:"The Defender Model, animated", note:"A modern, AI-animated tribute bringing flyer #41 to life \u2014 not a period artifact, just a fun homage. Her real identity is undocumented; see the flyer caption for what's known.", file:"videos/defender-model-film.mp4" }
+], photos:[
+  { src:"images/flyers/01-defender-flyer.jpg", cap:"A five-cabinet lineup shot against a city-skyline backdrop, marking Williams' first year in video games: Defender, Stargate, Make Trax, Robotron: 2084, and Moon Patrol." },
+  { src:"images/flyers/02-defender-flyer.jpg", cap:"A Japanese-market flyer from Taito/Taitronics, full color, showing both the upright and cocktail-table Defender cabinets against painted sci-fi artwork of ships and astronauts." },
+  { src:"images/flyers/03-defender-flyer.jpg", cap:"A black-and-white “Free at Last!!” flyer from Taito Corporation, printed in Japan, laying out Defender's play features — hyperspace, reverse, thrust, scanner, and smart bomb — in detail." },
+  { src:"images/flyers/04-defender-flyer.jpg", cap:"A German-market flyer distributed by Seevend Automaten, “...immer einen Schritt voraus!” (“always one step ahead”), built around the cabinet's marquee art." },
+  { src:"images/flyers/05-defender-flyer.jpg", cap:"A German-language text flyer from Seevend Automaten describing Defender's gameplay and diagnostics, with per-play pricing listed as 1 Spiel = DM 1, 6 Spiele = DM 5." },
+  { src:"images/flyers/06-defender-flyer.jpg", cap:"“Defender reaches new heights!” — announcing the game's release as an upright, a cocktail table, and a cocktail table with base, with dimensions listed for each cabinet style." },
+  { src:"images/flyers/07-defender-flyer.jpg", cap:"“Still #1” — touting Defender's April/May 1981 RePlay Magazine Players' Choice win and its August 1981 Play Meter Equipment Poll #1 video game ranking, shown across all three cabinet styles." },
+  { src:"images/flyers/08-defender-flyer.jpg", cap:"“Advertising and promotions that put you ahead of the game” — a close-up of hands on a cabinet's control panel and coin door, from a Williams sales and marketing kit." },
+  { src:"images/flyers/09-defender-flyer.jpg", cap:"A plain back-cover page carrying only the Williams Electronics, Inc. script logo and the company's Chicago address." },
+  { src:"images/flyers/10-defender-flyer.jpg", cap:"“You can offer your guests bed and bored” — a trade-press reprint (Lodging, Hospitality, Hotel & Motel Management, Hotel & Resort Industry) contrasting bored hotel guests with a family playing Make Trax and Stargate." },
+  { src:"images/flyers/11-defender-flyer.jpg", cap:"“High Scorers” — a College Union magazine reprint showing DePaul University basketball coach Ray Meyer and students playing Make Trax and Defender at De Paul University, Chicago." },
+  { src:"images/flyers/12-defender-flyer.jpg", cap:"“Keep your customers rolling in the aisles!” — a Progressive Grocer reprint of shoppers pausing mid-errand to play Stargate, with a distributor reply card for store owners." },
+  { src:"images/flyers/13-defender-flyer.jpg", cap:"“Fun” / “Fun & Games” — a Restaurant Business / Food Service Marketing reprint photographed at Arnie's Sidewalk Cafe in Chicago, courtesy of owner Arnie Morton, promoting Williams cocktail-table games for restaurants and bars." },
+  { src:"images/flyers/14-defender-flyer.jpg", cap:"“Now your customers can eat, drink and be merry” — a Progressive Grocer / Convenience Store News reprint of shoppers playing Stargate and Make Trax inside a convenience store." },
+  { src:"images/flyers/15-defender-flyer.jpg", cap:"A “1982 promotions” recap page covering the Williams/Taco Bell/Pepsi “Video Games” sweepstakes cards and the 7-Eleven Slurpee Video Cup giveaway featuring Defender and Robotron: 2084 artwork." },
+  { src:"images/flyers/16-defender-flyer.jpg", cap:"Entex's licensed table-top Stargate electronic game in its retail packaging, alongside a still from the TV game show “Starcade” with contestants Lester and Rich." },
+  { src:"images/flyers/17-defender-flyer.jpg", cap:"“Bullish on the industry” — the cover of a Williams corporate brochure, shot on a stock exchange trading floor." },
+  { src:"images/flyers/18-defender-flyer.jpg", cap:"“The Williams portfolio. Profitable, reliable, bullish on the industry.” — the companion trading-floor photo spread from the same corporate brochure." },
+  { src:"images/flyers/19-defender-flyer.jpg", cap:"An introduction spread for Joust, Williams' first dual-player video game and cocktail table, shown against the same trading-floor backdrop as the rest of the brochure." },
+  { src:"images/flyers/20-defender-flyer.jpg", cap:"An introduction spread for Sinistar, “the newest offering in the Williams portfolio,” showing both the cockpit and upright cabinet styles." },
+  { src:"images/flyers/21-defender-flyer.jpg", cap:"A spread on Defender pinball and the Warlok pinball table, describing Defender pinball as a direct adaptation of the video game's Landers, Mutants, Baiters, Bombers, Pods, and smart bombs." },
+  { src:"images/flyers/22-defender-flyer.jpg", cap:"A pinball cabinet detail paired with Williams' corporate mission statement on reliability and long-term play appeal." },
+  { src:"images/flyers/23-defender-flyer.jpg", cap:"“What company has the most successful line of video games in the coin-op industry?” — a family gathered around a child playing Defender." },
+  { src:"images/flyers/24-defender-flyer.jpg", cap:"“Williams' line-up of games. One hit after another after another.” — a 1983 distributor cover sheet from Lieberman Music Co., Minneapolis." },
+  { src:"images/flyers/25-defender-flyer.jpg", cap:"“Surprise! It's Williams Electronics!” — Defender, Stargate, and Make Trax cabinets lined up together." },
+  { src:"images/flyers/26-defender-flyer.jpg", cap:"“Take a look at every Williams video game” — Robotron: 2084, Moon Patrol, and Joust cabinets, crediting Defender as the game that started it all." },
+  { src:"images/flyers/27-defender-flyer.jpg", cap:"An introduction spread for the Joust pinball table and the Bubbles video cabinet, Williams' newest additions to the line." },
+  { src:"images/flyers/28-defender-flyer.jpg", cap:"A continuation of the Bubbles and Sinistar introduction spread, describing Bubbles as approachable for novices and Sinistar as intense, high-resolution action." },
+  { src:"images/flyers/29-defender-flyer.jpg", cap:"A close-up spread on the Sinistar cockpit and upright cabinets, describing its taunting “I live” villain and first-of-its-kind variable-speed joystick." },
+  { src:"images/flyers/30-defender-flyer.jpg", cap:"“Opening the door...” — a door fitted with a Williams-logo doorknob, used as a teaser page for a company brochure." },
+  { src:"images/flyers/31-defender-flyer.jpg", cap:"A second plain back-cover page carrying the Williams Electronics, Inc. script logo and Chicago address." },
+  { src:"images/flyers/32-defender-flyer.jpg", cap:"“The leading pinball game maker is now a leading video game maker. Convenient, isn't it?” — stacked quarters arranged into a numeral 1 around the Williams logo." },
+  { src:"images/flyers/33-defender-flyer.jpg", cap:"“Introducing the latest electronic business machines from Williams” — Defender and Black Knight pinball paired for convenience-store placement as “souped-up cash registers.”" },
+  { src:"images/flyers/34-defender-flyer.jpg", cap:"“24-Hour Top-Name Entertainment” — a family game room scene with two Defender cabinets alongside Jungle Lord and Black Knight pinball machines." },
+  { src:"images/flyers/35-defender-flyer.jpg", cap:"“#1 in their class*” — Defender and Black Knight pinball shown side by side, citing RePlay Magazine's Players' Choice rankings." },
+  { src:"images/flyers/36-defender-flyer.jpg", cap:"“1982 Top Money-Makers,” reprinted from Hotel & Motel Management, September 1981, with cabinets silhouetted against a blue backdrop." },
+  { src:"images/flyers/37-defender-flyer.jpg", cap:"“Reserved for Williams” — a trade ad citing RePlay and Play Meter's #1 rankings for Black Knight pinball and Defender video during 1981." },
+  { src:"images/flyers/38-defender-flyer.jpg", cap:"“Shouldn't you stock the Williams variety of profit makers?” — a Campbell's Soup can parody labeled Williams, featuring Defender and Black Knight." },
+  { src:"images/flyers/39-defender-flyer.jpg", cap:"“This is all you need to profit from the #1 games in the industry” — an electrical outlet fitted with a Williams-logo plug, paired with Defender and Black Knight." },
+  { src:"images/flyers/40-defender-flyer.jpg", cap:"“No Vacancy.” — a hotel game-room scene with two Defender cabinets and pinball machines in use." },
+  { src:"images/flyers/41-defender-flyer.jpg", cap:"The Defender promotional photo of a model in a white dress posed beside an upright cabinet, mid-attract-mode. Her identity doesn't appear to be documented anywhere \u2014 even dedicated collector communities discussing this photo don't have a name for her. An AI-animated tribute to this photo is included as a video on this gallery page." },
+  { src:"images/flyers/42-defender-flyer.jpg", cap:"“The Brave New World of Williams” — a starfield cover opening onto an in-game Defender screenshot of the scanner and battlefield." },
+  { src:"images/flyers/43-defender-flyer.jpg", cap:"“The brave new world of Williams. Experience it.” — a Defender cabinet with full dimensions listed, stamped for distributor J&J Distributors, Inc. of Indianapolis." },
+  { src:"images/flyers/44-defender-flyer.jpg", cap:"A coin door and cash box detail shot against the cabinet's flame and Humanoid side art, with blank space left for a dealer's imprint." },
+  { src:"images/flyers/45-defender-flyer.jpg", cap:"“Electronic Design. Reliability. Innovation. The Mark of Williams.” — a full page of Defender's self-test and diagnostic screens, from ROM and RAM checks to the monitor test pattern and bookkeeping totals." },
+  { src:"images/flyers/46-defender-flyer.jpg", cap:"“The most technically advanced video game ever created. And the most sensational!” — a full gameplay rundown with the enemy chart (Humanoid, Lander, Mutant, Baiter, Bomber, Pod, Swarmer) and control panel diagram." },
+  { src:"images/flyers/47-defender-flyer.jpg", cap:"“Vid-Kid of the Month: Gene Simmons of KISS” — a magazine feature photo of Simmons in full KISS makeup and armor posed at a Defender cabinet." },
+  { src:"images/flyers/48-defender-flyer.jpg", cap:"The instruction decal from the side of the cabinet, listing scoring values, hyperspace and smart bomb rules, and “1 Play – 25¢.”" },
+  { src:"images/flyers/49-defender-flyer.jpg", cap:"“And the operators said... let the only people who could have given us Flash, Gorgar, and Firepower design a video game...” — a Defender cabinet lit by a moody sunburst." },
+  { src:"images/flyers/50-defender-flyer.jpg", cap:"“First, the pinball universe. Now, the world of video. Once again, Williams reigns supreme.” — a Defender cabinet with its attract-mode screen reading “Credits: 28.”" },
+  { src:"images/flyers/51-defender-flyer.jpg", cap:"“In April, we outdid everybody else! 1st time ever in the industry: Number 1 with 2!” — Black Knight pinball and Defender video, both named #1 by RePlay Magazine, April 1981." },
 ] },
     raiderroom:{ name:"Raider Room", blurb:"The Raider Room was a game room my parents ran in Plant City, Florida from 1980 to 1984. These are the photos that survived, with the people in them identified.", cover:"images/raiderroom/02_Raider_Room_Storefront_Sunset.jpg", photos:[
   { src:"images/raiderroom/01_Group_Outside_Defender_Asteroids_Wall.jpg", cap:"My father, Ed Thomas, in his black QIX shirt. He owned the Raider Room. I'm next to him in the red shirt and shorts, fourteen years old. My friend Kenny is in the green '50' jersey. My brother JT, sixteen, is on the right in the red shirt with sweatbands. There's a fifth person in back I don't know." },
@@ -2314,10 +2316,10 @@ const BH_FACTS=[
 })();
 
 /* ============ data helpers ============ */
-const GAL_ORDER=['beginnings','history','inspection','paint','bezel','controls','marquee','boards','monitor','coindoor','tribute','fullphotos','flyers','raiderroom'];
+const GAL_ORDER=['raiderroom','beginnings','history','inspection','paint','bezel','controls','marquee','boards','monitor','coindoor','tribute','fullphotos','flyers'];
 // Which 8 galleries the Home page teaser shows (2 rows of 4). Full order/
 // numbering on the Galleries page still comes from GAL_ORDER above.
-const HOME_GAL_PREVIEW=['beginnings','history','inspection','paint','bezel','controls','fullphotos','raiderroom'];
+const HOME_GAL_PREVIEW=['raiderroom','beginnings','history','inspection','paint','bezel','controls','fullphotos'];
 
 function radarBlips(){
   const pts=[[30,38],[68,30],[58,64],[40,72],[74,58],[24,58]];
