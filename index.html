@@ -142,7 +142,7 @@ nav.main a.active::after{content:"";position:absolute;left:13px;right:13px;botto
   color:var(--ink);border-radius:10px;padding:10px 14px;font-family:'Space Mono';font-size:12px;letter-spacing:2px}
 @media(max-width:1000px){
   nav.main{display:none;position:fixed;inset:67px 0 auto 0;flex-direction:column;gap:0;
-    background:rgba(7,10,24,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:8px;z-index:49}
+    background:rgb(7,10,24);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:8px;z-index:49}
   nav.main.open{display:flex}
   nav.main a{padding:15px 16px;font-size:14px;border-bottom:1px solid var(--line)}
   nav.main a.active::after{display:none}
@@ -1972,8 +1972,11 @@ const BH_FACTS=[
     dust=Array.from({length:Math.round(n/9)},()=>({x:Math.random()*w,y:Math.random()*h,
       r:(Math.random()*1.6+.8)*dpr,a:Math.random()*.5+.2,tw:Math.random()*6.28}));
     // black hole — distant, upper-right, with golden accretion disk
-    const R=Math.max(20*dpr,Math.min(54*dpr,Math.min(w,h)*0.05));
-    bh={x:w*0.85,y:h*0.19,R,rot:0,flashes:[],flashCooldown:0,shipAlpha:0,shipAlphaCur:0,
+    // on narrow single-column phones, tuck it tighter into the corner so it
+    // doesn't sit behind the stacked hero heading/lead text below it
+    const narrow = innerWidth < 700;
+    const R=Math.max(20*dpr,Math.min((narrow?32:54)*dpr,Math.min(w,h)*0.05));
+    bh={x:w*(narrow?0.86:0.85),y:h*(narrow?0.075:0.19),R,rot:0,flashes:[],flashCooldown:0,shipAlpha:0,shipAlphaCur:0,
       parts:Array.from({length:46},()=>({ang:Math.random()*6.28,rad:rnd(R*1.35,R*5.2),
         sp:rnd(.005,.015),vr:rnd(.07,.22)*dpr}))};
   }
