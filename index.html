@@ -1973,10 +1973,12 @@ const BH_FACTS=[
       r:(Math.random()*1.6+.8)*dpr,a:Math.random()*.5+.2,tw:Math.random()*6.28}));
     // black hole — distant, upper-right, with golden accretion disk
     // on narrow single-column phones, tuck it tighter into the corner so it
-    // doesn't sit behind the stacked hero heading/lead text below it
+    // doesn't sit behind the stacked hero heading/lead text below it. Uses a
+    // fixed pixel offset from the top (not a height %) so it clears the 67px
+    // sticky header consistently across every phone height, not just tall ones.
     const narrow = innerWidth < 700;
-    const R=Math.max(20*dpr,Math.min((narrow?32:54)*dpr,Math.min(w,h)*0.05));
-    bh={x:w*(narrow?0.86:0.85),y:h*(narrow?0.075:0.19),R,rot:0,flashes:[],flashCooldown:0,shipAlpha:0,shipAlphaCur:0,
+    const R=Math.max(20*dpr,Math.min((narrow?28:54)*dpr,Math.min(w,h)*0.05));
+    bh={x:w*(narrow?0.86:0.85),y:narrow?(67+R/dpr+18)*dpr:h*0.19,R,rot:0,flashes:[],flashCooldown:0,shipAlpha:0,shipAlphaCur:0,
       parts:Array.from({length:46},()=>({ang:Math.random()*6.28,rad:rnd(R*1.35,R*5.2),
         sp:rnd(.005,.015),vr:rnd(.07,.22)*dpr}))};
   }
