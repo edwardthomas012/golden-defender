@@ -122,9 +122,10 @@ header{position:sticky;top:0;z-index:50;
   backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .bar{max-width:var(--maxw);margin:0 auto;padding:14px 26px;display:flex;align-items:center;gap:22px}
 .brand{display:flex;align-items:center;gap:13px;flex-shrink:0}
-.brand .orb{position:relative;width:40px;height:40px;flex-shrink:0;border-radius:50%;
+.brand .orb{position:relative;width:40px;height:40px;flex-shrink:0;border-radius:50%;overflow:hidden;
   background:radial-gradient(circle at 36% 30%,#fff3c4,var(--gold) 46%,#7a5410 88%);
   box-shadow:0 0 22px rgba(255,206,77,.55),inset 0 -3px 8px rgba(0,0,0,.4)}
+.brand .orb .orb-face{position:absolute;inset:7px;width:calc(100% - 14px);height:calc(100% - 14px)}
 .brand .orb::after{content:"";position:absolute;inset:-6px;border-radius:50%;
   border:1px solid rgba(255,206,77,.4);transform:rotate(18deg)}
 .brand .nm{font-family:'Sora';font-weight:800;font-size:19px;letter-spacing:.5px;line-height:1}
@@ -805,7 +806,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 <header>
   <div class="bar">
     <a class="brand" href="#home" data-nav>
-      <span class="orb"></span>
+      <span class="orb"><svg class="orb-face" viewBox="0 0 120 145" aria-hidden="true"><use href="#sym-alien"/></svg></span>
       <span class="nm">Golden Defender<small>SECTOR 1981 · NO. 50,001</small></span>
     </a>
     <button class="menu-btn" id="menuBtn" aria-label="Menu">MENU</button>
