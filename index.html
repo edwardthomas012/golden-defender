@@ -127,9 +127,8 @@ header{position:sticky;top:0;z-index:50;
 .bar{max-width:var(--maxw);margin:0 auto;padding:14px 26px;display:flex;align-items:center;gap:22px}
 .brand{display:flex;align-items:center;gap:13px;flex-shrink:0}
 .brand .orb{position:relative;width:40px;height:40px;flex-shrink:0;border-radius:50%;overflow:hidden;
-  background:radial-gradient(circle at 36% 30%,#fff3c4,var(--gold) 46%,#7a5410 88%);
-  box-shadow:0 0 22px rgba(255,206,77,.55),inset 0 -3px 8px rgba(0,0,0,.4)}
-.brand .orb .orb-face{position:absolute;inset:7px;width:calc(100% - 14px);height:calc(100% - 14px)}
+  box-shadow:0 0 16px rgba(255,206,77,.4)}
+.brand .orb .orb-face{position:absolute;inset:0;width:100%;height:100%}
 .brand .orb::after{content:"";position:absolute;inset:-6px;border-radius:50%;
   border:1px solid rgba(255,206,77,.4);transform:rotate(18deg)}
 .brand .nm{font-family:'Sora';font-weight:800;font-size:19px;letter-spacing:.5px;line-height:1}
@@ -702,13 +701,13 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
   box-shadow:0 10px 26px rgba(0,0,0,.55),0 0 18px rgba(255,206,77,.15)}
 .bh-tip.show{opacity:1;transform:translateY(0)}
 .et-emblem{width:132px;height:132px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))}
-.et-emblem .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
-.et-emblem .et-stars circle:nth-child(2){animation-delay:.4s}
-.et-emblem .et-stars circle:nth-child(3){animation-delay:.9s}
-.et-emblem .et-stars circle:nth-child(4){animation-delay:1.4s}
-.et-emblem .et-stars circle:nth-child(5){animation-delay:.7s}
-.et-emblem .et-stars circle:nth-child(6){animation-delay:1.1s}
-.et-emblem .et-face{animation:etaura 3s ease-in-out infinite}
+.et-emblem .et-stars circle,.orb-face .et-stars circle{animation:ettwinkle 2.8s ease-in-out infinite}
+.et-emblem .et-stars circle:nth-child(2),.orb-face .et-stars circle:nth-child(2){animation-delay:.4s}
+.et-emblem .et-stars circle:nth-child(3),.orb-face .et-stars circle:nth-child(3){animation-delay:.9s}
+.et-emblem .et-stars circle:nth-child(4),.orb-face .et-stars circle:nth-child(4){animation-delay:1.4s}
+.et-emblem .et-stars circle:nth-child(5),.orb-face .et-stars circle:nth-child(5){animation-delay:.7s}
+.et-emblem .et-stars circle:nth-child(6),.orb-face .et-stars circle:nth-child(6){animation-delay:1.1s}
+.et-emblem .et-face,.orb-face .et-face{animation:etaura 3s ease-in-out infinite}
 @keyframes ettwinkle{0%,100%{opacity:.3}50%{opacity:1}}
 @keyframes etaura{0%,100%{filter:drop-shadow(0 0 2px rgba(91,255,134,.25))}50%{filter:drop-shadow(0 0 7px rgba(91,255,134,.7))}}
 #et-sprinkle{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
@@ -716,7 +715,7 @@ details.hist-ports .portcol{color:var(--ink-mute);font-size:13px;line-height:1.9
 .etmark-fx svg,.etmark-fx img{width:100%;height:auto;display:block;filter:brightness(1.4) saturate(1.5) drop-shadow(0 0 7px rgba(91,255,134,.5))}
 .etmark-fx.swarmer img{filter:brightness(1.4) saturate(1.5) drop-shadow(0 0 7px rgba(255,90,90,.55))}
 @keyframes etbob{0%,100%{transform:translate(0,0) rotate(var(--rot,0deg))}50%{transform:translate(var(--sway,6px),-24px) rotate(var(--rot,0deg))}}
-@media(prefers-reduced-motion:reduce){.et-emblem .et-stars circle,.et-emblem .et-face,.etmark-fx{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.et-emblem .et-stars circle,.et-emblem .et-face,.orb-face .et-stars circle,.orb-face .et-face,.etmark-fx{animation:none!important}}
 #swarmer-chaser{position:fixed;left:0;top:0;width:18px;height:18px;z-index:60;pointer-events:none;opacity:0;transition:opacity .3s ease;will-change:transform}
 #swarmer-chaser.sc-visible{opacity:.6}
 #swarmer-chaser img{width:100%;height:100%;display:block;object-fit:contain}
@@ -810,7 +809,23 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 <header>
   <div class="bar">
     <a class="brand" href="#home" data-nav>
-      <span class="orb"><svg class="orb-face" viewBox="0 0 120 145" aria-hidden="true"><use href="#sym-alien"/></svg></span>
+      <span class="orb"><svg class="orb-face" viewBox="0 0 220 220" aria-hidden="true">
+        <defs>
+          <radialGradient id="hepl" cx="42%" cy="38%" r="70%"><stop offset="0%" stop-color="#1a2740"/><stop offset="100%" stop-color="#070a14"/></radialGradient>
+          <radialGradient id="heglow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(255,206,77,.5)"/><stop offset="100%" stop-color="rgba(255,206,77,0)"/></radialGradient>
+        </defs>
+        <circle cx="110" cy="110" r="104" fill="url(#hepl)" stroke="#ffce4d" stroke-width="2.5"/>
+        <circle cx="110" cy="110" r="66" fill="url(#heglow)"/>
+        <g transform="rotate(-18 110 110)">
+          <ellipse cx="110" cy="110" rx="98" ry="34" fill="none" stroke="rgba(255,206,77,.5)" stroke-width="2"/>
+          <circle r="3" fill="#fff0b8"><animateMotion dur="7s" repeatCount="indefinite" path="M12 110 a98 34 0 1 1 196 0 a98 34 0 1 1 -196 0"/></circle>
+        </g>
+        <g class="et-stars" fill="#ffe08a">
+          <circle cx="40" cy="52" r="2.4"/><circle cx="182" cy="70" r="1.8"/><circle cx="168" cy="150" r="2.6"/>
+          <circle cx="52" cy="168" r="2"/><circle cx="196" cy="118" r="1.6"/><circle cx="30" cy="120" r="1.8"/>
+        </g>
+        <g class="et-face" transform="translate(110 108) scale(0.62) translate(-60 -74)"><use href="#sym-alien"/></g>
+      </svg></span>
       <span class="nm">Golden Defender<small>SECTOR 1981 · NO. 50,001</small></span>
     </a>
     <button class="menu-btn" id="menuBtn" aria-label="Menu">MENU</button>
