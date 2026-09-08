@@ -847,7 +847,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 </div>
 
 <div class="attract" id="attract" role="dialog" aria-label="Attract mode">
-  <div class="eyebrow">Attract Mode · Golden History</div>
+  <div class="eyebrow" id="attractEyebrow">Attract Mode · Golden History</div>
   <div class="stage"><img id="attractImg" alt="" /></div>
   <div class="cap" id="attractCap"></div>
   <div class="hint">Move, click, or press any key to continue</div>
@@ -1879,12 +1879,12 @@ const BH_FACTS=[
 
 /* ============ ATTRACT MODE ============
    After a stretch of inactivity on Home, fade in a random slideshow of
-   photos from the Golden History gallery — like an arcade cabinet's
-   attract loop. Any interaction dismisses it instantly. */
+   photos from the Golden History and Golden Flyers galleries — like an
+   arcade cabinet's attract loop. Any interaction dismisses it instantly. */
 (function attractMode(){
   const IDLE_MS=25000;      // how long to wait before triggering
   const CYCLE_MS=4500;      // how often the photo changes while showing
-  const overlay=$('#attract'), img=$('#attractImg'), cap=$('#attractCap');
+  const overlay=$('#attract'), img=$('#attractImg'), cap=$('#attractCap'), eyebrow=$('#attractEyebrow');
   if(!overlay||!img||!cap) return;
 
   let idleTimer=null, cycleTimer=null, lastIdx=-1;
@@ -1892,7 +1892,10 @@ const BH_FACTS=[
   function onHome(){ return (location.hash||'#home').slice(1).split('/')[0] in {home:1,'':1}; }
 
   function pickPhoto(){
-    const photos=(SITE.galleries.history&&SITE.galleries.history.photos)||[];
+    const history=(SITE.galleries.history&&SITE.galleries.history.photos)||[];
+    const flyers=(SITE.galleries.flyers&&SITE.galleries.flyers.photos)||[];
+    const photos=history.map(p=>({p,label:'Golden History'}))
+      .concat(flyers.map(p=>({p,label:'Golden Flyers'})));
     if(!photos.length) return null;
     let i=Math.floor(Math.random()*photos.length);
     if(photos.length>1 && i===lastIdx) i=(i+1)%photos.length;
@@ -1901,11 +1904,13 @@ const BH_FACTS=[
   }
 
   function showNextPhoto(){
-    const p=pickPhoto();
-    if(!p) return;
+    const pick=pickPhoto();
+    if(!pick) return;
+    const p=pick.p;
     img.style.animation='none'; void img.offsetWidth; img.style.animation='';
     img.src=p.src; img.alt=p.cap||'';
     cap.textContent=p.cap||'';
+    if(eyebrow) eyebrow.textContent=`Attract Mode · ${pick.label}`;
   }
 
   function open(){
