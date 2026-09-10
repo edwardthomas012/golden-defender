@@ -4142,7 +4142,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       spawnParticles(en.x,en.y);
       const info=(SITE.enemies||[]).find(x=>x.key===en.key);
       score+=(info&&info.score)||100;
-      while(score>=nextExtraLifeScore){ lives++; bombs=Math.min(BOMB_MAX,bombs+1); nextExtraLifeScore+=10000; }
+      while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
       waveKills++;
     }
     enemies=[];
@@ -4181,10 +4181,10 @@ $('#lightbox').addEventListener('touchend',e=>{
     const survivors=humanoids.length;
     const bonus=survivors*100;
     score+=bonus;
-    while(score>=nextExtraLifeScore){ lives++; bombs=Math.min(BOMB_MAX,bombs+1); nextExtraLifeScore+=10000; }
+    while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
     waveBonusText=survivors+' Humanoid'+(survivors===1?'':'s')+' saved — +'+bonus+' bonus';
     wave++; waveKills=0; waveSpawned=0;
-    bombs=Math.min(BOMB_MAX, bombs+1); // one more panic button earned per cleared wave
+    bombs++; // one more panic button earned per cleared wave
     bullets=[]; // fresh start next wave — no shots carrying over
     speechCountThisWave=0; speechCooldown=3+Math.random()*4;
     if(wave%5===0) replenishHumanoids();
@@ -4269,7 +4269,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           } else {
             const info=(SITE.enemies||[]).find(x=>x.key===en.key);
             score+=(info&&info.score)||100;
-            while(score>=nextExtraLifeScore){ lives++; bombs=Math.min(BOMB_MAX,bombs+1); nextExtraLifeScore+=10000; }
+            while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
             spawnParticles(en.x,en.y);
             enemies.splice(i,1);
             waveKills++;
@@ -4329,7 +4329,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           // Even dying to it, that Manti is gone — award its points same as a clean kill.
           const info=(SITE.enemies||[]).find(x=>x.key===en.key);
           score+=(info&&info.score)||100;
-          while(score>=nextExtraLifeScore){ lives++; bombs=Math.min(BOMB_MAX,bombs+1); nextExtraLifeScore+=10000; }
+          while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
           lives--;
           waveKills++;
           updateHud();
