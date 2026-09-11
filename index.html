@@ -829,16 +829,26 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   border:none;pointer-events:auto;box-shadow:0 8px 20px rgba(255,93,93,.4);
   -webkit-tap-highlight-color:transparent}
 .gt-bomb:active{transform:scale(.94)}
+.game-fs-btn{position:absolute;top:10px;right:14px;z-index:4;background:rgba(8,12,28,.7);
+  border:1px solid rgba(255,206,77,.4);color:#ffe08a;border-radius:8px;padding:6px 10px;
+  font-family:'Sora';font-weight:700;font-size:12px;cursor:pointer;letter-spacing:.4px;
+  display:flex;align-items:center;gap:5px;transition:background .15s}
+.game-fs-btn:hover{background:rgba(255,206,77,.18)}
+.game-fs-btn svg{width:14px;height:14px}
+.game-wrap:fullscreen{aspect-ratio:auto;max-height:none;width:100vw;height:100vh;border-radius:0}
 /* ---- Golden Hall of Fame ---- */
-.hof-overlay{z-index:5;background:rgba(4,5,13,.92);overflow:auto;padding:20px 0}
-.hof-inner{max-width:620px;width:100%;padding:0 16px}
+.hof-overlay{z-index:5;background:rgba(4,5,13,.92);overflow:auto;padding:20px 0;
+  display:flex;align-items:center;justify-content:center}
+.hof-inner{max-width:780px;width:100%;padding:0 16px}
+.hof-logo{max-height:72px;width:auto;margin:0 auto 4px;display:block;
+  filter:drop-shadow(0 0 14px rgba(255,206,77,.35))}
 .hof-title{font-family:'Sora';font-weight:800;letter-spacing:3px;font-size:clamp(24px,5vw,36px);
   margin:0 0 4px;background:linear-gradient(180deg,#ffe9a8,var(--gold) 60%,var(--gold-deep));
   -webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 0 14px rgba(255,206,77,.35))}
 .hof-sub{font-family:'Sora';font-weight:700;letter-spacing:2px;color:var(--plasma);
-  font-size:clamp(11px,2.6vw,14px);margin-bottom:22px;text-shadow:0 0 10px rgba(111,214,255,.4)}
-.hof-columns{display:flex;gap:36px;justify-content:center;text-align:left;margin-bottom:20px}
+  font-size:clamp(11px,2.6vw,14px);margin-bottom:18px;text-shadow:0 0 10px rgba(111,214,255,.4)}
+.hof-columns{display:flex;gap:18px;justify-content:center;text-align:left;margin-bottom:16px;flex-wrap:wrap}
 .hof-col{list-style:none;margin:0;padding:0;font-family:'Sora';font-size:clamp(12px,2.5vw,15px);
   font-weight:700;letter-spacing:.4px;display:flex;flex-direction:column;gap:6px}
 .hof-col li{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;
@@ -3003,6 +3013,10 @@ function viewPlay(){
       <div class="game-hud">
         <span class="ghud-item ghud-score"><b id="gScore">0</b></span>
       </div>
+      <button class="game-fs-btn" id="gameFsBtn" aria-label="Toggle fullscreen" title="Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+        <span id="gameFsLabel">FULL</span>
+      </button>
       <canvas id="gameCanvas" aria-label="Golden Defender mini-game, playable"></canvas>
       <div class="game-overlay" id="gameOverlay">
         <div class="go-inner">
@@ -3024,11 +3038,13 @@ function viewPlay(){
       </div>
       <div class="game-overlay hof-overlay hidden" id="hofOverlay">
         <div class="go-inner hof-inner">
-          <h3 class="hof-title">DEFENDER</h3>
+          <img class="hof-logo" src="images/sprites/golden-defender-hof-logo.jpg" alt="Golden Defender">
           <div class="hof-sub">GOLDEN HALL OF FAME</div>
           <div class="hof-columns">
             <ol class="hof-col" id="hofColA"></ol>
-            <ol class="hof-col" id="hofColB" start="11"></ol>
+            <ol class="hof-col" id="hofColB" start="6"></ol>
+            <ol class="hof-col" id="hofColC" start="11"></ol>
+            <ol class="hof-col" id="hofColD" start="16"></ol>
           </div>
           <div class="hof-entry" id="hofEntryRow" style="display:none">
             <label for="hofInitials">NEW HIGH SCORE! ENTER YOUR INITIALS:</label>
@@ -3651,13 +3667,14 @@ $('#lightbox').addEventListener('touchend',e=>{
   };
 
   let canvas, ctx, overlay, scoreEl, livesEl, highEl, waveEl, bombsEl, nextBossEl, goTitle, goSub, goBtn;
-  let hofOverlay, hofColA, hofColB, hofEntryRow, hofInitialsInput, hofSubmitBtn, hofHint, hofControlsWrap, hofSummary, hofPlayAgainBtn;
+  let hofOverlay, hofColA, hofColB, hofColC, hofColD, hofEntryRow, hofInitialsInput, hofSubmitBtn, hofHint, hofControlsWrap, hofSummary, hofPlayAgainBtn;
+  let gameFsBtn, gameFsLabel;
   let pendingScoreForHOF=null;
   let images={}, imagesReady=false;
   let state='idle';
   let raf=null, lastT=0;
   let W=900, H=562;
-  let player, bullets=[], enemies=[], particles=[], humanoids=[], killTexts=[];
+  let player, bullets=[], enemies=[], particles=[], humanoids=[], killTexts=[], fallingHumanoids=[];
   let terrain=[];
   let score=0, lives=3, highScore=0, nextExtraLifeScore=10000, bombs=3;
   const BOMB_START=3, BOMB_MAX=6;
@@ -3910,25 +3927,34 @@ $('#lightbox').addEventListener('touchend',e=>{
   };
   function bossLabel(key){ return key.charAt(0).toUpperCase()+key.slice(1); }
 
-  /* How much harder things get. This climbs early on to keep waves feeling
-     progressively tougher, but is capped well short of "impossible" — past
+  /* How much harder things get. Starts at a higher base so wave 1 isn't a
+     walkover, climbs steadily, then ramps up steeper after wave 5 to keep
+     veteran players on their toes. Capped well short of "impossible" — past
      a certain point more waves mean more/tankier enemies, not enemies that
      are literally too fast to react to. */
-  function difficultyFactor(){
-    const waveGrowth=Math.min(1.7,(wave-1)*0.045);
-    const frenzy=humanoids.length===0?0.45:0;
-    const boss=isBossWave(wave)?0.3:0;
-    return Math.min(3.4, 1+waveGrowth+frenzy+boss);
+  /* Total humanoids still in play: on the ground, being carried by a
+     lander, or falling after being dropped. Used for frenzy difficulty
+     and the wipeout trigger so the game doesn't go frantic while a
+     humanoid is still being carried or falling. */
+  function activeHumanoidCount(){
+    return humanoids.length+fallingHumanoids.length+enemies.filter(e=>e.carrying).length;
   }
-  function isFrantic(){ return humanoids.length===0; }
+
+  function difficultyFactor(){
+    const waveGrowth=Math.min(1.9,(wave-1)*0.06+Math.max(0,wave-5)*0.05);
+    const frenzy=activeHumanoidCount()===0?0.45:0;
+    const boss=isBossWave(wave)?0.3:0;
+    return Math.min(3.8, 1.3+waveGrowth+frenzy+boss);
+  }
+  function isFrantic(){ return activeHumanoidCount()===0; }
 
   function spawnEnemy(){
     const types=['lander','mutant','baiter','bomber','pod','swarmer'];
     const boss=isBossWave(wave);
     const key=boss?bossKeyForWave(wave):types[Math.floor(Math.random()*types.length)];
-    const speedBase={lander:66,mutant:86,baiter:132,bomber:52,pod:44,swarmer:148}[key]||80;
+    const speedBase={lander:90,mutant:115,baiter:170,bomber:70,pod:60,swarmer:190}[key]||80;
     const s=scaleUnit();
-    const rMul={swarmer:0.018,baiter:0.030,lander:0.028,mutant:0.028,bomber:0.028,pod:0.028}[key]||0.028;
+    const rMul={swarmer:0.018,baiter:0.030,lander:0.028,mutant:0.028,bomber:0.020,pod:0.020}[key]||0.028;
     const diff=difficultyFactor();
     const bossMul=boss?1.35:1;
     const tough=boss?bossToughness(wave):null;
@@ -3940,7 +3966,8 @@ $('#lightbox').addEventListener('touchend',e=>{
       phase:Math.random()*6.28,
       r:Math.max(7,s*rMul),
       boss, hp:tough?tough.hp:1, maxHp:tough?tough.hp:1,
-      hitScale:tough?tough.hitScale:1, hitFlash:0
+      hitScale:tough?tough.hitScale:1, hitFlash:0,
+      carrying:null, diveTarget:null, aiState:'normal'
     });
   }
 
@@ -3948,17 +3975,20 @@ $('#lightbox').addEventListener('touchend',e=>{
     player={x:W*0.16,y:H*0.42,r:Math.max(12,scaleUnit()*0.030),facing:1,invuln:1.2};
   }
 
-  /* Wave 1 needs 15 kills; every wave after that needs 5 more than the
-     last (20, 25, 30...), capped once it reaches 100 so very late waves
-     stay a real fight without turning into pure grind. Boss waves use
-     their own round-number scale instead (Pods 20 → Baiters 50), climbing
-     a bit further each repeat lap before it, too, tops out. */
+  /* Wave 1 needs 20 kills; every wave after that needs 5 more than the
+     last (25, 30, 35...). After wave 5 the target jumps by 8 per wave
+     instead of 5, so the challenge is noticeably steeper for experienced
+     players. Capped at 120 so very late waves stay a real fight without
+     turning into pure grind. Boss waves use their own round-number scale
+     instead (Pods 20 → Baiters 50), climbing a bit further each repeat lap
+     before it, too, tops out. */
   function waveTarget(w){
     if(isBossWave(w)){
       const rank=bossRankForWave(w), tier=Math.min(3,bossTierForWave(w));
       return 20+rank*6+tier*15;
     }
-    return Math.min(100, 15+(Math.max(1,w)-1)*5);
+    if(w<=5) return Math.min(120, 20+(w-1)*5);
+    return Math.min(120, 40+(w-5)*8);
   }
 
   function updateHud(){
@@ -3973,7 +4003,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   function startGame(){
     if(typeof hideHOF==='function') hideHOF();
     genTerrain(); seedHumanoids(); resetPlayer();
-    bullets=[]; enemies=[]; particles=[]; killTexts=[];
+    bullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
     score=0; lives=3; nextExtraLifeScore=10000; spawnTimer=0; spawnInterval=1500; elapsed=0; fireCooldown=0;
     wave=1; waveKills=0; waveSpawned=0; waveBreakTimer=0; waveBonusText=''; bombs=BOMB_START;
     terrainGone=false; prevHumanoidCount=10; screenFlash=0; frenzyBannerTimer=0;
@@ -3995,13 +4025,15 @@ $('#lightbox').addEventListener('touchend',e=>{
      paused, and shown with the initials-entry form when a just-finished
      run's score beats the current #20. */
   function renderHOF(){
-    if(!hofColA||!hofColB) return;
+    if(!hofColA) return;
     const rowHTML=(e,n)=>{
       const cls = n===1?' hof-r1':n===2?' hof-r2':n===3?' hof-r3':'';
       return '<li class="'+cls.trim()+'"><span class="hof-rank">'+n+'.</span><span class="hof-init">'+e.i+'</span><span class="hof-score">'+e.s.toLocaleString()+'</span></li>';
     };
-    hofColA.innerHTML=hallOfFame.slice(0,10).map((e,i)=>rowHTML(e,i+1)).join('');
-    hofColB.innerHTML=hallOfFame.slice(10,20).map((e,i)=>rowHTML(e,i+11)).join('');
+    if(hofColA) hofColA.innerHTML=hallOfFame.slice(0,5).map((e,i)=>rowHTML(e,i+1)).join('');
+    if(hofColB) hofColB.innerHTML=hallOfFame.slice(5,10).map((e,i)=>rowHTML(e,i+6)).join('');
+    if(hofColC) hofColC.innerHTML=hallOfFame.slice(10,15).map((e,i)=>rowHTML(e,i+11)).join('');
+    if(hofColD) hofColD.innerHTML=hallOfFame.slice(15,20).map((e,i)=>rowHTML(e,i+16)).join('');
   }
   function showHOF(mode){ // 'pause' | 'entry' | 'gameover'
     renderHOF();
@@ -4048,7 +4080,7 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   function idleFrame(){
     genTerrain(); seedHumanoids(); resetPlayer();
-    bullets=[]; enemies=[]; particles=[];
+    bullets=[]; enemies=[]; particles=[]; fallingHumanoids=[];
     draw();
   }
 
@@ -4146,6 +4178,11 @@ $('#lightbox').addEventListener('touchend',e=>{
       while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
       waveKills++;
     }
+    for(const en of enemies){
+      if(en.carrying){
+        fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase});
+      }
+    }
     enemies=[];
     screenFlash=Math.max(screenFlash,0.7);
     updateHud();
@@ -4185,7 +4222,6 @@ $('#lightbox').addEventListener('touchend',e=>{
     while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
     waveBonusText=survivors+' Humanoid'+(survivors===1?'':'s')+' saved — +'+bonus+' bonus';
     wave++; waveKills=0; waveSpawned=0;
-    bombs++; // one more panic button earned per cleared wave
     bullets=[]; // fresh start next wave — no shots carrying over
     speechCountThisWave=0; speechCooldown=3+Math.random()*4;
     if(wave%5===0) replenishHumanoids();
@@ -4199,7 +4235,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     const down=keys['ArrowDown']||keys['s']||keys['S']||touchDir.down;
     const left=keys['ArrowLeft']||keys['a']||keys['A']||touchDir.left;
     const right=keys['ArrowRight']||keys['d']||keys['D']||touchDir.right;
-    const speed=260;
+    const speed=320;
     if(up) player.y-=speed*dt;
     if(down) player.y+=speed*dt;
     if(left){ player.x-=speed*dt; player.facing=-1; }
@@ -4209,7 +4245,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     if(player.invuln>0) player.invuln=Math.max(0,player.invuln-dt);
 
     fireCooldown-=dt;
-    if(fireHeld&&fireCooldown<=0){ fireBullet(); fireCooldown=0.22; }
+    if(fireHeld&&fireCooldown<=0){ fireBullet(); fireCooldown=0.18; }
 
     for(let i=bullets.length-1;i>=0;i--){
       const b=bullets[i]; b.x+=b.vx*dt;
@@ -4218,16 +4254,19 @@ $('#lightbox').addEventListener('touchend',e=>{
 
     spawnTimer+=dt;
     const diff=difficultyFactor();
-    const targetInterval=Math.max(240,(1500-(wave-1)*95-elapsed*14)/diff);
+    const targetInterval=Math.max(180,(1050-(wave-1)*70-elapsed*18)/diff);
     if(spawnTimer>=targetInterval/1000&&waveSpawned<waveTarget(wave)){
       spawnTimer=0;
-      const cap=9+Math.min(14,wave-1)+(humanoids.length===0?4:0);
+      const cap=12+Math.min(16,wave-1)+(activeHumanoidCount()===0?4:0);
       if(enemies.length<cap){ spawnEnemy(); waveSpawned++; }
     }
 
     const frantic=isFrantic();
     for(const en of enemies){
       if(en.zigPhase===undefined) en.zigPhase=Math.random()*6.28;
+      // Diving/ascending landers are fully controlled by the abduction AI below —
+      // skip normal drift/bob so they track the humanoid and rise straight up.
+      if(en.aiState==='diving'||en.aiState==='ascending') continue;
       if(frantic){
         // full frenzy: fast, unpredictable zig-zag on both axes plus random
         // sharp dodge-jumps — hard to track and hard to land a hit on.
@@ -4249,10 +4288,65 @@ $('#lightbox').addEventListener('touchend',e=>{
         en.y=flightTop()+Math.random()*(flightBottom()-flightTop());
         en.phase=Math.random()*6.28;
         en.zigPhase=Math.random()*6.28;
+        if(en.carrying){ en.carrying=null; en.aiState='normal'; }
       }
     }
 
     for(const en of enemies){ if(en.hitFlash>0) en.hitFlash=Math.max(0,en.hitFlash-dt*4); }
+
+    /* Lander abduction AI: landers above the halfway line can dive down to
+       grab a humanoid directly below them, carry it upward, and if not shot
+       in time, mutate it into a mutant at the top of the screen. Classic
+       Defender mechanic. */
+    for(const en of enemies){
+      if(en.key!=='lander'||en.boss) continue;
+      if(en.aiState==='normal'){
+        if(en.y<H*0.5 && humanoids.length>0 && !en.carrying){
+          const enXf=en.x/W;
+          for(const h of humanoids){
+            if(Math.abs(enXf-h.xf)<0.04){
+              if(Math.random()<0.012){
+                en.aiState='diving';
+                en.diveTarget=h;
+                break;
+              }
+            }
+          }
+        }
+      } else if(en.aiState==='diving'){
+        if(en.diveTarget && humanoids.indexOf(en.diveTarget)>=0){
+          const targetX=en.diveTarget.xf*W;
+          const targetY=terrainYAt(targetX);
+          const dy=targetY-en.y;
+          const dx=targetX-en.x;
+          // Steer horizontally toward the target so the lander follows the humanoid
+          en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*dt);
+          if(Math.abs(dy)<10 && Math.abs(dx)<15){
+            en.carrying=en.diveTarget;
+            en.carrying.speechText='';
+            en.carrying.speechTimer=0;
+            const idx=humanoids.indexOf(en.diveTarget);
+            if(idx>=0) humanoids.splice(idx,1);
+            en.aiState='ascending';
+            en.diveTarget=null;
+          } else {
+            en.y+=Math.sign(dy)*180*dt;
+          }
+        } else {
+          en.aiState='normal';
+          en.diveTarget=null;
+        }
+      } else if(en.aiState==='ascending'){
+        en.y-=50*dt;
+        if(en.y<=flightTop()+20){
+          en.key='mutant';
+          en.carrying=null;
+          en.aiState='normal';
+          en.vx=en.vx*1.3;
+        }
+      }
+      if(en.carrying) en.carrying.walkPhase+=dt*6;
+    }
 
     for(let i=enemies.length-1;i>=0;i--){
       const en=enemies[i];
@@ -4272,6 +4366,9 @@ $('#lightbox').addEventListener('touchend',e=>{
             score+=(info&&info.score)||100;
             while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
             spawnParticles(en.x,en.y);
+            if(en.carrying){
+              fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase});
+            }
             enemies.splice(i,1);
             waveKills++;
             updateHud();
@@ -4309,8 +4406,40 @@ $('#lightbox').addEventListener('touchend',e=>{
         }
       }
     }
-    if(prevHumanoidCount>0&&humanoids.length===0) triggerWipeout();
-    prevHumanoidCount=humanoids.length;
+    /* Falling humanoids: when a lander is shot while carrying one, the
+       humanoid plummets with gravity. If it hits the ground at high speed
+       it dies; if it's close enough to the ground to land softly, it
+       survives and walks again. */
+    for(let i=fallingHumanoids.length-1;i>=0;i--){
+      const fh=fallingHumanoids[i];
+      fh.vy+=420*dt;
+      fh.y+=fh.vy*dt;
+      fh.walkPhase+=dt*6;
+      const groundY=terrainYAt(fh.x);
+      if(fh.y>=groundY){
+        if(fh.vy>350){
+          spawnParticles(fh.x,groundY);
+          if(Math.random()<0.4 && spotIsFree(fh.x,groundY)){
+            killTexts.push({
+              x:fh.x, y:groundY-scaleUnit()*0.04,
+              text:HUMANOID_KILL_LINES[Math.floor(Math.random()*HUMANOID_KILL_LINES.length)],
+              life:3.2, maxLife:3.2, vy:-scaleUnit()*0.025
+            });
+          }
+        } else {
+          humanoids.push({
+            xf:Math.max(0.05,Math.min(0.95,fh.x/W)), dir:Math.random()<0.5?-1:1,
+            speed:0.010+Math.random()*0.016, walkPhase:fh.walkPhase,
+            woman:fh.woman, speechText:'', speechTimer:0
+          });
+        }
+        fallingHumanoids.splice(i,1);
+      }
+    }
+
+    const totalHumanoids=activeHumanoidCount();
+    if(prevHumanoidCount>0&&totalHumanoids===0) triggerWipeout();
+    prevHumanoidCount=totalHumanoids;
 
     for(let i=killTexts.length-1;i>=0;i--){
       const k=killTexts[i];
@@ -4325,6 +4454,9 @@ $('#lightbox').addEventListener('touchend',e=>{
         const dx=en.x-player.x, dy=en.y-player.y;
         const killR=en.r*0.55+player.r*0.55; // tighter than the drawn size — has to actually touch, not just get near
         if(dx*dx+dy*dy<killR*killR){
+          if(en.carrying){
+            fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase});
+          }
           enemies.splice(i,1);
           spawnParticles(player.x,player.y);
           // Even dying to it, that Manti is gone — award its points same as a clean kill.
@@ -4726,6 +4858,15 @@ $('#lightbox').addEventListener('touchend',e=>{
     }
   }
 
+  /* Humanoids falling after their lander was shot — drawn at their current
+     fall position with the same figure used on the ground. */
+  function drawFallingHumanoids(){
+    const s=Math.max(15,scaleUnit()*0.032);
+    for(const fh of fallingHumanoids){
+      drawHumanoidFigure(fh.x,fh.y,s,fh.woman,fh.walkPhase);
+    }
+  }
+
   /* Draws a sprite scaled (preserving its own aspect ratio, like
      object-fit:contain) so a target diameter means the actual artwork,
      never a stretched/cropped square. */
@@ -4752,6 +4893,10 @@ $('#lightbox').addEventListener('touchend',e=>{
         drawSpriteFit(im,0,0,d);
       } else { ctx.fillStyle='#ff5d5d'; ctx.beginPath(); ctx.arc(en.x,en.y,en.r,0,6.283); ctx.fill(); }
       ctx.restore();
+      if(en.carrying){
+        const hs=Math.max(15,scaleUnit()*0.032);
+        drawHumanoidFigure(en.x,en.y+en.r*1.6,hs,en.carrying.woman,en.carrying.walkPhase);
+      }
       if(en.boss&&en.maxHp>1&&en.hp<en.maxHp){
         // a thin remaining-hits pip row under tougher boss-wave Manti
         const pw=Math.max(3,en.r*0.28), gap=pw*0.5, total=en.maxHp*pw+(en.maxHp-1)*gap;
@@ -4893,6 +5038,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     drawStars();
     drawTerrain();
     drawHumanoids();
+    drawFallingHumanoids();
     drawKillTexts();
     drawEnemies();
     drawBullets();
@@ -4934,9 +5080,13 @@ $('#lightbox').addEventListener('touchend',e=>{
     goTitle=document.getElementById('goTitle');
     goSub=document.getElementById('goSub');
     goBtn=document.getElementById('gameGoBtn');
+    gameFsBtn=document.getElementById('gameFsBtn');
+    gameFsLabel=document.getElementById('gameFsLabel');
     hofOverlay=document.getElementById('hofOverlay');
     hofColA=document.getElementById('hofColA');
     hofColB=document.getElementById('hofColB');
+    hofColC=document.getElementById('hofColC');
+    hofColD=document.getElementById('hofColD');
     hofEntryRow=document.getElementById('hofEntryRow');
     hofInitialsInput=document.getElementById('hofInitials');
     hofSubmitBtn=document.getElementById('hofSubmit');
@@ -4965,6 +5115,32 @@ $('#lightbox').addEventListener('touchend',e=>{
       window.addEventListener('resize',()=>{ if(canvas&&document.body.contains(canvas)) onSizeReady(); });
       document.addEventListener('keydown',onKeyDown);
       document.addEventListener('keyup',onKeyUp);
+      document.addEventListener('fullscreenchange',()=>{
+        if(gameFsLabel) gameFsLabel.textContent=document.fullscreenElement?'EXIT':'FULL';
+        setTimeout(()=>{ if(canvas) resize(); },120);
+      });
+      /* Owner-only score reset: type GOLDRESET while the Hall of Fame is
+         visible. No button is shown to visitors — they never see this option. */
+      let resetBuf='';
+      document.addEventListener('keydown',function(ev){
+        if(!hofOverlay||hofOverlay.classList.contains('hidden')){ resetBuf=''; return; }
+        if(/^[a-zA-Z]$/.test(ev.key)){
+          resetBuf=(resetBuf+ev.key.toUpperCase()).slice(-9);
+          if(resetBuf==='GOLDRESET'){
+            resetBuf='';
+            if(confirm('Reset all Hall of Fame scores to defaults?')){
+              hallOfFame=DEFAULT_HOF.slice();
+              saveHOF();
+              highScore=0;
+              try{ localStorage.removeItem(HS_KEY); }catch(e){}
+              statsGamesPlayed=0; statsBestWave=0;
+              try{ localStorage.removeItem(STATS_KEY); }catch(e){}
+              renderHOF();
+              updateHud();
+            }
+          }
+        }
+      });
     }
     // ResizeObserver catches the canvas's real size the moment layout settles
     // (its first callback fires as soon as it starts observing), so the game
@@ -4980,6 +5156,17 @@ $('#lightbox').addEventListener('touchend',e=>{
     wireTouch();
 
     if(goBtn) goBtn.onclick=()=>{ if(state==='idle'||state==='gameover') startGame(); };
+    if(gameFsBtn){
+      gameFsBtn.onclick=()=>{
+        const wrap=document.getElementById('gameWrap');
+        if(!wrap) return;
+        if(!document.fullscreenElement){
+          if(wrap.requestFullscreen) wrap.requestFullscreen().catch(()=>{});
+        } else {
+          document.exitFullscreen().catch(()=>{});
+        }
+      };
+    }
     canvas.addEventListener('click',()=>{ if(state==='idle') startGame(); });
 
     if(!imagesReady) loadImages(()=>{ imagesReady=true; idleFrame(); });
