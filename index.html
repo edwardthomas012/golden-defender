@@ -599,6 +599,8 @@ section.block.tight{padding:60px 0}
 .romhead h4{font-family:'Sora';font-weight:700;font-size:18px;margin:0}
 .romperiod{font-family:'Space Mono';font-size:11px;letter-spacing:.5px;color:var(--ink-mute);text-transform:uppercase}
 .romcard p{color:var(--ink-dim);font-size:14.5px;line-height:1.6;margin:0}
+.rombtns{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
+.romcount{font-size:13px;color:var(--ink-mute);font-family:'Sora'}
 .romnote{margin-top:20px;font-family:'Space Mono';font-size:12px;color:var(--ink-mute);line-height:1.7;max-width:70ch}
 /* ---------------- HISTORY PAGE ---------------- */
 .hist-intro p{max-width:76ch;color:var(--ink-dim);font-size:16px;line-height:1.75;margin:0 0 18px}
@@ -1581,10 +1583,10 @@ const SITE = {
       { name:"Later Series", note:"25 pages · enhanced white", pdf:"schematics/later-series.pdf", cover:"schematics/cover-02.jpg" }
     ],
     romHistory:[
-      { name:"White Label", period:"November 1980", desc:"Defender debuted at the AMOA Chicago trade show on October 31, 1980, and reached operators about two weeks later. White label boards are the earliest ROM set and by far the rarest today — most surviving accounts describe only a handful of genuine White-labeled machines, and they're frequently confused with lightly-striped Blue boards. White carries an attract-mode scoring bug: the high-score table lists Landers at 100 points instead of the correct 150, and the built-in high score for player PGD reads 14,185 instead of the corrected 14,285 seen in later revisions. That exact bug later surfaced in a real Williams court case against Artic Manufacturing over their bootleg 'Defense Command' — the case record confirms the error existed in Williams' own early code, not just the clone." },
-      { name:"Blue Label", period:"Early production", desc:"A close revision of White, built on 10 EPROMs and missing the chip at position IC5. It shares several ROM chips with the Green set that came after it, and still upright-cabinet only — the cocktail version didn't exist yet. The same Lander scoring bug from White carries over into Blue." },
-      { name:"Green Label", period:"Mid production", desc:"Green label boards use 11 EPROMs (still nothing in IC5) and correct the scoring bug from White and Blue — Landers correctly show 150 points, and the attract-mode high score is updated. Still upright-only, and the last revision before Williams introduced the cocktail cabinet." },
-      { name:"Red Label", period:"1981", desc:"Released alongside Williams' two-player, sit-down cocktail cabinet, which needed real code changes — not just a bugfix — to flip the screen and controls for player two. Red uses 11 EPROMs, all different part numbers from the earlier sets, a mix of 2716 and 2532 chips. It became the most widely produced revision and the most common one still in circulation, and it's the version MAME uses as its default parent set." }
+      { name:"White Label", period:"November 1980", romZip:"schematics/roms-white-label.zip", romCount:"10 EPROMs + sound", desc:"Defender debuted at the AMOA Chicago trade show on October 31, 1980, and reached operators about two weeks later. White label boards are the earliest ROM set and by far the rarest today — most surviving accounts describe only a handful of genuine White-labeled machines, and they're frequently confused with lightly-striped Blue boards. White carries an attract-mode scoring bug: the high-score table lists Landers at 100 points instead of the correct 150, and the built-in high score for player PGD reads 14,185 instead of the corrected 14,285 seen in later revisions. That exact bug later surfaced in a real Williams court case against Artic Manufacturing over their bootleg 'Defense Command' — the case record confirms the error existed in Williams' own early code, not just the clone." },
+      { name:"Blue Label", period:"Early production", romZip:"schematics/roms-blue-label.zip", romCount:"10 EPROMs + sound", desc:"A close revision of White, built on 10 EPROMs and missing the chip at position IC5. It shares several ROM chips with the Green set that came after it, and still upright-cabinet only — the cocktail version didn't exist yet. The same Lander scoring bug from White carries over into Blue." },
+      { name:"Green Label", period:"Mid production", romZip:"schematics/roms-green-label.zip", romCount:"11 EPROMs + sound", desc:"Green label boards use 11 EPROMs (still nothing in IC5) and correct the scoring bug from White and Blue — Landers correctly show 150 points, and the attract-mode high score is updated. Still upright-only, and the last revision before Williams introduced the cocktail cabinet." },
+      { name:"Red Label", period:"1981", romZip:"schematics/roms-red-label.zip", romCount:"11 EPROMs + sound", desc:"Released alongside Williams' two-player, sit-down cocktail cabinet, which needed real code changes — not just a bugfix — to flip the screen and controls for player two. Red uses 11 EPROMs, all different part numbers from the earlier sets, a mix of 2716 and 2532 chips. It became the most widely produced revision and the most common one still in circulation, and it's the version MAME uses as its default parent set." }
     ]
   },
 
@@ -1606,7 +1608,7 @@ const SITE = {
       { q:"What does the number 50,001 mean?", a:"It's a tribute number. The original 50,000th Defender rolled off the Williams production line in 1981 — this machine is numbered 50,001 in its honor, finished in gold to mark the milestone." },
       { q:"Who created the original Defender?", a:"Defender was created in 1981 by Eugene Jarvis, Larry DeMar, and Sam Dicker at Williams Electronics — the same team credited for the game's iconic sound design." },
       { q:"Where can I hear the game's music and sound effects?", a:"Head to the Songs and Sounds pages — tribute tracks from fans and musicians, plus every classic effect straight from the cabinet." },
-      { q:"Can I download the schematics?", a:"Yes. The Schematics page has the full Early and Later series service manuals, viewable on-screen or downloadable as a zip." },
+      { q:"Can I download the schematics?", a:"Yes. The Schematics page has the full Early and Later series service manuals, viewable on-screen or downloadable as a zip. You'll also find the original ROM dumps for all four production sets — White, Blue, Green, and Red — each downloadable as a separate zip." },
       { q:"How was Defender received when it first came out?", a:"Rougher than you'd expect for a legend. It debuted at the AMOA Chicago trade show on October 31, 1980, and the demanding controls scared off a lot of first-time players — some in the industry predicted it would flop next to Pac-Man. Williams even burned its first demo ROMs backwards and had to redo them just before the show. It obviously turned out fine: Defender went on to become one of the highest-grossing arcade games ever made." },
       { q:"Is there a Defender song?", a:"Yes — Buckner & Garcia, the duo behind 'Pac-Man Fever,' wrote a tribute track called 'Defender' for that same album. The cabinet has also made cameo appearances in a handful of early-80s films." },
       { q:"What's the official high score record?", a:"On Marathon settings, Chris Hoffman holds the record at 79,976,975 points, set January 1, 1984. On Tournament settings, Bill Jones holds it at 543,950 points, set August 15, 2008." }
@@ -2935,13 +2937,17 @@ function viewSchematics(){
   const roms=(s.romHistory||[]).map(r=>`<div class="romcard">
       <div class="romhead"><h4 class="tgold">${esc(r.name)}</h4><span class="romperiod">${esc(r.period)}</span></div>
       <p>${esc(r.desc)}</p>
+      <div class="rombtns">
+        ${r.romZip?`<a class="btn primary" href="${esc(r.romZip)}" download>⬇ Download ROMs (.zip)</a>`:''}
+        ${r.romCount?`<span class="romcount">${esc(r.romCount)}</span>`:''}
+      </div>
     </div>`).join('');
   const romSection=(s.romHistory||[]).length?`<div class="sec-head" style="margin-top:56px"><div>
       <span class="eyebrow">Production history</span><h2>The ROM Sets</h2>
-      <p class="lead">Defender went through four ROM revisions over its production run, in this order: White, Blue, Green, then Red. Here's what changed with each one.</p>
+      <p class="lead">Defender went through four ROM revisions over its production run, in this order: White, Blue, Green, then Red. Here's what changed with each one — and you can download the original ROM dumps for all four sets below.</p>
     </div></div>
     <div class="romgrid">${roms}</div>
-    <p class="romnote">Note: these ROM chips contain the original Defender game code, which is copyrighted software — so we're not able to host or link the actual ROM files here. This is a historical write-up only.</p>`:'';
+    <p class="romnote">These ROM dumps are provided for preservation, repair, and MAME emulation purposes. The original Defender ROM code is copyrighted by Williams Electronics. If you own a physical Defender cabinet, these files can be used to repair or replace faulty ROM chips.</p>`:'';
   return `<section class="block wrap"><div class="sec-head"><div><span class="eyebrow">Reference // service manual</span><h2>Schematics</h2>
     <p class="lead">${esc(s.blurb)}</p></div>
     ${s.zip?`<a class="btn primary schzip" href="${esc(s.zip)}" download>⬇ Download all (.zip)</a>`:''}</div>
