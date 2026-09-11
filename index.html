@@ -134,20 +134,21 @@ header{position:sticky;top:0;z-index:50;
 .brand .nm{font-family:'Sora';font-weight:800;font-size:19px;letter-spacing:.5px;line-height:1}
 .brand .nm small{display:block;font-family:'Space Mono';font-weight:400;font-size:9px;letter-spacing:3px;
   color:var(--ink-mute);margin-top:5px}
-nav.main{margin-left:auto;display:flex;gap:2px;flex-wrap:wrap}
-nav.main a{font-family:'Space Mono';font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--ink-dim);padding:10px 13px;border-radius:9px;transition:.18s;position:relative}
+nav.main{margin-left:auto;display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+nav.main::-webkit-scrollbar{display:none}
+nav.main a{font-family:'Space Mono';font-size:12px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--ink-dim);padding:10px 11px;border-radius:9px;transition:.18s;position:relative;white-space:nowrap}
 nav.main a:hover{color:var(--ink);background:rgba(140,160,230,.08)}
 nav.main a.active{color:var(--gold)}
 nav.main a.active::after{content:"";position:absolute;left:13px;right:13px;bottom:4px;height:2px;
   background:var(--gold);box-shadow:0 0 10px var(--gold);border-radius:2px}
 .menu-btn{display:none;margin-left:auto;background:var(--glass);border:1px solid var(--line-2);
   color:var(--ink);border-radius:10px;padding:10px 14px;font-family:'Space Mono';font-size:12px;letter-spacing:2px}
-@media(max-width:1000px){
-  nav.main{display:none;position:fixed;inset:67px 0 auto 0;flex-direction:column;gap:0;
-    background:rgb(7,10,24);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:8px;z-index:49}
+@media(max-width:1150px){
+  nav.main{display:none;position:fixed;top:67px;left:0;right:0;bottom:0;height:calc(100vh - 67px);flex-direction:column;gap:0;
+    background:rgb(7,10,24);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:8px;z-index:49;overflow-y:auto}
   nav.main.open{display:flex}
-  nav.main a{padding:15px 16px;font-size:14px;border-bottom:1px solid var(--line)}
+  nav.main a{padding:15px 16px;font-size:14px;border-bottom:1px solid var(--line);white-space:normal}
   nav.main a.active::after{display:none}
   .menu-btn{display:block}
 }
