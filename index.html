@@ -968,7 +968,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 #flybyLayer{position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden}
 .flyby-banner{position:absolute;top:var(--flyby-y,18%);left:0;transform:translateX(110vw);
   animation:flybySweep var(--flyby-duration,22s) linear forwards;display:flex;align-items:center;gap:0;
-  will-change:transform}
+  pointer-events:auto;cursor:pointer;will-change:transform}
 .flyby-banner .fb-ship{width:64px;height:40px;object-fit:contain;flex-shrink:0;margin-right:-6px;z-index:2;
   filter:drop-shadow(0 0 8px rgba(255,206,77,.45))}
 .flyby-banner .fb-rope{width:22px;height:2px;background:var(--gold);flex-shrink:0;opacity:.7}
