@@ -852,7 +852,14 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;
   box-shadow:0 30px 70px rgba(0,0,0,.55);touch-action:none;user-select:none}
 @media(pointer:coarse) and (max-width:1024px){
-  .game-wrap{aspect-ratio:auto;height:60vh;max-height:60vh}
+  .game-wrap{aspect-ratio:auto;height:55vh;max-height:55vh}
+}
+/* Smaller touch controls on narrow phones so all buttons fit */
+@media(max-width:420px){
+  .gt-pad{width:108px;height:108px;left:10px;bottom:10px;gap:3px}
+  .gt-btn{font-size:14px;border-radius:8px}
+  .gt-fire{width:64px;height:64px;right:12px;bottom:16px;font-size:12px}
+  .gt-bomb{width:46px;height:46px;right:84px;bottom:24px;font-size:9px}
 }
 #gameCanvas{display:block;width:100%;height:100%}
 .game-hud{position:absolute;top:10px;left:14px;z-index:3;display:flex;flex-direction:column;gap:3px;
@@ -876,6 +883,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .go-keys{margin-top:14px;font-size:12px;color:var(--ink-mute);letter-spacing:.3px;white-space:normal;line-height:1.6}
 .game-touch{position:absolute;inset:0;z-index:2;display:none;pointer-events:none}
 @media(pointer:coarse){.game-touch{display:block}}
+@media(max-width:1024px){.game-touch{display:block}}
 .gt-pad{position:absolute;left:14px;bottom:14px;width:132px;height:132px;
   display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;
   gap:4px;pointer-events:auto}
@@ -5948,22 +5956,32 @@ $('#lightbox').addEventListener('touchend',e=>{
     wireTouch();
 
     if(goBtn) goBtn.onclick=()=>{ if(state==='idle'||state==='gameover') startGame(); };
-    /* Mobile fullscreen: when starting game on touch device, expand to fill viewport */
-    if(goBtn){
-      goBtn.addEventListener('click',function(){
-        var wrap=document.getElementById('gameWrap');
-        if(wrap&&matchMedia('(pointer:coarse) and (max-width:1024px)').matches){
-          wrap.classList.add('mobile-fs');
-          if(wrap.requestFullscreen) wrap.requestFullscreen().catch(function(){});
-          setTimeout(function(){ if(canvas) canvas.focus(); },100);
+    /* Mobile fullscreen: auto-expand game to fill viewport on phones/tablets */
+    (function(){
+      var wrap=document.getElementById('gameWrap');
+      if(!wrap) return;
+      var isMobile = matchMedia('(max-width:1024px)').matches;
+      if(isMobile){
+        wrap.classList.add('mobile-fs');
+        /* Move to body so z-index:9999 isn't trapped inside section's stacking context */
+        if(wrap.parentElement !== document.body){
+          document.body.appendChild(wrap);
         }
-      });
-    }
+        /* Also try native fullscreen on START click (requires user gesture) */
+        if(goBtn){
+          goBtn.addEventListener('click',function(){
+            if(wrap.requestFullscreen) wrap.requestFullscreen().catch(function(){});
+          });
+        }
+      }
+    })();
     if(gameExitBtn){
       gameExitBtn.onclick=function(){
         var wrap=document.getElementById('gameWrap');
         if(wrap) wrap.classList.remove('mobile-fs');
         if(document.fullscreenElement) document.exitFullscreen().catch(function(){});
+        /* Navigate away from game page */
+        location.hash='#home';
       };
     }
     if(gameFsBtn){
