@@ -3036,7 +3036,10 @@ function viewContact(){
     </div></div>
 
     <div class="sec-head" style="margin:40px 0 16px"><div><span class="eyebrow">Send a message</span><h2>Direct Transmission</h2></div></div>
-    <form class="contact-form" id="contactForm">
+    <form class="contact-form" id="contactForm" action="https://formsubmit.co/contact@golden-defender.com" method="POST">
+      <input type="hidden" name="_subject" value="New message from Golden Defender site" />
+      <input type="hidden" name="_template" value="table" />
+      <input type="text" name="_honey" style="display:none" />
       <div class="cf-row">
         <div class="cf-field">
           <label for="cfName">Your Name</label>
@@ -3063,7 +3066,7 @@ function viewContact(){
         <textarea id="cfMessage" name="message" required placeholder="Your message..."></textarea>
       </div>
       <button type="submit" class="cf-submit">Send Transmission ▸</button>
-      <p class="cf-note">Powered by Formspree — your email is never exposed. Replace the form ID in the code to activate.</p>
+      <p class="cf-note">Free form service by FormSubmit — your email is never exposed. First submission triggers a one-time confirmation email.</p>
     </form>
     <div class="cf-success" id="cfSuccess">✓ Message sent. I'll get back to you soon.</div>
 
@@ -3414,7 +3417,7 @@ function render(){
   else if(window._stopGamePage){ window._stopGamePage(); }
   document.body.classList.toggle('on-play', base==='play');
 
-  /* Formspree contact form — replace FORM_ID with your real Formspree form ID */
+  /* FormSubmit contact form — free, no account needed, unlimited submissions */
   var cf=document.getElementById('contactForm');
   if(cf){
     cf.addEventListener('submit',function(e){
@@ -3423,8 +3426,7 @@ function render(){
       var orig=btn.textContent;
       btn.textContent='Transmitting...';
       btn.disabled=true;
-      var data=new FormData(cf);
-      fetch('https://formspree.io/f/FORM_ID',{method:'POST',body:data,headers:{Accept:'application/json'}})
+      fetch(cf.action,{method:'POST',body:new FormData(cf),headers:{Accept:'application/json'}})
         .then(function(r){if(r.ok){cf.reset();document.getElementById('cfSuccess').classList.add('show');}})
         .catch(function(){})
         .finally(function(){btn.textContent=orig;btn.disabled=false;});
