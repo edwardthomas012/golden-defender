@@ -968,22 +968,37 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 #flybyLayer{position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden}
 .flyby-banner{position:absolute;top:var(--flyby-y,18%);left:0;transform:translateX(110vw);
   animation:flybySweep var(--flyby-duration,22s) linear forwards;display:flex;align-items:center;gap:0;
-  pointer-events:auto;cursor:pointer;will-change:transform}
+  pointer-events:auto;cursor:pointer;will-change:transform;transition:filter .2s}
+.flyby-banner:hover{filter:brightness(1.15)}
 .flyby-banner .fb-ship{width:64px;height:40px;object-fit:contain;flex-shrink:0;margin-right:-6px;z-index:2;
   filter:drop-shadow(0 0 8px rgba(255,206,77,.45))}
 .flyby-banner .fb-rope{width:22px;height:2px;background:var(--gold);flex-shrink:0;opacity:.7}
 .flyby-banner .fb-panel{background:rgba(8,12,28,.92);border:2px solid var(--gold);border-radius:10px;
-  padding:10px 22px;display:flex;flex-direction:column;gap:2px;white-space:nowrap;
-  box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 0 1px rgba(255,206,77,.15)}
+  padding:10px 22px 10px 18px;display:flex;flex-direction:column;gap:2px;white-space:nowrap;
+  box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 0 1px rgba(255,206,77,.15);position:relative}
 .flyby-banner .fb-title{font-family:'Sora',sans-serif;font-weight:800;font-size:16px;color:var(--gold-bri);
   letter-spacing:.5px;text-transform:uppercase}
 .flyby-banner .fb-line{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);opacity:.85}
+/* Pulsing clickable hint badge */
+.flyby-banner .fb-hint{position:absolute;top:-8px;right:-8px;background:var(--gold);color:#1a1405;
+  font-family:'Sora',sans-serif;font-weight:800;font-size:9px;padding:3px 7px;border-radius:6px;
+  letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;
+  animation:fbPulse 1.8s ease-in-out infinite;box-shadow:0 2px 8px rgba(255,206,77,.5)}
+@keyframes fbPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+@media(max-width:900px){
+  .flyby-banner .fb-ship{width:52px;height:33px}
+  .flyby-banner .fb-panel{padding:8px 16px 8px 12px}
+  .flyby-banner .fb-title{font-size:14px}
+  .flyby-banner .fb-line{font-size:12px}
+  .flyby-banner .fb-rope{width:16px}
+}
 @media(max-width:640px){
-  .flyby-banner .fb-ship{width:44px;height:28px}
-  .flyby-banner .fb-panel{padding:7px 14px}
-  .flyby-banner .fb-title{font-size:13px}
-  .flyby-banner .fb-line{font-size:11px}
-  .flyby-banner .fb-rope{width:14px}
+  .flyby-banner .fb-ship{width:40px;height:25px;margin-right:-4px}
+  .flyby-banner .fb-panel{padding:6px 12px 6px 8px;border-radius:8px}
+  .flyby-banner .fb-title{font-size:12px}
+  .flyby-banner .fb-line{font-size:10px;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+  .flyby-banner .fb-rope{width:10px}
+  .flyby-banner .fb-hint{font-size:8px;padding:2px 5px;top:-6px;right:-6px}
 }
 @keyframes flybySweep{from{transform:translateX(110vw)}to{transform:translateX(-130vw)}}
 @media(prefers-reduced-motion:reduce){.flyby-banner{animation:none!important;display:none!important}}
@@ -3781,6 +3796,10 @@ addEventListener('hashchange',render);
     lineEl.textContent=line;
     panel.appendChild(title);
     panel.appendChild(lineEl);
+    var hint=document.createElement('span');
+    hint.className='fb-hint';
+    hint.textContent='Tap →';
+    panel.appendChild(hint);
     banner.appendChild(ship);
     banner.appendChild(rope);
     banner.appendChild(panel);
@@ -4759,7 +4778,7 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   function fireBullet(){
     const r=Math.max(2.4,scaleUnit()*0.007);
-    bullets.push({x:player.x+player.facing*player.r*1.05, y:player.y, vx:player.facing*560, r});
+    bullets.push({x:player.x+player.facing*player.r*1.8, y:player.y, vx:player.facing*560, r});
     playPew();
   }
 
@@ -5074,7 +5093,7 @@ $('#lightbox').addEventListener('touchend',e=>{
        survives and walks again. */
     for(let i=fallingHumanoids.length-1;i>=0;i--){
       const fh=fallingHumanoids[i];
-      fh.vy+=220*dt;
+      fh.vy+=90*dt;
       fh.y+=fh.vy*dt;
       fh.walkPhase+=dt*6;
       if(fh.speechTimer>0) fh.speechTimer=Math.max(0,fh.speechTimer-dt);
@@ -5457,33 +5476,29 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   /* Small speech-bubble callout above a Humanoid's head, with a fade
      in/out and a little pointer tail. */
-  function drawSpeechBubble(x,y,text,alpha){
+  function drawSpeechBubble(x,y,text,alpha,color){
     ctx.save();
     ctx.globalAlpha=alpha;
     const fontSize=Math.max(10,scaleUnit()*0.020);
     ctx.font='800 '+fontSize+'px Sora, sans-serif';
     const padX=fontSize*0.6, padY=fontSize*0.42;
-    const maxWidth=Math.min(240,ctx.canvas?ctx.canvas.width*0.42:220);
-    /* Wrap text into up to 2 lines based on measured width */
+    const maxWidth=Math.min(260,ctx.canvas?ctx.canvas.width*0.44:240);
+    /* Wrap text into up to 3 lines based on measured width — no truncation */
     var words=String(text).split(' ');
     var lines=[], cur='';
     for(var wi=0;wi<words.length;wi++){
       var test=cur?cur+' '+words[wi]:words[wi];
       if(ctx.measureText(test).width>maxWidth && cur){
         lines.push(cur);
-        /* line 2 = remaining words */
-        cur=words.slice(wi).join(' ');
-        break;
+        cur=words[wi];
       } else { cur=test; }
     }
     if(cur) lines.push(cur);
     if(lines.length===0) lines=[text];
-    /* If line 2 still too long, truncate with ellipsis */
-    if(lines.length>1 && ctx.measureText(lines[1]).width>maxWidth){
-      while(lines[1].length>1 && ctx.measureText(lines[1]+'…').width>maxWidth){
-        lines[1]=lines[1].slice(0,-1);
-      }
-      lines[1]+='…';
+    /* If more than 3 lines, merge excess into line 3 (no truncation) */
+    if(lines.length>3){
+      lines[2]=lines.slice(2).join(' ');
+      lines=lines.slice(0,3);
     }
     var lineH=fontSize*1.15;
     var bw=0;
@@ -5496,13 +5511,20 @@ $('#lightbox').addEventListener('touchend',e=>{
     /* Clamp x so bubble stays fully on-screen */
     var bx=x-bw/2;
     var cw=ctx.canvas?ctx.canvas.width:800;
+    var ch=ctx.canvas?ctx.canvas.height:600;
     if(bx<4) bx=4;
     if(bx+bw>cw-4) bx=cw-4-bw;
     var by=y-bh-fontSize*0.9;
     if(by<4) by=4;
+    /* If bubble would go below screen, show below speaker instead */
+    if(by+bh>ch-4){ by=y+fontSize*0.9; if(by+bh>ch-4) by=ch-4-bh; if(by<4) by=4; }
     var r=Math.min(8,bh*0.3);
-    ctx.fillStyle='rgba(8,12,28,.86)';
-    ctx.strokeStyle='rgba(255,206,77,.85)';
+    var textColor=color||'#ffe9a8';
+    var borderColor=color||'rgba(255,206,77,.85)';
+    /* If border is a hex color, convert to rgba with .85 alpha */
+    if(color&&color[0]==='#'){ borderColor=color+'d9'; }
+    ctx.fillStyle='rgba(8,12,28,.88)';
+    ctx.strokeStyle=borderColor;
     ctx.lineWidth=1.4;
     ctx.beginPath();
     ctx.moveTo(bx+r,by);
@@ -5510,12 +5532,21 @@ $('#lightbox').addEventListener('touchend',e=>{
     ctx.lineTo(bx+bw,by+bh-r); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh);
     /* Tail points toward the speaker — clamp tail x to bubble bounds */
     var tailX=Math.max(bx+10,Math.min(bx+bw-10,x));
-    ctx.lineTo(tailX+6,by+bh); ctx.lineTo(tailX,by+bh+7); ctx.lineTo(tailX-6,by+bh);
-    ctx.lineTo(bx+r,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-r);
-    ctx.lineTo(bx,by+r); ctx.quadraticCurveTo(bx,by,bx+r,by);
+    var tailDir=by<y?1:-1; /* tail points down if bubble is above speaker */
+    if(tailDir>0){
+      ctx.lineTo(tailX+6,by+bh); ctx.lineTo(tailX,by+bh+7); ctx.lineTo(tailX-6,by+bh);
+      ctx.lineTo(bx+r,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-r);
+      ctx.lineTo(bx,by+r); ctx.quadraticCurveTo(bx,by,bx+r,by);
+    } else {
+      /* Bubble is below speaker — tail points up */
+      ctx.lineTo(bx+bw-r,by+bh); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh);
+      ctx.lineTo(bx+r,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-r);
+      ctx.lineTo(bx,by+r); ctx.quadraticCurveTo(bx,by,bx+r,by);
+      ctx.moveTo(tailX-6,by); ctx.lineTo(tailX,by-7); ctx.lineTo(tailX+6,by);
+    }
     ctx.closePath();
     ctx.fill(); ctx.stroke();
-    ctx.fillStyle='#ffe9a8';
+    ctx.fillStyle=textColor;
     ctx.textAlign='center'; ctx.textBaseline='middle';
     var textStartY=by+padY+lineH/2;
     for(var ti=0;ti<lines.length;ti++){
@@ -5541,29 +5572,31 @@ $('#lightbox').addEventListener('touchend',e=>{
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=fontSize*0.4;
       ctx.fillStyle='#ff8a8a';
-      /* Wrap kill text into up to 2 lines, clamped to screen */
-      var maxWidth=Math.min(220,ctx.canvas?ctx.canvas.width*0.38:200);
+      /* Wrap kill text into up to 3 lines, clamped to screen — no truncation */
+      var maxWidth=Math.min(240,ctx.canvas?ctx.canvas.width*0.42:220);
       var words=String(k.text).split(' ');
       var lines=[], cur='';
       for(var wi=0;wi<words.length;wi++){
         var test=cur?cur+' '+words[wi]:words[wi];
         if(ctx.measureText(test).width>maxWidth && cur){
           lines.push(cur);
-          cur=words.slice(wi).join(' ');
-          break;
+          cur=words[wi];
         } else { cur=test; }
       }
       if(cur) lines.push(cur);
       if(lines.length===0) lines=[k.text];
-      if(lines.length>1 && ctx.measureText(lines[1]).width>maxWidth){
-        while(lines[1].length>1 && ctx.measureText(lines[1]+'…').width>maxWidth){ lines[1]=lines[1].slice(0,-1); }
-        lines[1]+='…';
-      }
+      if(lines.length>3){ lines[2]=lines.slice(2).join(' '); lines=lines.slice(0,3); }
       var lineH=fontSize*1.15;
       var cw=ctx.canvas?ctx.canvas.width:800;
+      var ch=ctx.canvas?ctx.canvas.height:600;
       var kx=Math.max(maxWidth/2+4,Math.min(cw-maxWidth/2-4,k.x));
+      /* Clamp y so text stays fully on-screen */
+      var startY=k.y;
+      var totalH=lines.length*lineH;
+      if(startY<totalH/2+4) startY=totalH/2+4;
+      if(startY+totalH/2>ch-4) startY=ch-4-totalH/2;
       for(var ti=0;ti<lines.length;ti++){
-        ctx.fillText(lines[ti], kx, k.y+ti*lineH);
+        ctx.fillText(lines[ti], kx, startY+ti*lineH);
       }
       ctx.restore();
     }
@@ -5578,7 +5611,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         let a=1;
         if(h.speechTimer>3.7) a=(4.2-h.speechTimer)/0.5;
         else if(h.speechTimer<0.6) a=h.speechTimer/0.6;
-        drawSpeechBubble(x,y-s,h.speechText,Math.max(0,Math.min(1,a)));
+        drawSpeechBubble(x,y-s,h.speechText,Math.max(0,Math.min(1,a)),'#ffe9a8');
       }
     }
   }
@@ -5590,7 +5623,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(const fh of fallingHumanoids){
       drawHumanoidFigure(fh.x,fh.y,s,fh.woman,fh.walkPhase);
       if(fh.speechTimer>0&&fh.speechText){
-        drawSpeechBubble(fh.x,fh.y-s,fh.speechText,1);
+        drawSpeechBubble(fh.x,fh.y-s,fh.speechText,1,'#ffc89a');
       }
     }
   }
@@ -5626,7 +5659,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         const hy=en.y+en.r*1.6;
         drawHumanoidFigure(en.x,hy,hs,en.carrying.woman,en.carrying.walkPhase);
         if(en.carrying.speechTimer>0){
-          drawSpeechBubble(en.x,hy-hs,en.carrying.speechText,1);
+          drawSpeechBubble(en.x,hy-hs,en.carrying.speechText,1,'#a8e6ff');
         }
       }
       if(en.boss&&en.maxHp>1&&en.hp<en.maxHp){
@@ -5659,7 +5692,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   function drawBullets(){
     for(const b of bullets){
       const dir=b.vx>=0?1:-1;
-      const len=Math.max(46,b.r*18);
+      const len=Math.max(28,b.r*10);
       const x2=b.x-dir*len;
       const g=ctx.createLinearGradient(b.x,b.y,x2,b.y);
       g.addColorStop(0,'#f2ffff');
