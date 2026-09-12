@@ -3759,7 +3759,8 @@ $('#lightbox').addEventListener('touchend',e=>{
     "SEE YOU NEXT WAVE, MAYBE!"
   ];
   /* Funny, witty lines a Humanoid says while being carried aloft by a
-     Lander — panicking, sarcastic, resigned, or oddly enthusiastic. */
+     Lander — panicking, sarcastic, resigned, or oddly enthusiastic.
+     One saying per pickup — no cycling. */
   const HUMANOID_CARRIED_LINES=[
     "PUT ME DOWN, I'M EXPENSIVE!","IS THIS FIRST CLASS?","I DIDN'T PACK FOR THIS!",
     "MY MOM IS GONNA FREAK!","DOES THIS COUNT AS FLYING?","I CAN'T SWIM!",
@@ -3779,7 +3780,61 @@ $('#lightbox').addEventListener('touchend',e=>{
     "I THINK I SEE GOLDIE UP THERE!","HEY, WATCH THE CARRY HANDLE!",
     "IS THIS THE MUTANT CONVERSION PROGRAM?","I HAD PLANS TONIGHT!",
     "MY KIDS ARE GONNA HEAR ABOUT THIS!","DOES THIS COUNT AS MILEAGE?",
-    "I THINK I LEFT THE OVEN ON!","THIS IS NOT WHAT I MEANT BY 'GETTING LIFTED'!"
+    "I THINK I LEFT THE OVEN ON!","THIS IS NOT WHAT I MEANT BY 'GETTING LIFTED'!",
+    "DOES THIS COME WITH A CHARGER?","I DIDN'T READ THE TERMS AND CONDITIONS!",
+    "IS TIPPING EXPECTED UP HERE?","MY FITBIT SAYS I'M CLIMBING!",
+    "I'M TOO YOUNG TO MUTATE!","WHERE'S THE EMERGENCY EXIT?",
+    "DOES ANYBODY READ THE REVIEWS FOR THIS?","I THINK MY SHOE FELL OFF!",
+    "I SHOULD'VE CALLED IN SICK TODAY!","IS IT TOO LATE FOR A PARACHUTE?",
+    "DOES THIS COUNT AS A MILEAGE REBATE?","I CANCELLED MY GYM MEMBERSHIP FOR THIS?",
+    "HEY, AT LEAST IT'S NOT A SWARMER!","I FEEL LIKE A PIZZA DELIVERY RIGHT NOW!",
+    "DO I GET A STAMP IN MY ALIEN PASSPORT?","IS THE MUTANT PROGRAM VOLUNTARY?",
+    "I WAS PROMISED COMPLIMENTARY SNACKS!","DOES THIS COUNT TOWARDS MY SKYMILES?",
+    "I MISSED MY DENTIST APPOINTMENT FOR THIS!","WHO DO I TALK TO ABOUT THE VIBRATIONS?",
+    "I THINK I SEE MY EX DOWN THERE!","DOES THE MUTANT PROGRAM HAVE DENTAL?",
+    "I FORGOT TO FEED THE CAT!","I SHOULD'VE GONE WITH THE OTHER ABDUCTOR!",
+    "DOES THIS THING GO ANY FASTER?","MY HORIZONTALLY CHALLENGED BODY WASN'T READY!",
+    "I WAS TOLD THERE'D BE SNACKS!","CAN WE SWING BY MY HOUSE FIRST?",
+    "IS THIS THE SCENIC ROUTE TO MUTANT TOWN?","I DIDN'T KNOW ALIENS HAD CUSTOMER SERVICE!",
+    "I GIVE THIS RIDE TWO STARS!","DOES ANYBODY HAVE A MINT?",
+    "I THINK I LEFT MY WALLET IN MY OTHER PANTS!","DOES THE LANDER HAVE A FREQUENT FLYER PROGRAM?",
+    "I WAS PROMISED A REFRESHMENT CART!","IS IT NORMAL FOR THE GROUND TO GET SMALLER?",
+    "I DIDN'T CONSENT TO BEING A SOUVENIR!","DOES THIS RIDE HAVE A HEIGHT REQUIREMENT?",
+    "I FEEL LIKE A TROPHY RIGHT NOW!","WHO'S THE PILOT OF THIS THING, A LANDER?!",
+    "DO I GET A BADGE FOR SURVIVING THIS?","I THINK MY LUNCH IS COMING BACK UP!",
+    "IS THERE A COMPLAINT BOX UP HERE?","DOES THIS COUNT AS COMMUNITY SERVICE?"
+  ];
+  /* Witty, panicked lines a Humanoid says while plummeting after their
+     lander was shot — one saying per drop, shown during the fall. */
+  const HUMANOID_DROPPED_LINES=[
+    "THIS IS FINE, EVERYTHING IS FINE!","REMEMBER ME AS A HERO!","I SHOULD'VE WORN PARACHUTE PANTS!",
+    "GRAVITY IS MY ENEMY NOW!","WHEEE— NO WAIT, NOT WHEEE!","I REGRET NOTHING! WELL, MAYBE THIS!",
+    "DOES ANYONE HAVE A TRAMPOLINE DOWN THERE?!","I KNEW I SHOULD'VE PACKED A CHUTE!",
+    "THIS IS NOT WHAT SKYDIVING LOOKS LIKE!","I CAN'T FLY! I NEVER COULD!",
+    "SOMEBODY CATCH ME!","I SHOULD'VE STAYED IN BED!",
+    "IS THIS WHAT ASTROLOGY MEANT BY 'BIG CHANGES'?!",
+    "I FEEL LIKE A LAWN DART!","NOTE TO SELF: HATE GRAVITY!",
+    "I WANT MY MONEY BACK!","THIS ISN'T THE BUNGEE JUMP I SIGNED UP FOR!",
+    "I'M COMING IN HOT!","DOES THIS COUNT AS EXTREME SPORTS?",
+    "I NEVER LIKED HEIGHTS AND NOW I HAVE A REASON!","I SHOULD'VE LISTENED TO MY MOM!",
+    "WELL, THIS ACCELERATED QUICKLY!","I THINK I SEE MY LIFE FLASHING!",
+    "MY LAST WORDS: AAAAAAAAA!","I REGRET EVERYTHING THAT LED TO THIS!",
+    "I WAS PROMISED A LANDING, NOT A FALL!","SOMEBODY CALL MY MOM!",
+    "DOES ANYBODY HAVE A NET?!","I FEEL LIKE A SAND BAG!",
+    "IS IT TOO LATE TO APOLOGIZE TO GRAVITY?!","I SHOULD'VE WORN A HELMET!",
+    "THIS IS THE WORST ROLLER COASTER EVER!","I SHOULD'VE TAKEN THE ELEVATOR!",
+    "WELL, AT LEAST THE VIEW IS NICE— OH NO!","I DON'T WANT TO BE A PANCAKE!",
+    "DOES ANYBODY HAVE A SPARE PARACHUTE?!","I KNEW I SHOULD'VE LEARNED TO FLY!",
+    "THIS IS NOT HOW I WANTED TO MAKE AN ENTRANCE!","SOMEBODY PUT SOMETHING SOFT DOWN THERE!",
+    "I FEEL LIKE A BRICK WITH FEELINGS!","I THINK MY STOMACH IS STILL UP THERE!",
+    "IS THIS WHAT 'FREE FALL' MEANS?!","I SHOULD'VE WORN SENSIBLE SHOES!",
+    "I'M GOING TO SUE GRAVITY!","DOES THIS COUNT AS SKYDIVING WITHOUT THE COOL PART?",
+    "I NEVER SIGNED UP FOR THE VERTICAL KIND OF FUN!","IS THERE A BOUNCE HOUSE DOWN THERE?!",
+    "MY LAST THOUGHT: I SHOULD'VE ATE BREAKFAST!","I THINK I LEFT MY SOUL UP THERE!",
+    "WELL, THIS IS A PLOT TWIST!","I FEEL LIKE A METEOR WITH ANXIETY!",
+    "I HOPE THE GROUND IS READY FOR ME!","DOES ANYBODY HAVE A PILLOW?!",
+    "I SHOULD'VE BEFRIENDED GRAVITY SOONER!","I'M NOT READY FOR IMPACT!",
+    "THIS IS THE FASTEST I'VE EVER GONE DOWNWARD!","DOES THIS COUNT AS A WORKOUT?!"
   ];
   /* No-repeat shuffle system: cycles through all sayings in each array
      before any can repeat, so players never see the same line twice in a row. */
@@ -3802,6 +3857,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   const nextWalkLine=makeShuffler(HUMANOID_LINES);
   const nextKillLine=makeShuffler(HUMANOID_KILL_LINES);
   const nextCarriedLine=makeShuffler(HUMANOID_CARRIED_LINES);
+  const nextDroppedLine=makeShuffler(HUMANOID_DROPPED_LINES);
   const WAVE_BREAK_DURATION=2.6;
   const BOSS_WAVE_BREAK_DURATION=3.4;
   let keys={};
@@ -4227,7 +4283,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     }
     for(const en of enemies){
       if(en.carrying){
-        fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase});
+        fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
       }
     }
     enemies=[];
@@ -4371,7 +4427,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           if(Math.abs(dy)<10 && Math.abs(dx)<15){
             en.carrying=en.diveTarget;
             en.carrying.speechText=nextCarriedLine();
-            en.carrying.speechTimer=3.5;
+            en.carrying.speechTimer=99;
             const idx=humanoids.indexOf(en.diveTarget);
             if(idx>=0) humanoids.splice(idx,1);
             en.aiState='ascending';
@@ -4394,12 +4450,9 @@ $('#lightbox').addEventListener('touchend',e=>{
       }
       if(en.carrying){
         en.carrying.walkPhase+=dt*6;
-        // Cycle carried speech: when timer runs out, set a new witty line
+        // One saying per pickup — just count down the timer, no new lines
         if(en.carrying.speechTimer>0){
           en.carrying.speechTimer=Math.max(0,en.carrying.speechTimer-dt);
-        } else {
-          en.carrying.speechText=nextCarriedLine();
-          en.carrying.speechTimer=3.5;
         }
       }
     }
@@ -4423,7 +4476,7 @@ $('#lightbox').addEventListener('touchend',e=>{
             while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
             spawnParticles(en.x,en.y);
             if(en.carrying){
-              fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase});
+              fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
             }
             enemies.splice(i,1);
             waveKills++;
@@ -4471,6 +4524,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       fh.vy+=420*dt;
       fh.y+=fh.vy*dt;
       fh.walkPhase+=dt*6;
+      if(fh.speechTimer>0) fh.speechTimer=Math.max(0,fh.speechTimer-dt);
       const groundY=terrainYAt(fh.x);
       if(fh.y>=groundY){
         if(fh.vy>550){
@@ -4511,7 +4565,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         const killR=en.r*0.55+player.r*0.55; // tighter than the drawn size — has to actually touch, not just get near
         if(dx*dx+dy*dy<killR*killR){
           if(en.carrying){
-            fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase});
+            fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
           }
           enemies.splice(i,1);
           spawnParticles(player.x,player.y);
@@ -4920,6 +4974,9 @@ $('#lightbox').addEventListener('touchend',e=>{
     const s=Math.max(15,scaleUnit()*0.032);
     for(const fh of fallingHumanoids){
       drawHumanoidFigure(fh.x,fh.y,s,fh.woman,fh.walkPhase);
+      if(fh.speechTimer>0&&fh.speechText){
+        drawSpeechBubble(fh.x,fh.y-s,fh.speechText,1);
+      }
     }
   }
 
@@ -4954,10 +5011,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         const hy=en.y+en.r*1.6;
         drawHumanoidFigure(en.x,hy,hs,en.carrying.woman,en.carrying.walkPhase);
         if(en.carrying.speechTimer>0){
-          let a=1;
-          if(en.carrying.speechTimer>3.0) a=(3.5-en.carrying.speechTimer)/0.5;
-          else if(en.carrying.speechTimer<0.6) a=en.carrying.speechTimer/0.6;
-          drawSpeechBubble(en.x,hy-hs,en.carrying.speechText,Math.max(0,Math.min(1,a)));
+          drawSpeechBubble(en.x,hy-hs,en.carrying.speechText,1);
         }
       }
       if(en.boss&&en.maxHp>1&&en.hp<en.maxHp){
