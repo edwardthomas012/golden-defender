@@ -640,15 +640,24 @@ section.block.tight{padding:60px 0}
 .schzip{white-space:nowrap;margin-top:6px}
 .schgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;margin-top:14px}
 @media(max-width:720px){.schgrid{grid-template-columns:1fr}}
-.romgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin-top:22px}
-.romcard{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:20px 22px}
-.romhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.romgrid{display:flex;flex-direction:column;gap:16px;margin-top:22px}
+.romcard{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:18px 24px;display:flex;align-items:flex-start;gap:20px}
+.romcard .rominfo{flex:1;min-width:0}
+.romhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
 .romhead h4{font-family:'Sora';font-weight:700;font-size:18px;margin:0}
 .romperiod{font-family:'Space Mono';font-size:11px;letter-spacing:.5px;color:var(--ink-mute);text-transform:uppercase}
-.romcard p{color:var(--ink-dim);font-size:14.5px;line-height:1.6;margin:0}
+.romcard p{color:var(--ink-dim);font-size:14px;line-height:1.55;margin:0}
 .rombtns{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
 .romcount{font-size:13px;color:var(--ink-mute);font-family:'Sora'}
+.romdl{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:160px}
 .romnote{margin-top:20px;font-family:'Space Mono';font-size:12px;color:var(--ink-mute);line-height:1.7;max-width:70ch}
+.guide-card{display:flex;gap:28px;align-items:flex-start;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:24px}
+.guide-cover{width:140px;height:auto;flex-shrink:0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+.guide-info{flex:1;min-width:0}
+.guide-info .eyebrow{display:block;margin-bottom:4px}
+.guide-info h2{font-size:clamp(22px,3vw,32px);margin:0 0 10px}
+.guide-info .lead{color:var(--ink-dim);font-size:15px;line-height:1.65;margin:0 0 16px}
+@media(max-width:600px){.guide-card{flex-direction:column;align-items:center;text-align:center}.guide-cover{width:120px}}
 /* ---------------- HISTORY PAGE ---------------- */
 .hist-intro p{max-width:76ch;color:var(--ink-dim);font-size:16px;line-height:1.75;margin:0 0 18px}
 .histgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin-top:22px}
@@ -3030,9 +3039,11 @@ function viewSchematics(){
       </div>
     </article>`).join('');
   const roms=(s.romHistory||[]).map(r=>`<div class="romcard">
-      <div class="romhead"><h4 class="tgold">${esc(r.name)}</h4><span class="romperiod">${esc(r.period)}</span></div>
-      <p>${esc(r.desc)}</p>
-      <div class="rombtns">
+      <div class="rominfo">
+        <div class="romhead"><h4 class="tgold">${esc(r.name)}</h4><span class="romperiod">${esc(r.period)}</span></div>
+        <p>${esc(r.desc)}</p>
+      </div>
+      <div class="romdl">
         ${r.romZip?`<a class="btn primary" href="${esc(r.romZip)}" download>⬇ Download ROMs (.zip)</a>`:''}
         ${r.romCount?`<span class="romcount">${esc(r.romCount)}</span>`:''}
       </div>
@@ -3047,11 +3058,15 @@ function viewSchematics(){
     <p class="lead">${esc(s.blurb)}</p></div>
     ${s.zip?`<a class="btn primary schzip" href="${esc(s.zip)}" download>⬇ Download all (.zip)</a>`:''}</div>
     <div class="schgrid">${cards}</div>
-    ${s.guide?`<div class="sec-head" style="margin-top:56px"><div>
-      <span class="eyebrow">Strategy guide</span><h2>${esc(s.guide.title)}</h2>
-      <p class="lead">${esc(s.guide.desc)} <strong>By ${esc(s.guide.author)}</strong> (${esc(s.guide.year)}).</p>
-    </div>
-    <a class="btn primary schzip" href="${esc(s.guide.zip)}" download>⬇ Download Guide (.zip)</a></div>`:''}
+    ${s.guide?`<div class="guide-card" style="margin-top:56px">
+      <img class="guide-cover" src="schematics/guide-cover.jpg" alt="Cover of The Video Master's Guide to Defender" loading="lazy"/>
+      <div class="guide-info">
+        <span class="eyebrow">Strategy guide</span>
+        <h2>${esc(s.guide.title)}</h2>
+        <p class="lead">${esc(s.guide.desc)} <strong>By ${esc(s.guide.author)}</strong> (${esc(s.guide.year)}).</p>
+        <a class="btn primary" href="${esc(s.guide.zip)}" download>⬇ Download Guide (.zip)</a>
+      </div>
+    </div>`:''}
     ${romSection}</section>`;
 }
 
