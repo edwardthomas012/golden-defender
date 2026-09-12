@@ -955,6 +955,29 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .cf-success{display:none;background:rgba(91,255,134,.08);border:1px solid rgba(91,255,134,.3);border-radius:8px;
   padding:18px 22px;margin-top:20px;color:#5bff86;font-size:15px}
 .cf-success.show{display:block}
+/* Flyby banner */
+#flybyLayer{position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden}
+.flyby-banner{position:absolute;top:var(--flyby-y,18%);left:0;transform:translateX(110vw);
+  animation:flybySweep var(--flyby-duration,22s) linear forwards;display:flex;align-items:center;gap:0;
+  will-change:transform}
+.flyby-banner .fb-ship{width:64px;height:40px;object-fit:contain;flex-shrink:0;margin-right:-6px;z-index:2;
+  filter:drop-shadow(0 0 8px rgba(255,206,77,.45))}
+.flyby-banner .fb-rope{width:22px;height:2px;background:var(--gold);flex-shrink:0;opacity:.7}
+.flyby-banner .fb-panel{background:rgba(8,12,28,.92);border:2px solid var(--gold);border-radius:10px;
+  padding:10px 22px;display:flex;flex-direction:column;gap:2px;white-space:nowrap;
+  box-shadow:0 8px 32px rgba(0,0,0,.5),0 0 0 1px rgba(255,206,77,.15)}
+.flyby-banner .fb-title{font-family:'Sora',sans-serif;font-weight:800;font-size:16px;color:var(--gold-bri);
+  letter-spacing:.5px;text-transform:uppercase}
+.flyby-banner .fb-line{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);opacity:.85}
+@media(max-width:640px){
+  .flyby-banner .fb-ship{width:44px;height:28px}
+  .flyby-banner .fb-panel{padding:7px 14px}
+  .flyby-banner .fb-title{font-size:13px}
+  .flyby-banner .fb-line{font-size:11px}
+  .flyby-banner .fb-rope{width:14px}
+}
+@keyframes flybySweep{from{transform:translateX(110vw)}to{transform:translateX(-130vw)}}
+@media(prefers-reduced-motion:reduce){.flyby-banner{animation:none!important;display:none!important}}
 </style>
 </head>
 <body>
@@ -1018,6 +1041,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 </header>
 
 <main id="app"></main>
+<div id="flybyLayer" aria-hidden="true"></div>
 
 <div class="lb" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
   <button class="lb-btn close" id="lbClose" aria-label="Close">✕</button>
@@ -3438,6 +3462,88 @@ function render(){
 }
 addEventListener('hashchange',render);
 
+/* Flyby banner — Goldie Ship pulls a banner across the screen promoting
+   different pages. Appears randomly, skips during gameplay. */
+(function(){
+  var FLYBY_MESSAGES=[
+    {route:'#home',title:'Golden Defender',line:'A gold cabinet with a hero complex.'},
+    {route:'#story',title:'Read the Story',line:'One boy, one ship, zero chill from aliens.'},
+    {route:'#video',title:'Watch the Videos',line:'Arcade history with extra cosmic sparkle.'},
+    {route:'#play',title:'Play the Mini Game',line:'Save humanoids. Brag later. Panic now.'},
+    {route:'#galleries',title:'Explore the Galleries',line:'Proof that gold paint makes everything faster.'},
+    {route:'#inspection',title:'Inspection Details',line:'Serial numbers, stickers, and arcade archaeology.'},
+    {route:'#history',title:'Defender History',line:'The game that made quarters nervous.'},
+    {route:'#music',title:'Hear the Music',line:'Retro sounds for modern button mashers.'},
+    {route:'#schematics',title:'Download Schematics',line:'For restorers, tinkerers, and brave solder heroes.'},
+    {route:'#contact',title:'Contact Edward',line:'Send a transmission before the Landers do.'}
+  ];
+  var SHIP_IMG='images/sprites-gold/defender-ship.png';
+  var layer=document.getElementById('flybyLayer');
+  if(!layer) return;
+  var timer=null;
+  var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  function isPlayRoute(){ return location.hash.indexOf('#play')===0; }
+
+  function pickMessage(){
+    /* Pick a random message, but prefer one that isn't the current page */
+    var hash=location.hash||'#home';
+    var pool=FLYBY_MESSAGES.filter(function(m){return m.route!==hash;});
+    if(pool.length===0) pool=FLYBY_MESSAGES;
+    return pool[Math.floor(Math.random()*pool.length)];
+  }
+
+  function showFlyby(){
+    if(reduced||isPlayRoute()) { scheduleNext(); return; }
+    var msg=pickMessage();
+    var y=8+Math.random()*14; /* top 8%-22% of viewport, below nav */
+    var dur=20+Math.random()*10; /* 20-30s slow sweep */
+    var banner=document.createElement('div');
+    banner.className='flyby-banner';
+    banner.style.setProperty('--flyby-y',y+'vh');
+    banner.style.setProperty('--flyby-duration',dur+'s');
+    var ship=document.createElement('img');
+    ship.className='fb-ship';
+    ship.src=SHIP_IMG; ship.alt='';
+    var rope=document.createElement('div');
+    rope.className='fb-rope';
+    var panel=document.createElement('div');
+    panel.className='fb-panel';
+    var title=document.createElement('span');
+    title.className='fb-title';
+    title.textContent=msg.title;
+    var line=document.createElement('span');
+    line.className='fb-line';
+    line.textContent=msg.line;
+    panel.appendChild(title);
+    panel.appendChild(line);
+    banner.appendChild(ship);
+    banner.appendChild(rope);
+    banner.appendChild(panel);
+    layer.appendChild(banner);
+    /* Clean up after animation finishes */
+    banner.addEventListener('animationend',function(){
+      if(banner.parentNode) banner.parentNode.removeChild(banner);
+      scheduleNext();
+    });
+  }
+
+  function scheduleNext(){
+    if(timer) clearTimeout(timer);
+    var delay=12000+Math.random()*28000; /* 12-40s between flybys */
+    timer=setTimeout(showFlyby,delay);
+  }
+
+  /* Don't show during gameplay */
+  addEventListener('hashchange',function(){
+    if(isPlayRoute()&&timer){ clearTimeout(timer); timer=null; }
+    else if(!timer&&!reduced) scheduleNext();
+  });
+
+  /* Start after initial page load */
+  if(!reduced) scheduleNext();
+})();
+
 function wireAudioControls(root){
   const fmt=s=>{ if(!isFinite(s)||s<0) return '0:00'; const m=Math.floor(s/60), sec=Math.floor(s%60); return m+':'+String(sec).padStart(2,'0'); };
   if(!window._apOutsideBound){
@@ -3807,7 +3913,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   let terrain=[];
   let score=0, lives=3, highScore=0, nextExtraLifeScore=10000, bombs=3;
   const BOMB_START=3, BOMB_MAX=6;
-  let spawnTimer=0, spawnInterval=1500, elapsed=0, fireCooldown=0;
+  let spawnTimer=0, spawnInterval=1000, elapsed=0, fireCooldown=0;
   let wave=1, waveKills=0, waveSpawned=0, waveBreakTimer=0, waveBonusText='';
   let terrainGone=false, prevHumanoidCount=10, screenFlash=0, frenzyBannerTimer=0;
   let speechCooldown=3, speechCountThisWave=0;
@@ -4170,10 +4276,10 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function difficultyFactor(){
-    const waveGrowth=Math.min(1.9,(wave-1)*0.06+Math.max(0,wave-5)*0.05);
+    const waveGrowth=Math.min(2.2,(wave-1)*0.08+Math.max(0,wave-5)*0.10);
     const frenzy=activeHumanoidCount()===0?0.45:0;
     const boss=isBossWave(wave)?0.3:0;
-    return Math.min(3.8, 1.3+waveGrowth+frenzy+boss);
+    return Math.min(4.2, 1.6+waveGrowth+frenzy+boss);
   }
   function isFrantic(){ return activeHumanoidCount()===0; }
 
@@ -4216,8 +4322,8 @@ $('#lightbox').addEventListener('touchend',e=>{
       const rank=bossRankForWave(w), tier=Math.min(3,bossTierForWave(w));
       return 20+rank*6+tier*15;
     }
-    if(w<=5) return Math.min(120, 20+(w-1)*5);
-    return Math.min(120, 40+(w-5)*8);
+    if(w<=5) return Math.min(120, 25+(w-1)*5);
+    return Math.min(120, 45+(w-5)*10);
   }
 
   function updateHud(){
@@ -4233,7 +4339,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     if(typeof hideHOF==='function') hideHOF();
     genTerrain(); seedHumanoids(); resetPlayer();
     bullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
-    score=0; lives=3; nextExtraLifeScore=10000; spawnTimer=0; spawnInterval=1500; elapsed=0; fireCooldown=0;
+    score=0; lives=3; nextExtraLifeScore=10000; spawnTimer=0; spawnInterval=1000; elapsed=0; fireCooldown=0;
     wave=1; waveKills=0; waveSpawned=0; waveBreakTimer=0; waveBonusText=''; bombs=BOMB_START;
     terrainGone=false; prevHumanoidCount=10; screenFlash=0; frenzyBannerTimer=0;
     speechCooldown=3+Math.random()*3; speechCountThisWave=0;
@@ -4483,7 +4589,7 @@ $('#lightbox').addEventListener('touchend',e=>{
 
     spawnTimer+=dt;
     const diff=difficultyFactor();
-    const targetInterval=Math.max(180,(1050-(wave-1)*70-elapsed*18)/diff);
+    const targetInterval=Math.max(150,(900-(wave-1)*60-elapsed*20)/diff);
     if(spawnTimer>=targetInterval/1000&&waveSpawned<waveTarget(wave)){
       spawnTimer=0;
       const cap=12+Math.min(16,wave-1)+(activeHumanoidCount()===0?4:0);
@@ -4496,6 +4602,63 @@ $('#lightbox').addEventListener('touchend',e=>{
       // Diving/ascending landers are fully controlled by the abduction AI below —
       // skip normal drift/bob so they track the humanoid and rise straight up.
       if(en.aiState==='diving'||en.aiState==='ascending') continue;
+      /* Mutant AI: one dash burst per screen wrap, then continue left and
+         wrap around. This keeps mutants dynamic but not relentlessly
+         aggressive — they lunge once, then leave and come back. */
+      if(en.key==='mutant'){
+        if(en.mutantBurstUsed===undefined){
+          en.mutantBurstUsed=false;
+          en.mutantBurstDelay=1+Math.random()*2; /* delay before the one lunge */
+          en.mutantDash=0;
+          en.mutantDashVx=0;
+          en.mutantDashVy=0;
+          en.mutantTargetVx=0;
+          en.mutantTargetVy=0;
+        }
+        if(en.mutantDash>0){
+          /* Active dash: one burst toward the player, plus zigzag weave */
+          en.mutantDash-=dt;
+          en.zigPhase=(en.zigPhase||0)+dt*12;
+          en.x+=en.mutantDashVx*dt+Math.sin(en.zigPhase)*90*dt;
+          en.y+=en.mutantDashVy*dt+Math.cos(en.zigPhase*1.4)*70*dt;
+          if(en.mutantDash<=0){ en.mutantBurstUsed=true; /* done bursting this pass */ }
+        } else if(!en.mutantBurstUsed){
+          /* Waiting for the one burst — count down delay, then lunge */
+          en.mutantBurstDelay-=dt;
+          /* Track player's vertical position for the upcoming lunge */
+          var pdy=player.y-en.y;
+          en.mutantTargetVy=Math.sign(pdy)*Math.min(Math.abs(pdy),120)*dt;
+          if(en.mutantBurstDelay<=0){
+            /* Start the one dash burst — horizontal stays leftward, vertical lunges at player */
+            en.mutantDash=0.4+Math.random()*0.3;
+            en.mutantDashVx=-Math.abs(en.vx)*1.3; /* keep moving left during burst */
+            en.mutantDashVy=Math.sign(pdy)*Math.abs(en.vx)*0.8;
+          } else {
+            /* Pre-burst: drift left with gentle weave toward player's height */
+            en.phase+=dt*en.bobSpeed;
+            en.x-=Math.abs(en.vx)*dt;
+            en.y+=Math.sin(en.phase)*en.bobAmp*dt+en.mutantTargetVy;
+          }
+        } else {
+          /* Post-burst: continue left and exit, no more dashes this pass */
+          en.phase+=dt*en.bobSpeed;
+          en.x-=Math.abs(en.vx)*dt;
+          en.y+=Math.sin(en.phase)*en.bobAmp*dt;
+        }
+        /* Keep within vertical flight bounds */
+        en.y=Math.max(flightTop(),Math.min(flightBottom(),en.y));
+        /* Wrap around when off-screen — reset burst for next pass */
+        if(en.x<-60){
+          en.x=W+40+Math.random()*80;
+          en.y=flightTop()+Math.random()*(flightBottom()-flightTop());
+          en.phase=Math.random()*6.28;
+          en.zigPhase=Math.random()*6.28;
+          en.mutantBurstUsed=false;
+          en.mutantBurstDelay=1+Math.random()*2;
+          en.mutantDash=0;
+        }
+        continue;
+      }
       if(frantic){
         // full frenzy: fast, unpredictable zig-zag on both axes plus random
         // sharp dodge-jumps — hard to track and hard to land a hit on.
@@ -4550,7 +4713,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           const dx=targetX-en.x;
           // Steer horizontally toward the target so the lander follows the humanoid
           en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*dt);
-          if(Math.abs(dy)<10 && Math.abs(dx)<15){
+          if(Math.abs(dy)<4 && Math.abs(dx)<8){
             en.carrying=en.diveTarget;
             en.carrying.speechText=nextCarriedLine();
             en.carrying.speechTimer=99;
@@ -4559,7 +4722,7 @@ $('#lightbox').addEventListener('touchend',e=>{
             en.aiState='ascending';
             en.diveTarget=null;
           } else {
-            en.y+=Math.sign(dy)*180*dt;
+            en.y+=Math.sign(dy)*160*dt;
           }
         } else {
           en.aiState='normal';
@@ -4647,13 +4810,13 @@ $('#lightbox').addEventListener('touchend',e=>{
        survives and walks again. */
     for(let i=fallingHumanoids.length-1;i>=0;i--){
       const fh=fallingHumanoids[i];
-      fh.vy+=420*dt;
+      fh.vy+=220*dt;
       fh.y+=fh.vy*dt;
       fh.walkPhase+=dt*6;
       if(fh.speechTimer>0) fh.speechTimer=Math.max(0,fh.speechTimer-dt);
       const groundY=terrainYAt(fh.x);
       if(fh.y>=groundY){
-        if(fh.vy>550){
+        if(fh.vy>400){
           spawnParticles(fh.x,groundY);
           if(Math.random()<0.4 && spotIsFree(fh.x,groundY)){
             killTexts.push({
@@ -5036,10 +5199,44 @@ $('#lightbox').addEventListener('touchend',e=>{
     const fontSize=Math.max(10,scaleUnit()*0.020);
     ctx.font='800 '+fontSize+'px Sora, sans-serif';
     const padX=fontSize*0.6, padY=fontSize*0.42;
-    const tw=ctx.measureText(text).width;
-    const bw=tw+padX*2, bh=fontSize+padY*2;
-    const bx=x-bw/2, by=y-bh-fontSize*0.9;
-    const r=Math.min(8,bh*0.3);
+    const maxWidth=Math.min(240,ctx.canvas?ctx.canvas.width*0.42:220);
+    /* Wrap text into up to 2 lines based on measured width */
+    var words=String(text).split(' ');
+    var lines=[], cur='';
+    for(var wi=0;wi<words.length;wi++){
+      var test=cur?cur+' '+words[wi]:words[wi];
+      if(ctx.measureText(test).width>maxWidth && cur){
+        lines.push(cur);
+        /* line 2 = remaining words */
+        cur=words.slice(wi).join(' ');
+        break;
+      } else { cur=test; }
+    }
+    if(cur) lines.push(cur);
+    if(lines.length===0) lines=[text];
+    /* If line 2 still too long, truncate with ellipsis */
+    if(lines.length>1 && ctx.measureText(lines[1]).width>maxWidth){
+      while(lines[1].length>1 && ctx.measureText(lines[1]+'…').width>maxWidth){
+        lines[1]=lines[1].slice(0,-1);
+      }
+      lines[1]+='…';
+    }
+    var lineH=fontSize*1.15;
+    var bw=0;
+    for(var li=0;li<lines.length;li++){
+      var lw=ctx.measureText(lines[li]).width;
+      if(lw>bw) bw=lw;
+    }
+    bw+=padX*2;
+    var bh=lines.length*lineH+padY*2;
+    /* Clamp x so bubble stays fully on-screen */
+    var bx=x-bw/2;
+    var cw=ctx.canvas?ctx.canvas.width:800;
+    if(bx<4) bx=4;
+    if(bx+bw>cw-4) bx=cw-4-bw;
+    var by=y-bh-fontSize*0.9;
+    if(by<4) by=4;
+    var r=Math.min(8,bh*0.3);
     ctx.fillStyle='rgba(8,12,28,.86)';
     ctx.strokeStyle='rgba(255,206,77,.85)';
     ctx.lineWidth=1.4;
@@ -5047,14 +5244,19 @@ $('#lightbox').addEventListener('touchend',e=>{
     ctx.moveTo(bx+r,by);
     ctx.lineTo(bx+bw-r,by); ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+r);
     ctx.lineTo(bx+bw,by+bh-r); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh);
-    ctx.lineTo(x+6,by+bh); ctx.lineTo(x,by+bh+7); ctx.lineTo(x-6,by+bh);
+    /* Tail points toward the speaker — clamp tail x to bubble bounds */
+    var tailX=Math.max(bx+10,Math.min(bx+bw-10,x));
+    ctx.lineTo(tailX+6,by+bh); ctx.lineTo(tailX,by+bh+7); ctx.lineTo(tailX-6,by+bh);
     ctx.lineTo(bx+r,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-r);
     ctx.lineTo(bx,by+r); ctx.quadraticCurveTo(bx,by,bx+r,by);
     ctx.closePath();
     ctx.fill(); ctx.stroke();
     ctx.fillStyle='#ffe9a8';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(text, x, by+bh/2);
+    var textStartY=by+padY+lineH/2;
+    for(var ti=0;ti<lines.length;ti++){
+      ctx.fillText(lines[ti], bx+bw/2, textStartY+ti*lineH);
+    }
     ctx.restore();
   }
 
@@ -5075,7 +5277,30 @@ $('#lightbox').addEventListener('touchend',e=>{
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=fontSize*0.4;
       ctx.fillStyle='#ff8a8a';
-      ctx.fillText(k.text, k.x, k.y);
+      /* Wrap kill text into up to 2 lines, clamped to screen */
+      var maxWidth=Math.min(220,ctx.canvas?ctx.canvas.width*0.38:200);
+      var words=String(k.text).split(' ');
+      var lines=[], cur='';
+      for(var wi=0;wi<words.length;wi++){
+        var test=cur?cur+' '+words[wi]:words[wi];
+        if(ctx.measureText(test).width>maxWidth && cur){
+          lines.push(cur);
+          cur=words.slice(wi).join(' ');
+          break;
+        } else { cur=test; }
+      }
+      if(cur) lines.push(cur);
+      if(lines.length===0) lines=[k.text];
+      if(lines.length>1 && ctx.measureText(lines[1]).width>maxWidth){
+        while(lines[1].length>1 && ctx.measureText(lines[1]+'…').width>maxWidth){ lines[1]=lines[1].slice(0,-1); }
+        lines[1]+='…';
+      }
+      var lineH=fontSize*1.15;
+      var cw=ctx.canvas?ctx.canvas.width:800;
+      var kx=Math.max(maxWidth/2+4,Math.min(cw-maxWidth/2-4,k.x));
+      for(var ti=0;ti<lines.length;ti++){
+        ctx.fillText(lines[ti], kx, k.y+ti*lineH);
+      }
       ctx.restore();
     }
   }
