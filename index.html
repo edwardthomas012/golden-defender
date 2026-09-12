@@ -3758,6 +3758,50 @@ $('#lightbox').addEventListener('touchend',e=>{
     "NOT THE HERO I EXPECTED!","MAYBE AIM AT THE MANTI NEXT TIME?","WELL, THAT ESCALATED QUICKLY!",
     "SEE YOU NEXT WAVE, MAYBE!"
   ];
+  /* Funny, witty lines a Humanoid says while being carried aloft by a
+     Lander — panicking, sarcastic, resigned, or oddly enthusiastic. */
+  const HUMANOID_CARRIED_LINES=[
+    "PUT ME DOWN, I'M EXPENSIVE!","IS THIS FIRST CLASS?","I DIDN'T PACK FOR THIS!",
+    "MY MOM IS GONNA FREAK!","DOES THIS COUNT AS FLYING?","I CAN'T SWIM!",
+    "WHERE ARE WE GOING?!","I FORGOT MY PHONE!","IS IT TOO LATE TO OPT OUT?",
+    "I HAVE A FEAR OF HEIGHTS... AND ALIENS!","CAN I USE THE RESTROOM FIRST?",
+    "I DIDN'T AGREE TO THIS!","MY STOMACH DOESN'T AGREE!","ARE WE THERE YET?",
+    "I LEFT MY KEYS DOWN THERE!","THIS ISN'T UBER!","I THINK I'M GONNA BE SICK!",
+    "DOES ANYONE HAVE A BAG?","I PAID EXTRA FOR LEGROOM!","THE VIEW IS NICE THOUGH!",
+    "I CAN SEE MY CAR FROM HERE!","TELL MY PLANTS I LOVE THEM!","IS THIS A KIDNAPPING?!",
+    "I'M CALLING MY LAWYER! OH WAIT...","DOES THIS HAVE WIFI?",
+    "I SHOULD'VE TAKEN THE STAIRS!","MY THERAPIST IS GONNA HEAR ABOUT THIS!",
+    "I WAS HAVING A GOOD DAY TOO!","DO I GET A SNACK OR WHAT?",
+    "IS THIS WHAT SPACE FEELS LIKE?","I CAN'T FEEL MY LEGS!",
+    "THIS IS THE WEIRDEST RIDE EVER!","DOES THIS THING HAVE SEATBELTS?",
+    "I WANT A FULL REFUND!","AT LEAST PLAY SOME MUSIC!","I THINK I DROPPED SOMETHING!",
+    "THIS WASN'T IN THE BROCHURE!","I DIDN'T BRING A JACKET!","WHO'S DRIVING THIS THING?!",
+    "I THINK I SEE GOLDIE UP THERE!","HEY, WATCH THE CARRY HANDLE!",
+    "IS THIS THE MUTANT CONVERSION PROGRAM?","I HAD PLANS TONIGHT!",
+    "MY KIDS ARE GONNA HEAR ABOUT THIS!","DOES THIS COUNT AS MILEAGE?",
+    "I THINK I LEFT THE OVEN ON!","THIS IS NOT WHAT I MEANT BY 'GETTING LIFTED'!"
+  ];
+  /* No-repeat shuffle system: cycles through all sayings in each array
+     before any can repeat, so players never see the same line twice in a row. */
+  function makeShuffler(arr){
+    let bag=[], idx=0;
+    function reshuffle(){
+      bag=[...arr];
+      for(let i=bag.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [bag[i],bag[j]]=[bag[j],bag[i]];
+      }
+      idx=0;
+    }
+    reshuffle();
+    return function next(){
+      if(idx>=bag.length) reshuffle();
+      return bag[idx++];
+    };
+  }
+  const nextWalkLine=makeShuffler(HUMANOID_LINES);
+  const nextKillLine=makeShuffler(HUMANOID_KILL_LINES);
+  const nextCarriedLine=makeShuffler(HUMANOID_CARRIED_LINES);
   const WAVE_BREAK_DURATION=2.6;
   const BOSS_WAVE_BREAK_DURATION=3.4;
   let keys={};
@@ -4326,8 +4370,8 @@ $('#lightbox').addEventListener('touchend',e=>{
           en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*dt);
           if(Math.abs(dy)<10 && Math.abs(dx)<15){
             en.carrying=en.diveTarget;
-            en.carrying.speechText='';
-            en.carrying.speechTimer=0;
+            en.carrying.speechText=nextCarriedLine();
+            en.carrying.speechTimer=3.5;
             const idx=humanoids.indexOf(en.diveTarget);
             if(idx>=0) humanoids.splice(idx,1);
             en.aiState='ascending';
@@ -4348,7 +4392,16 @@ $('#lightbox').addEventListener('touchend',e=>{
           en.vx=en.vx*1.3;
         }
       }
-      if(en.carrying) en.carrying.walkPhase+=dt*6;
+      if(en.carrying){
+        en.carrying.walkPhase+=dt*6;
+        // Cycle carried speech: when timer runs out, set a new witty line
+        if(en.carrying.speechTimer>0){
+          en.carrying.speechTimer=Math.max(0,en.carrying.speechTimer-dt);
+        } else {
+          en.carrying.speechText=nextCarriedLine();
+          en.carrying.speechTimer=3.5;
+        }
+      }
     }
 
     for(let i=enemies.length-1;i>=0;i--){
@@ -4399,7 +4452,7 @@ $('#lightbox').addEventListener('touchend',e=>{
             if(Math.random()<0.4 && spotIsFree(hx,hy)){
               killTexts.push({
                 x:hx, y:hy-hs*0.6,
-                text:HUMANOID_KILL_LINES[Math.floor(Math.random()*HUMANOID_KILL_LINES.length)],
+                text:nextKillLine(),
                 life:3.2, maxLife:3.2, vy:-scaleUnit()*0.025
               });
             }
@@ -4420,12 +4473,12 @@ $('#lightbox').addEventListener('touchend',e=>{
       fh.walkPhase+=dt*6;
       const groundY=terrainYAt(fh.x);
       if(fh.y>=groundY){
-        if(fh.vy>350){
+        if(fh.vy>550){
           spawnParticles(fh.x,groundY);
           if(Math.random()<0.4 && spotIsFree(fh.x,groundY)){
             killTexts.push({
               x:fh.x, y:groundY-scaleUnit()*0.04,
-              text:HUMANOID_KILL_LINES[Math.floor(Math.random()*HUMANOID_KILL_LINES.length)],
+              text:nextKillLine(),
               life:3.2, maxLife:3.2, vy:-scaleUnit()*0.025
             });
           }
@@ -4494,7 +4547,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         const h=humanoids[Math.floor(Math.random()*humanoids.length)];
         const hx=h.xf*W, hy=terrainYAt(hx);
         if(spotIsFree(hx,hy)){
-          h.speechText=HUMANOID_LINES[Math.floor(Math.random()*HUMANOID_LINES.length)];
+          h.speechText=nextWalkLine();
           h.speechTimer=4.2;
           speechCountThisWave++;
         }
@@ -4898,7 +4951,14 @@ $('#lightbox').addEventListener('touchend',e=>{
       ctx.restore();
       if(en.carrying){
         const hs=Math.max(15,scaleUnit()*0.032);
-        drawHumanoidFigure(en.x,en.y+en.r*1.6,hs,en.carrying.woman,en.carrying.walkPhase);
+        const hy=en.y+en.r*1.6;
+        drawHumanoidFigure(en.x,hy,hs,en.carrying.woman,en.carrying.walkPhase);
+        if(en.carrying.speechTimer>0){
+          let a=1;
+          if(en.carrying.speechTimer>3.0) a=(3.5-en.carrying.speechTimer)/0.5;
+          else if(en.carrying.speechTimer<0.6) a=en.carrying.speechTimer/0.6;
+          drawSpeechBubble(en.x,hy-hs,en.carrying.speechText,Math.max(0,Math.min(1,a)));
+        }
       }
       if(en.boss&&en.maxHp>1&&en.hp<en.maxHp){
         // a thin remaining-hits pip row under tougher boss-wave Manti
