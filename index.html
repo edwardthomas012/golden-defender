@@ -851,6 +851,9 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   background:linear-gradient(180deg,#020208 0%,#040713 55%,#060c1e 100%);
   border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;
   box-shadow:0 30px 70px rgba(0,0,0,.55);touch-action:none;user-select:none}
+@media(pointer:coarse) and (max-width:1024px){
+  .game-wrap{aspect-ratio:auto;height:60vh;max-height:60vh}
+}
 #gameCanvas{display:block;width:100%;height:100%}
 .game-hud{position:absolute;top:10px;left:14px;z-index:3;display:flex;flex-direction:column;gap:3px;
   font-family:'Sora';font-weight:700;font-size:13px;letter-spacing:.6px;color:var(--gold-bri);
@@ -862,9 +865,15 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   background:rgba(4,5,13,.72);backdrop-filter:blur(3px);text-align:center;padding:20px;transition:opacity .2s}
 .game-overlay.hidden{opacity:0;pointer-events:none}
 .go-inner{max-width:420px}
+@media(max-width:640px){
+  .go-inner{max-width:90%;padding:0 8px}
+  .go-inner h3{font-size:18px}
+  .go-inner p{font-size:12px;line-height:1.5}
+  .go-keys{font-size:10px;line-height:1.5}
+}
 .go-inner h3{margin:0 0 10px;font-family:'Sora';color:var(--gold-bri);letter-spacing:1px;font-size:22px}
 .go-inner p{margin:0 0 16px;color:var(--ink-dim);font-size:14px;line-height:1.5}
-.go-keys{margin-top:14px;font-size:12px;color:var(--ink-mute);letter-spacing:.3px;white-space:nowrap}
+.go-keys{margin-top:14px;font-size:12px;color:var(--ink-mute);letter-spacing:.3px;white-space:normal;line-height:1.6}
 .game-touch{position:absolute;inset:0;z-index:2;display:none;pointer-events:none}
 @media(pointer:coarse){.game-touch{display:block}}
 .gt-pad{position:absolute;left:14px;bottom:14px;width:132px;height:132px;
@@ -894,6 +903,22 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .game-fs-btn:hover{background:rgba(255,206,77,.18)}
 .game-fs-btn svg{width:14px;height:14px}
 .game-wrap:fullscreen{aspect-ratio:auto;max-height:none;width:100vw;height:100vh;border-radius:0}
+/* Mobile fullscreen — game fills viewport when .mobile-fs class is active */
+.game-wrap.mobile-fs{position:fixed;inset:0;width:100vw;height:100vh;max-height:none;
+  aspect-ratio:auto;border-radius:0;border:none;z-index:9999;margin:0}
+.game-wrap.mobile-fs .game-fs-btn{display:none}
+.game-wrap.mobile-fs .game-exit{display:flex}
+.game-wrap.mobile-fs .gt-pad{opacity:.5;transition:opacity .15s}
+.game-wrap.mobile-fs .gt-pad:active{opacity:.85}
+.game-wrap.mobile-fs .gt-fire{opacity:.55;transition:opacity .15s}
+.game-wrap.mobile-fs .gt-fire:active{opacity:.9}
+.game-wrap.mobile-fs .gt-bomb{opacity:.5;transition:opacity .15s}
+.game-wrap.mobile-fs .gt-bomb:active{opacity:.85}
+.game-exit{display:none;position:absolute;top:10px;right:14px;z-index:5;
+  background:rgba(8,12,28,.8);border:1px solid rgba(255,206,77,.4);color:#ffe08a;
+  border-radius:8px;padding:6px 12px;font-family:'Sora';font-weight:700;font-size:14px;
+  cursor:pointer;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent}
+.game-exit:active{background:rgba(255,206,77,.2)}
 /* ---- Golden Hall of Fame ---- */
 .hof-overlay{z-index:5;background:rgba(4,5,13,.92);overflow:auto;padding:20px 0;
   display:flex;align-items:center;justify-content:center}
@@ -3189,6 +3214,7 @@ function viewPlay(){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
         <span id="gameFsLabel">FULL</span>
       </button>
+      <button class="game-exit" id="gameExitBtn" aria-label="Exit fullscreen">✕ EXIT</button>
       <canvas id="gameCanvas" aria-label="Golden Defender mini-game, playable"></canvas>
       <div class="game-overlay" id="gameOverlay">
         <div class="go-inner">
@@ -4186,7 +4212,7 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   let canvas, ctx, overlay, scoreEl, livesEl, highEl, waveEl, bombsEl, nextBossEl, goTitle, goSub, goBtn;
   let hofOverlay, hofColA, hofColB, hofColC, hofColD, hofEntryRow, hofInitialsInput, hofSubmitBtn, hofHint, hofControlsWrap, hofSummary, hofPlayAgainBtn;
-  let gameFsBtn, gameFsLabel;
+  let gameFsBtn, gameFsLabel, gameExitBtn;
   let pendingScoreForHOF=null;
   let images={}, imagesReady=false;
   let state='idle';
@@ -5847,6 +5873,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     goBtn=document.getElementById('gameGoBtn');
     gameFsBtn=document.getElementById('gameFsBtn');
     gameFsLabel=document.getElementById('gameFsLabel');
+    gameExitBtn=document.getElementById('gameExitBtn');
     hofOverlay=document.getElementById('hofOverlay');
     hofColA=document.getElementById('hofColA');
     hofColB=document.getElementById('hofColB');
@@ -5921,6 +5948,24 @@ $('#lightbox').addEventListener('touchend',e=>{
     wireTouch();
 
     if(goBtn) goBtn.onclick=()=>{ if(state==='idle'||state==='gameover') startGame(); };
+    /* Mobile fullscreen: when starting game on touch device, expand to fill viewport */
+    if(goBtn){
+      goBtn.addEventListener('click',function(){
+        var wrap=document.getElementById('gameWrap');
+        if(wrap&&matchMedia('(pointer:coarse) and (max-width:1024px)').matches){
+          wrap.classList.add('mobile-fs');
+          if(wrap.requestFullscreen) wrap.requestFullscreen().catch(function(){});
+          setTimeout(function(){ if(canvas) canvas.focus(); },100);
+        }
+      });
+    }
+    if(gameExitBtn){
+      gameExitBtn.onclick=function(){
+        var wrap=document.getElementById('gameWrap');
+        if(wrap) wrap.classList.remove('mobile-fs');
+        if(document.fullscreenElement) document.exitFullscreen().catch(function(){});
+      };
+    }
     if(gameFsBtn){
       gameFsBtn.onclick=()=>{
         const wrap=document.getElementById('gameWrap');
