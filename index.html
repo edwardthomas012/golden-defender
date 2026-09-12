@@ -87,7 +87,7 @@
     {"@type": "Question", "name": "Why focus on the 50,000th machine?", "acceptedAnswer": {"@type": "Answer", "text": "The 50,000th machine represents a historical moment in the game's production run, marking its success and influence. It's like commemorating a rare collector's item."}},
     {"@type": "Question", "name": "What does the number 50,001 mean?", "acceptedAnswer": {"@type": "Answer", "text": "It's a tribute number. The original 50,000th Defender rolled off the Williams production line in 1981 — this machine is numbered 50,001 in its honor, finished in gold to mark the milestone."}},
     {"@type": "Question", "name": "Who created the original Defender?", "acceptedAnswer": {"@type": "Answer", "text": "Defender was created in 1981 by Eugene Jarvis, Larry DeMar, and Sam Dicker at Williams Electronics — the same team credited for the game's iconic sound design."}},
-    {"@type": "Question", "name": "Can I download the schematics?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The Schematics page has the full Early and Later series service manuals, viewable on-screen or downloadable as a zip. You'll also find the original ROM dumps for all four production sets — White, Blue, Green, and Red — each downloadable as a separate zip."}}
+    {"@type": "Question", "name": "Can I download the schematics?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The Schematics page has the full Early and Later series service manuals, viewable on-screen or downloadable as a zip. You'll also find the original ROM dumps for all four production sets — White, Blue, Green, and Red — each downloadable as a separate zip, plus the 1982 Video Master's Guide to Defender strategy book."}}
   ]
 }
 </script>
@@ -1677,11 +1677,12 @@ const SITE = {
       { name:"Later Series", note:"25 pages · enhanced white", pdf:"schematics/later-series.pdf", cover:"schematics/cover-02.jpg" }
     ],
     romHistory:[
-      { name:"White Label", period:"November 1980", romZip:"schematics/roms-white-label.zip", romCount:"10 EPROMs + sound", desc:"Defender debuted at the AMOA Chicago trade show on October 31, 1980, and reached operators about two weeks later. White label boards are the earliest ROM set and by far the rarest today — most surviving accounts describe only a handful of genuine White-labeled machines, and they're frequently confused with lightly-striped Blue boards. White carries an attract-mode scoring bug: the high-score table lists Landers at 100 points instead of the correct 150, and the built-in high score for player PGD reads 14,185 instead of the corrected 14,285 seen in later revisions. That exact bug later surfaced in a real Williams court case against Artic Manufacturing over their bootleg 'Defense Command' — the case record confirms the error existed in Williams' own early code, not just the clone." },
-      { name:"Blue Label", period:"Early production", romZip:"schematics/roms-blue-label.zip", romCount:"10 EPROMs + sound", desc:"A close revision of White, built on 10 EPROMs and missing the chip at position IC5. It shares several ROM chips with the Green set that came after it, and still upright-cabinet only — the cocktail version didn't exist yet. The same Lander scoring bug from White carries over into Blue." },
-      { name:"Green Label", period:"Mid production", romZip:"schematics/roms-green-label.zip", romCount:"11 EPROMs + sound", desc:"Green label boards use 11 EPROMs (still nothing in IC5) and correct the scoring bug from White and Blue — Landers correctly show 150 points, and the attract-mode high score is updated. Still upright-only, and the last revision before Williams introduced the cocktail cabinet." },
-      { name:"Red Label", period:"1981", romZip:"schematics/roms-red-label.zip", romCount:"11 EPROMs + sound", desc:"Released alongside Williams' two-player, sit-down cocktail cabinet, which needed real code changes — not just a bugfix — to flip the screen and controls for player two. Red uses 11 EPROMs, all different part numbers from the earlier sets, a mix of 2716 and 2532 chips. It became the most widely produced revision and the most common one still in circulation, and it's the version MAME uses as its default parent set." }
-    ]
+      { name:"White Label", period:"November 1980", romZip:"schematics/roms-white-label.zip", romCount:"10 EPROMs + sound", desc:"Defender debuted at the AMOA Chicago trade show on October 31, 1980, and reached operators about two weeks later. White Label boards are the earliest ROM set and by far the rarest today — surviving accounts describe only a handful of genuine White-labeled machines, and they're frequently confused with lightly-striped Blue boards. The code is entirely unique, sharing no ROMs with any later revision. White carries an attract-mode scoring bug: the high-score table lists Landers at 100 points instead of the correct 150, and the built-in high score for player PGD reads 14,185 instead of the corrected 14,285. That exact bug later surfaced in Williams' court case against Artic Manufacturing's bootleg 'Defense Command.' The Golden Defender's builder personally owns one of the very few original White Label ROM sets known to still exist." },
+      { name:"Blue Label", period:"Early production", romZip:"schematics/roms-blue-label.zip", romCount:"10 EPROMs + sound", desc:"A close revision of White, Blue Label boards run on 10 EPROMs with IC5 left unpopulated. IC1, IC2, and IC3 use 4K ROM chips — a configuration unique to this set. Code-wise, the lower half of Blue's IC1 is shared with Green's IC1, but the upper half is entirely different. Blue Label boards are the most commonly misidentified set: their oversized labels frequently lose their top and bottom stripes, causing them to be mistaken for White. The same Lander scoring bug from White carries over unchanged — Landers still display 100 points and PGD's high score still reads 14,185. Blue supports upright cabinets only, as the cocktail version would not arrive until Red." },
+      { name:"Green Label", period:"Mid production", romZip:"schematics/roms-green-label.zip", romCount:"10 EPROMs + sound", desc:"Green Label boards use 10 EPROMs and mark the first significant code revision. IC1 and IC4 shift to 2K ROM chips, a departure from Blue's 4K layout. Green corrects the attract-mode scoring bug that persisted through White and Blue — Landers now properly display 150 points, and PGD's high score updates to the correct 14,285. IC3 and IC4 contain entirely unique code not found in any other revision. Despite sharing the lower half of IC1 with Blue, Green shares no ROMs at all with White or Red. Green remains upright-only — the last revision before Williams introduced the cocktail cabinet that would define Red Label." },
+      { name:"Red Label", period:"1981", romZip:"schematics/roms-red-label.zip", romCount:"11 EPROMs + sound", desc:"Released in 1981 alongside Williams' two-player cocktail cabinet, Red Label required genuine code changes — not just bugfixes — to flip the screen and support a second set of controls for player two. Red uses 11 EPROMs, all with different part numbers from earlier sets, and mixes 2716 and 2532 chip types. IC5 remains unpopulated. Red's code is entirely unique, sharing no ROMs with White, Blue, or Green. It became the most widely produced and most commonly encountered revision, and it's the version MAME uses as its default parent ROM set. Red is also the only set to support both upright and cocktail cabinet configurations out of the box." }
+    ],
+    guide:{ zip:"schematics/guide-to-playing-defender.zip", title:"The Video Master's Guide to Defender", author:"Nick Broomis", year:"1982", desc:"A 96-page Bantam Books paperback from 1982 — the original strategy guide for mastering Defender. Covers enemy patterns, scoring strategies, smart bomb timing, and high-score techniques. A genuine piece of arcade-era memorabilia." }
   },
 
   /* ---- CONTACT ---- */
@@ -1702,7 +1703,7 @@ const SITE = {
       { q:"What does the number 50,001 mean?", a:"It's a tribute number. The original 50,000th Defender rolled off the Williams production line in 1981 — this machine is numbered 50,001 in its honor, finished in gold to mark the milestone." },
       { q:"Who created the original Defender?", a:"Defender was created in 1981 by Eugene Jarvis, Larry DeMar, and Sam Dicker at Williams Electronics — the same team credited for the game's iconic sound design." },
       { q:"Where can I hear the game's music and sound effects?", a:"Head to the Songs and Sounds pages — tribute tracks from fans and musicians, plus every classic effect straight from the cabinet." },
-      { q:"Can I download the schematics?", a:"Yes. The Schematics page has the full Early and Later series service manuals, viewable on-screen or downloadable as a zip. You'll also find the original ROM dumps for all four production sets — White, Blue, Green, and Red — each downloadable as a separate zip." },
+      { q:"Can I download the schematics?", a:"Yes. The Schematics page has the full Early and Later series service manuals, viewable on-screen or downloadable as a zip. You'll also find the original ROM dumps for all four production sets — White, Blue, Green, and Red — each downloadable as a separate zip, plus the 1982 Video Master's Guide to Defender strategy book." },
       { q:"How was Defender received when it first came out?", a:"Rougher than you'd expect for a legend. It debuted at the AMOA Chicago trade show on October 31, 1980, and the demanding controls scared off a lot of first-time players — some in the industry predicted it would flop next to Pac-Man. Williams even burned its first demo ROMs backwards and had to redo them just before the show. It obviously turned out fine: Defender went on to become one of the highest-grossing arcade games ever made." },
       { q:"Is there a Defender song?", a:"Yes — Buckner & Garcia, the duo behind 'Pac-Man Fever,' wrote a tribute track called 'Defender' for that same album. The cabinet has also made cameo appearances in a handful of early-80s films." },
       { q:"What's the official high score record?", a:"On Marathon settings, Chris Hoffman holds the record at 79,976,975 points, set January 1, 1984. On Tournament settings, Bill Jones holds it at 543,950 points, set August 15, 2008." }
@@ -3046,6 +3047,11 @@ function viewSchematics(){
     <p class="lead">${esc(s.blurb)}</p></div>
     ${s.zip?`<a class="btn primary schzip" href="${esc(s.zip)}" download>⬇ Download all (.zip)</a>`:''}</div>
     <div class="schgrid">${cards}</div>
+    ${s.guide?`<div class="sec-head" style="margin-top:56px"><div>
+      <span class="eyebrow">Strategy guide</span><h2>${esc(s.guide.title)}</h2>
+      <p class="lead">${esc(s.guide.desc)} <strong>By ${esc(s.guide.author)}</strong> (${esc(s.guide.year)}).</p>
+    </div>
+    <a class="btn primary schzip" href="${esc(s.guide.zip)}" download>⬇ Download Guide (.zip)</a></div>`:''}
     ${romSection}</section>`;
 }
 
@@ -3463,45 +3469,288 @@ function render(){
 addEventListener('hashchange',render);
 
 /* Flyby banner — Goldie Ship pulls a banner across the screen promoting
-   different pages. Appears randomly, skips during gameplay. */
+   different pages. 20 witty sayings per page, rotates through all pages
+   before repeating any. Clickable — click banner to visit that page.
+   Skips during gameplay. */
 (function(){
-  var FLYBY_MESSAGES=[
-    {route:'#home',title:'Golden Defender',line:'A gold cabinet with a hero complex.'},
-    {route:'#story',title:'Read the Story',line:'One boy, one ship, zero chill from aliens.'},
-    {route:'#video',title:'Watch the Videos',line:'Arcade history with extra cosmic sparkle.'},
-    {route:'#play',title:'Play the Mini Game',line:'Save humanoids. Brag later. Panic now.'},
-    {route:'#galleries',title:'Explore the Galleries',line:'Proof that gold paint makes everything faster.'},
-    {route:'#inspection',title:'Inspection Details',line:'Serial numbers, stickers, and arcade archaeology.'},
-    {route:'#history',title:'Defender History',line:'The game that made quarters nervous.'},
-    {route:'#music',title:'Hear the Music',line:'Retro sounds for modern button mashers.'},
-    {route:'#schematics',title:'Download Schematics',line:'For restorers, tinkerers, and brave solder heroes.'},
-    {route:'#contact',title:'Contact Edward',line:'Send a transmission before the Landers do.'}
+  var PAGES=[
+    {route:'#home',title:'Golden Defender',lines:[
+      'A gold cabinet with a hero complex.',
+      '50,001 machines later, one still shines.',
+      'The 24-karat tribute to a 1980 legend.',
+      'Gold paint, golden memories, zero rust.',
+      'One cabinet. Fifty thousand sisters. One survivor.',
+      'Where arcade history meets a gold card.',
+      'The shiniest machine in Sector 1981.',
+      'Proof that gold makes everything better — even aliens.',
+      'A cabinet so rare, Landers want to abduct it.',
+      'The Defender that went to the gold standard.',
+      'Not just a machine — a 24-karat time capsule.',
+      'Where a boyhood dream got a gold-plated sequel.',
+      'The only Defender that arrives in a limo.',
+      'Even the Mutants respect the paint job.',
+      'Golden on the outside, 1981 on the inside.',
+      'The cabinet that makes other cabinets jealous.',
+      'A quarter got you a life. Gold got you a legend.',
+      'Fifty thousand Defenders walked out. One came back golden.',
+      'The machine that makes smart bombs look underdressed.',
+      'If Defender had a baby with a gold ingot.']
+    },
+    {route:'#story',title:'Read the Story',lines:[
+      'One boy, one ship, zero chill from aliens.',
+      'A twelve-year-old, a dream, and a gold paint job.',
+      'The saga starts with a kid and ends with a cabinet.',
+      'From bedroom poster to gold-plated reality.',
+      'It took twelve years. It was worth every one.',
+      'The story of a boy who never hit Continue.',
+      'Every cabinet has a story. This one has a golden one.',
+      'He saved the humanoids. Then he saved the cabinet.',
+      'A tale of pixels, paint, and persistence.',
+      'The boy who traded quarters for gold.',
+      'Not all heroes wear capes. Some paint cabinets.',
+      'From joystick jockey to cabinet curator.',
+      'The story that proves arcade dreams don\'t expire.',
+      'A 40-year quest for the perfect gold cabinet.',
+      'He didn\'t just play Defender. He became one.',
+      'The human interest story behind the humanoid rescue.',
+      'Read it before the Landers rewrite history.',
+      'A story so good, even the Bombers are listening.',
+      'The journey from arcade rat to golden god.',
+      'Every word is true. The gold is real. The aliens are fictional.']
+    },
+    {route:'#history',title:'Defender History',lines:[
+      'The game that made quarters nervous.',
+      '1980: the year sideways scrolling was born.',
+      'Eugene Jarvis said hold my beer. Then he made Defender.',
+      'The hardest game in the arcade. Also the best.',
+      'Where one quarter bought five minutes of panic.',
+      'The game that made kids learn left from right.',
+      'Defender: because Galaxian was too easy.',
+      'The cabinet that ate more quarters than a laundromat.',
+      'Before there was Halo, there was this.',
+      'The game so hard it came with a warning label. Probably.',
+      'Williams Electronics\' finest hour. Also their hardest.',
+      'The game that taught a generation to multitask.',
+      'Five buttons, one joystick, infinite dread.',
+      'History is written by the survivors. Defender had few.',
+      'The year arcades got their first panic attack.',
+      'Before achievements, there was just staying alive.',
+      'The game where dying felt like a personal failing.',
+      'Forty years later, the radar still sweeps.',
+      'The only game where the tutorial was the gameplay.',
+      'Defender didn\'t just make history. It made therapists rich.']
+    },
+    {route:'#poem',title:'Read the Poem',lines:[
+      'Verses for the vertically challenged alien.',
+      'Ode to a gold cabinet and the boy who loved it.',
+      'Roses are red, Landers are green, this poem is golden.',
+      'The only sonnet that mentions smart bombs.',
+      'A poem so good, even Baiters stop to listen.',
+      'Rhyme scheme: ABAB. Threat level: golden.',
+      'Where arcade poetry meets gold-plated prose.',
+      'The ballad of the boy and his shiny cabinet.',
+      'Free verse about a not-so-free cabinet.',
+      'Stanzas so sharp they could cut a Pod in half.',
+      'The poem that makes Landers weep. Mostly from joy.',
+      'An epic in iambic pentameter. With aliens.',
+      'Where every line ends with a smart bomb.',
+      'The limerick that saved Sector 1981.',
+      'Poetry: because shooting aliens wasn\'t enough.',
+      'A verse for every humanoid that ever fell.',
+      'The ode that made even the Manti sway in rhythm.',
+      'Golden words for a golden cabinet.',
+      'The only poem that comes with a high score.',
+      'Read it aloud and watch the Bombers weep.']
+    },
+    {route:'#enemies',title:'Know the Enemies',lines:[
+      'Meet the things that want you dead.',
+      'Landers: they came for your humanoids.',
+      'Baiters: fast, angry, and no RSVP.',
+      'Bombers: they drop mines like bad habits.',
+      'Pods: crack them open and regret it.',
+      'Swarmers: tiny, angry, and everywhere.',
+      'Mutants: what happens when Landers get promoted.',
+      'Six enemies. One ship. Zero mercy.',
+      'The rogues\' gallery of Sector 1981.',
+      'Know thy enemy. Then shoot him.',
+      'Some abduct. Some bomb. All are annoying.',
+      'The only museum where the exhibits want you dead.',
+      'From Lander to Mutant: a career change nobody wanted.',
+      'Baiters are fast. Your reflexes are faster. Probably.',
+      'Pods don\'t die. They just get dramatic.',
+      'Every enemy here has a PhD in ruining your day.',
+      'The field guide for people who hate being abducted.',
+      'Study them. Then blast them. Then study them again.',
+      'Six species of bad news, catalogued for your pleasure.',
+      'The enemies are pixels. The fear is real.']
+    },
+    {route:'#play',title:'Play the Mini Game',lines:[
+      'Save humanoids. Brag later. Panic now.',
+      'One ship, five buttons, infinite regret.',
+      'The game where dying is a learning experience.',
+      'How many humanoids can YOU let fall?',
+      'Smart bombs: use them. Or save them. Or both. Panic.',
+      'The mini game with maximum-sized panic.',
+      'Your reflexes vs. six species of bad news.',
+      'Where every wave is a new excuse to sweat.',
+      'Press start. Lose track of time. Lose track of humanoids.',
+      'The only game where saving people is your second priority.',
+      'You have one job. Okay, two. Fine, several. Good luck.',
+      'A tiny version of a giant nightmare. Enjoy.',
+      'Where 10,000 points feels like a promotion.',
+      'Play it once. Lose. Play it again. That\'s Defender.',
+      'The mini game that punches above its weight class.',
+      'Your high score is a lie. The leaderboard knows.',
+      'Where even the practice mode is a struggle.',
+      'Five buttons of fury, one joystick of justice.',
+      'The game that made \'easy mode\' a lie.',
+      'Insert virtual quarter. Panic accordingly.']
+    },
+    {route:'#galleries',title:'Explore the Galleries',lines:[
+      'Proof that gold paint makes everything faster.',
+      'Photos so detailed you can smell the solder.',
+      'The cabinet in 4K. Because 1980 wasn\'t enough.',
+      'Every screw, every sticker, every golden pixel.',
+      'A photo tour of the shiniest cabinet alive.',
+      'Galleries: where the cabinet poses for its close-up.',
+      'From bare wood to gold leaf — the full transformation.',
+      'Pictures or it didn\'t happen. It happened. Here\'s proof.',
+      'The before-and-after that makes carpenters cry.',
+      'Where every photo has a gold filter. Literally.',
+      'A visual history of one man\'s beautiful obsession.',
+      'The gallery where even the wires look photogenic.',
+      'Step right up and see the golden cabinet in all its glory.',
+      'Photos so crisp you could read the serial number. Go ahead.',
+      'The only museum exhibit that\'s also a game.',
+      'From dust to gold — the cabinet\'s glow-up gallery.',
+      'Every panel, every angle, every shimmer.',
+      'The photo collection that proves patience pays in gold.',
+      'Where the cabinet gets its magazine cover moment.',
+      'A gallery so golden, the camera lens needed sunglasses.']
+    },
+    {route:'#songs',title:'Hear the Songs',lines:[
+      'Retro sounds for modern button mashers.',
+      'The soundtrack of Sector 1981, remixed.',
+      'Songs so retro they make vinyl feel futuristic.',
+      'The playlist for your next Lander invasion.',
+      'From arcade bleeps to golden beats.',
+      'Music that makes Mutants tap their feet.',
+      'The sounds of a quarter well spent.',
+      'A soundtrack for saving humanoids in style.',
+      'Where 8-bit meets 24-karat.',
+      'The playlist that Bombers bomb to.',
+      'Synth waves for golden days.',
+      'Music so good, even the attract mode is jealous.',
+      'The only playlist that comes with a high score.',
+      'Beats so fresh they\'re preserved in ROM.',
+      'Arcade anthems for the golden generation.',
+      'The sound of fifty thousand cabinets, distilled.',
+      'Where every track is a love letter to 1981.',
+      'Songs that make you want to insert a coin.',
+      'The greatest hits of Sector 1981.',
+      'Turn it up. The Landers can\'t stand the noise.']
+    },
+    {route:'#schematics',title:'Download Schematics',lines:[
+      'For restorers, tinkerers, and brave solder heroes.',
+      'The manual for people who like their electrons organized.',
+      'Schematics: because guessing is not a repair strategy.',
+      'Where every wire has a name and a purpose.',
+      'For when your Defender needs a Defender.',
+      'The only PDF that smells like solder.',
+      'Read it, trace it, fix it, celebrate.',
+      'Circuit diagrams for the electronically courageous.',
+      'Where IC5 is always empty and that\'s fine.',
+      'The schematics are golden. The solder is silver. Close enough.',
+      'For the person who looks at a PCB and sees art.',
+      'Every chip, every trace, every golden connection.',
+      'The reference doc that saved more cabinets than smart bombs.',
+      'Download the blueprints. Build a time machine. You\'ll need them.',
+      'Where \'check pin 7\' is a way of life.',
+      'For people who think \'EPROM\' is a term of endearment.',
+      'The only reading material that comes with a parts list.',
+      'Schematics: the other white paper.',
+      'Where the word \'capacitor\' elicits genuine emotion.',
+      'Fix it with this. Or just admire the wiring. Both valid.']
+    },
+    {route:'#contact',title:'Contact Edward',lines:[
+      'Send a transmission before the Landers do.',
+      'The only contact form that accepts distress signals.',
+      'Open a channel to Sector 1981.',
+      'Questions, comments, or humanoid rescue requests welcome.',
+      'The inbox is golden. The responses are faster than a Baiter.',
+      'Reach out before the Mutants reach you.',
+      'Your message will be read by a human, not a Lander.',
+      'Contact: because smoke signals are so 1979.',
+      'Send a note. Get a reply. No smart bombs required.',
+      'The contact page that doesn\'t require a coin insert.',
+      'Where every email gets a golden reply.',
+      'Open a channel. The radar is always on.',
+      'The form that accepts \'help\' as a subject line.',
+      'Send your transmission. The frequency is open.',
+      'Contact Edward — he doesn\'t bite. The cabinet might.',
+      'The only form where \'Lander abductions\' is a valid topic.',
+      'Messages received faster than a Pod can split.',
+      'Where \'insert coin\' is not a required field.',
+      'Your message travels at light speed. The reply is almost as fast.',
+      'The contact form that\'s more reliable than hyperspace.']
+    }
   ];
   var SHIP_IMG='images/sprites-gold/defender-ship.png';
   var layer=document.getElementById('flybyLayer');
   if(!layer) return;
   var timer=null;
   var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var pageOrder=[]; /* shuffled indices into PAGES */
+  var orderPos=0; /* current position in pageOrder */
+  var lineIdx=[]; /* per-page saying index, 0-19 */
+  for(var i=0;i<PAGES.length;i++) lineIdx.push(0);
 
   function isPlayRoute(){ return location.hash.indexOf('#play')===0; }
 
-  function pickMessage(){
-    /* Pick a random message, but prefer one that isn't the current page */
+  function shufflePages(){
+    pageOrder=PAGES.map(function(_,i){return i;});
+    for(var i=pageOrder.length-1;i>0;i--){
+      var j=Math.floor(Math.random()*(i+1));
+      var t=pageOrder[i];pageOrder[i]=pageOrder[j];pageOrder[j]=t;
+    }
+    orderPos=0;
+  }
+
+  function pickPage(){
+    if(pageOrder.length===0||orderPos>=pageOrder.length) shufflePages();
+    var pageIdx=pageOrder[orderPos];
+    orderPos++;
+    /* Skip the page we're currently on, try next */
     var hash=location.hash||'#home';
-    var pool=FLYBY_MESSAGES.filter(function(m){return m.route!==hash;});
-    if(pool.length===0) pool=FLYBY_MESSAGES;
-    return pool[Math.floor(Math.random()*pool.length)];
+    if(PAGES[pageIdx].route===hash && orderPos<pageOrder.length){
+      var nextIdx=pageOrder[orderPos];
+      orderPos++;
+      pageIdx=nextIdx;
+    }
+    return pageIdx;
   }
 
   function showFlyby(){
     if(reduced||isPlayRoute()) { scheduleNext(); return; }
-    var msg=pickMessage();
+    var pageIdx=pickPage();
+    var page=PAGES[pageIdx];
+    var line=page.lines[lineIdx[pageIdx] % page.lines.length];
+    lineIdx[pageIdx]++;
     var y=8+Math.random()*14; /* top 8%-22% of viewport, below nav */
     var dur=20+Math.random()*10; /* 20-30s slow sweep */
     var banner=document.createElement('div');
     banner.className='flyby-banner';
     banner.style.setProperty('--flyby-y',y+'vh');
     banner.style.setProperty('--flyby-duration',dur+'s');
+    banner.style.cursor='pointer';
+    banner.title='Click to visit '+page.title;
+    /* Click navigates to the page */
+    banner.addEventListener('click',function(){
+      location.hash=page.route;
+      if(banner.parentNode) banner.parentNode.removeChild(banner);
+      if(timer){clearTimeout(timer);timer=null;}
+      scheduleNext();
+    });
     var ship=document.createElement('img');
     ship.className='fb-ship';
     ship.src=SHIP_IMG; ship.alt='';
@@ -3511,12 +3760,12 @@ addEventListener('hashchange',render);
     panel.className='fb-panel';
     var title=document.createElement('span');
     title.className='fb-title';
-    title.textContent=msg.title;
-    var line=document.createElement('span');
-    line.className='fb-line';
-    line.textContent=msg.line;
+    title.textContent=page.title;
+    var lineEl=document.createElement('span');
+    lineEl.className='fb-line';
+    lineEl.textContent=line;
     panel.appendChild(title);
-    panel.appendChild(line);
+    panel.appendChild(lineEl);
     banner.appendChild(ship);
     banner.appendChild(rope);
     banner.appendChild(panel);
