@@ -4570,16 +4570,17 @@ $('#lightbox').addEventListener('touchend',e=>{
   /* Actual difficulty ranking, independent of which wave a type happens to
      show up on: Pod easiest, Baiter hardest, Swarmer just under Baiter. */
   const DIFFICULTY_RANK={pod:0, lander:1, bomber:2, mutant:3, swarmer:4, baiter:5};
-  /* HP (hits to kill) and how much smaller their real hitbox is, climbing
-     both with the type's own difficulty (Pod easy → Baiter brutal) and
-     with each repeat lap through the roster as waves keep going — capped
-     after a few laps so late-game boss waves stay hard, not impossible. */
+  /* Base hits-to-kill per species on their first appearance as a boss —
+     Lander and Mutant specifically take 5 hits per the owner's call, Pod
+     stays the easy one, Baiter the hardest. Climbs further on each repeat
+     lap through the roster as waves keep going. */
+  const BASE_BOSS_HP={pod:2, lander:5, bomber:3, mutant:5, swarmer:4, baiter:6};
   function bossToughness(w){
     const key=bossKeyForWave(w), diffRank=DIFFICULTY_RANK[key]||0;
     const tier=Math.min(3, bossTierForWave(w));
     return {
-      hp: 2+diffRank+tier*2,
-      hitScale: Math.max(0.42, 0.88-diffRank*0.07-tier*0.05)
+      hp: (BASE_BOSS_HP[key]||2)+tier*2,
+      hitScale: Math.max(0.5, 0.92-diffRank*0.05-tier*0.05)
     };
   }
   const BOSS_INTRO_LINES={
@@ -4606,7 +4607,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function difficultyFactor(){
-    const waveGrowth=Math.min(2.2,(wave-1)*0.08+Math.max(0,wave-5)*0.10);
+    const waveGrowth=Math.min(2.2,(wave-1)*0.08+Math.max(0,wave-5)*0.06);
     const frenzy=activeHumanoidCount()===0?0.45:0;
     const boss=isBossWave(wave)?0.3:0;
     return Math.min(4.2, 1.6+waveGrowth+frenzy+boss);
@@ -4621,7 +4622,11 @@ $('#lightbox').addEventListener('touchend',e=>{
     const s=scaleUnit();
     const rMul={swarmer:0.018,baiter:0.030,lander:0.028,mutant:0.028,bomber:0.020,pod:0.020}[key]||0.028;
     const diff=difficultyFactor();
-    const bossMul=boss?1.35:1;
+    // Boss-wave speed stays a gentle 1.15x on the first lap through the
+    // roster (waves 5-30) and ramps up on each repeat lap after that, so
+    // early boss waves stay approachable while later ones keep escalating.
+    const bossTier=boss?Math.min(3,bossTierForWave(wave)):0;
+    const bossMul=boss?(1.15+bossTier*0.18):1;
     const tough=boss?bossToughness(wave):null;
     enemies.push({
       key, x:W+40+Math.random()*70, y:flightTop()+Math.random()*(flightBottom()-flightTop()),
@@ -4933,12 +4938,14 @@ $('#lightbox').addEventListener('touchend',e=>{
   function useBomb(){
     if(state!=='playing'||bombs<=0||enemies.length===0) return;
     bombs--;
+    const podPositions=[];
     for(const en of enemies){
       spawnParticles(en.x,en.y);
       const info=(SITE.enemies||[]).find(x=>x.key===en.key);
       score+=(info&&info.score)||100;
       while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
-      waveKills++;
+      if(!en.bonus) waveKills++;
+      if(en.key==='pod') podPositions.push({x:en.x,y:en.y});
     }
     for(const en of enemies){
       if(en.carrying){
@@ -4946,6 +4953,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       }
     }
     enemies=[];
+    for(const p of podPositions) spawnSwarmersFromPod(p.x,p.y);
     screenFlash=Math.max(screenFlash,0.7);
     updateHud();
     advanceWaveIfDone();
@@ -4968,6 +4976,45 @@ $('#lightbox').addEventListener('touchend',e=>{
       particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:0.5+Math.random()*0.3,
         c:Math.random()<0.5?'#ffce4d':'#ff9d4d'});
     }
+  }
+
+  /* Straight out of the original arcade: destroying a Pod cracks it open
+     and releases a scattering of Swarmers (2-8 of them) — whether it was
+     shot, smart-bombed, or rammed by the ship. They spawn right where the
+     Pod died, drifting outward briefly before joining the normal leftward
+     drift/loop behaviour every other enemy uses. */
+  function spawnSwarmersFromPod(x,y){
+    const n=2+Math.floor(Math.random()*7); // 2..8 inclusive
+    const s=scaleUnit();
+    for(let i=0;i<n;i++){
+      const ang=Math.random()*6.283, dist=10+Math.random()*20;
+      const burstSpeed=(90+Math.random()*220)*(s/700||1);
+      enemies.push({
+        key:'swarmer',
+        x:x+Math.cos(ang)*dist, y:y+Math.sin(ang)*dist,
+        vx:-(190*(0.7+Math.random()*0.5)),
+        bobAmp:10+Math.random()*22,
+        bobSpeed:1.1+Math.random()*1.7,
+        phase:Math.random()*6.28,
+        r:Math.max(7,s*0.018),
+        boss:false, hp:1, maxHp:1, hitScale:1, hitFlash:0,
+        carrying:null, diveTarget:null, aiState:'normal',
+        // bonus:true — a pod-cracked freebie, not part of the wave's planned
+        // quota, so it never counts toward waveKills/advanceWaveIfDone and
+        // never touches waveSpawned's budget. Otherwise these extra kills
+        // padded wave completion early and threw the intended enemy counts
+        // off, sometimes skipping enemies the wave was actually supposed to
+        // spawn.
+        bonus:true,
+        // burstVx/burstVy: a brief outward kick in a wide range of
+        // directions so the scatter actually reads as an explosion, not
+        // a small huddle — fades out over burstTimer seconds, after which
+        // they settle into the normal leftward drift/loop like any Manti.
+        burstVx:Math.cos(ang)*burstSpeed, burstVy:Math.sin(ang)*burstSpeed,
+        burstTimer:0.55+Math.random()*0.45
+      });
+    }
+    spawnParticles(x,y);
   }
 
   /* Called any time an enemy that counted toward this wave's quota is gone
@@ -5034,6 +5081,15 @@ $('#lightbox').addEventListener('touchend',e=>{
     const frantic=isFrantic();
     for(const en of enemies){
       if(en.zigPhase===undefined) en.zigPhase=Math.random()*6.28;
+      // Pod-cracked Swarmers get a brief outward burst in whatever direction
+      // they scattered, layered on top of their normal movement below, so
+      // the pod "bursts open" instead of just leaking a tidy little cluster.
+      if(en.burstTimer>0){
+        const k=en.burstTimer/0.6;
+        en.x+=en.burstVx*k*dt;
+        en.y+=en.burstVy*k*dt;
+        en.burstTimer=Math.max(0,en.burstTimer-dt);
+      }
       // Diving/ascending landers are fully controlled by the abduction AI below —
       // skip normal drift/bob so they track the humanoid and rise straight up.
       if(en.aiState==='diving'||en.aiState==='ascending') continue;
@@ -5202,10 +5258,10 @@ $('#lightbox').addEventListener('touchend',e=>{
             if(en.carrying){
               fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
             }
+            if(en.key==='pod') spawnSwarmersFromPod(en.x,en.y);
             enemies.splice(i,1);
-            waveKills++;
+            if(!en.bonus){ waveKills++; advanceWaveIfDone(); }
             updateHud();
-            advanceWaveIfDone();
           }
           break;
         }
@@ -5291,6 +5347,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           if(en.carrying){
             fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
           }
+          if(en.key==='pod') spawnSwarmersFromPod(en.x,en.y);
           enemies.splice(i,1);
           spawnParticles(player.x,player.y);
           // Even dying to it, that Manti is gone — award its points same as a clean kill.
@@ -5298,10 +5355,10 @@ $('#lightbox').addEventListener('touchend',e=>{
           score+=(info&&info.score)||100;
           while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
           lives--;
-          waveKills++;
+          if(!en.bonus) waveKills++;
           updateHud();
           if(lives<=0){ endGame(); return; }
-          advanceWaveIfDone();
+          if(!en.bonus) advanceWaveIfDone();
           player.invuln=1.6;
           resetPlayer();
           break;
