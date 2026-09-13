@@ -641,15 +641,27 @@ section.block.tight{padding:60px 0}
 .schgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;margin-top:14px}
 @media(max-width:720px){.schgrid{grid-template-columns:1fr}}
 .romgrid{display:flex;flex-direction:column;gap:16px;margin-top:22px}
-.romcard{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:18px 24px;display:flex;align-items:flex-start;gap:20px}
-.romcard .rominfo{flex:1;min-width:0}
-.romhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.romcard{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:18px 24px}
+.romcard .rominfo{min-width:0}
+.romhead{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:10px}
+.romtitle{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}
 .romhead h4{font-family:'Sora';font-weight:700;font-size:18px;margin:0}
 .romperiod{font-family:'Space Mono';font-size:11px;letter-spacing:.5px;color:var(--ink-mute);text-transform:uppercase}
 .romcard p{color:var(--ink-dim);font-size:14px;line-height:1.55;margin:0}
 .rombtns{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
 .romcount{font-size:13px;color:var(--ink-mute);font-family:'Sora'}
-.romdl{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:160px}
+.romdl{flex-shrink:0;display:flex;align-items:center;gap:12px}
+.romdl .btn{padding:10px 16px;font-size:13px;white-space:nowrap}
+@media(max-width:600px){
+  .romcard{padding:16px}
+  .romhead{gap:10px;margin-bottom:12px}
+  .romtitle{align-items:flex-start;flex-direction:column;gap:3px}
+  .romhead h4{font-size:17px}
+  .romperiod{font-size:9px}
+  .romdl{flex-direction:column;align-items:flex-end;gap:4px}
+  .romdl .btn{padding:9px 11px;font-size:11px;letter-spacing:0}
+  .romcount{font-size:10px;text-align:right}
+}
 .romnote{margin-top:20px;font-family:'Space Mono';font-size:12px;color:var(--ink-mute);line-height:1.7;max-width:70ch}
 .guide-card{display:flex;gap:28px;align-items:flex-start;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:24px}
 .guide-cover{width:140px;height:auto;flex-shrink:0;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.5)}
@@ -3091,14 +3103,14 @@ function viewSchematics(){
       </div>
     </article>`).join('');
   const roms=(s.romHistory||[]).map(r=>`<div class="romcard">
-      <div class="rominfo">
-        <div class="romhead"><h4 class="tgold">${esc(r.name)}</h4><span class="romperiod">${esc(r.period)}</span></div>
-        <p>${esc(r.desc)}</p>
+      <div class="romhead">
+        <div class="romtitle"><h4 class="tgold">${esc(r.name)}</h4><span class="romperiod">${esc(r.period)}</span></div>
+        <div class="romdl">
+          ${r.romZip?`<a class="btn primary" href="${esc(r.romZip)}" download>⬇ Download ROMs</a>`:''}
+          ${r.romCount?`<span class="romcount">${esc(r.romCount)}</span>`:''}
+        </div>
       </div>
-      <div class="romdl">
-        ${r.romZip?`<a class="btn primary" href="${esc(r.romZip)}" download>⬇ Download ROMs (.zip)</a>`:''}
-        ${r.romCount?`<span class="romcount">${esc(r.romCount)}</span>`:''}
-      </div>
+      <div class="rominfo"><p>${esc(r.desc)}</p></div>
     </div>`).join('');
   const romSection=(s.romHistory||[]).length?`<div class="sec-head" style="margin-top:56px"><div>
       <span class="eyebrow">Production history</span><h2>The ROM Sets</h2>
