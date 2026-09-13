@@ -4588,7 +4588,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     lander:  n=>`LANDER SWARM — ${n} OF THEM. GOOD LUCK, YOU'RE GOING TO NEED IT!!`,
     mutant:  n=>`${n} MUTANTS, WALL TO WALL. THEY USED TO BE PEOPLE. NOW THEY BITE.`,
     bomber:  n=>`${n} BOMBERS DEAD AHEAD. DON'T STAND UNDER ANYTHING.`,
-    swarmer: n=>`${n} SWARMERS. IT'S ABOUT TO GET LOUD.`,
+    swarmer: n=>`${n} PODS INBOUND — POP THEM AND IT'S ABOUT TO GET LOUD.`,
     baiter:  n=>`KILL ${n} BAITERS. GOOD LUCK, YOU'RE GOING TO NEED IT!!`
   };
   function bossLabel(key){ return key.charAt(0).toUpperCase()+key.slice(1); }
@@ -4615,9 +4615,16 @@ $('#lightbox').addEventListener('touchend',e=>{
   function isFrantic(){ return activeHumanoidCount()===0; }
 
   function spawnEnemy(){
-    const types=['lander','mutant','baiter','bomber','pod','swarmer'];
+    // 'swarmer' removed from the direct-spawn roster — Swarmers now only
+    // ever come from a Pod being destroyed (see spawnSwarmersFromPod).
+    const types=['lander','mutant','baiter','bomber','pod'];
     const boss=isBossWave(wave);
-    const key=boss?bossKeyForWave(wave):types[Math.floor(Math.random()*types.length)];
+    let key=boss?bossKeyForWave(wave):types[Math.floor(Math.random()*types.length)];
+    // A "Swarmer" boss wave still exists (theming/toughness/target all still
+    // computed from bossKeyForWave='swarmer' below), but what actually
+    // spawns is a Pod — killing it is what releases the real Swarmers, same
+    // as everywhere else in the game.
+    if(key==='swarmer') key='pod';
     const speedBase={lander:90,mutant:115,baiter:170,bomber:70,pod:60,swarmer:190}[key]||80;
     const s=scaleUnit();
     const rMul={swarmer:0.018,baiter:0.030,lander:0.028,mutant:0.028,bomber:0.020,pod:0.020}[key]||0.028;
@@ -5025,6 +5032,11 @@ $('#lightbox').addEventListener('touchend',e=>{
      total could never reach the wave's target once it was spawned. */
   function advanceWaveIfDone(){
     if(waveKills<waveTarget(wave)) return;
+    // Quota met isn't enough on its own — Pods can still be mid-air or have
+    // just burst into a handful of bonus Swarmers. Don't advance until every
+    // enemy currently on screen (quota or bonus) is actually gone, or the
+    // next wave could start while last wave's Swarmers are still alive.
+    if(enemies.length>0) return;
     const survivors=humanoids.length;
     const bonus=survivors*100;
     score+=bonus;
@@ -5260,7 +5272,10 @@ $('#lightbox').addEventListener('touchend',e=>{
             }
             if(en.key==='pod') spawnSwarmersFromPod(en.x,en.y);
             enemies.splice(i,1);
-            if(!en.bonus){ waveKills++; advanceWaveIfDone(); }
+            if(!en.bonus) waveKills++;
+            // Always re-check, even on a bonus (Pod-spawned Swarmer) kill —
+            // that may be the last enemy standing between here and wave clear.
+            advanceWaveIfDone();
             updateHud();
           }
           break;
@@ -5358,7 +5373,9 @@ $('#lightbox').addEventListener('touchend',e=>{
           if(!en.bonus) waveKills++;
           updateHud();
           if(lives<=0){ endGame(); return; }
-          if(!en.bonus) advanceWaveIfDone();
+          // Always re-check, even on a bonus (Pod-spawned Swarmer) kill —
+          // that may be the last enemy standing between here and wave clear.
+          advanceWaveIfDone();
           player.invuln=1.6;
           resetPlayer();
           break;
@@ -5492,8 +5509,12 @@ $('#lightbox').addEventListener('touchend',e=>{
     ctx.stroke();
     ctx.restore();
 
-    // "N TO GO" reads right under the scanner, centered with it
-    const toGo=Math.max(0,waveTarget(wave)-waveKills);
+    // "N TO GO" reads right under the scanner, centered with it. Once the
+    // wave's kill quota is met, this switches to counting whatever's still
+    // alive on screen (leftover Pod-spawned Swarmers, etc.) — that's the
+    // actual thing standing between here and the next wave now.
+    const quotaLeft=Math.max(0,waveTarget(wave)-waveKills);
+    const toGo=quotaLeft>0?quotaLeft:enemies.length;
     ctx.save();
     ctx.textAlign='center';
     ctx.fillStyle='#ffe08a';
