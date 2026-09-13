@@ -854,10 +854,10 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 @media(pointer:coarse) and (max-width:1024px){
   .game-wrap{aspect-ratio:auto;height:55vh;max-height:55vh}
 }
-/* Smaller touch controls on narrow phones so all buttons fit */
+/* Smaller touch controls on narrow phones */
 @media(max-width:420px){
-  .gt-pad{width:108px;height:108px;left:10px;bottom:10px;gap:3px}
-  .gt-btn{font-size:14px;border-radius:8px}
+  .gt-joy-base{width:100px;height:100px}
+  .gt-joy-thumb{width:44px;height:44px}
   .gt-fire{width:64px;height:64px;right:12px;bottom:16px;font-size:12px}
   .gt-bomb{width:46px;height:46px;right:84px;bottom:24px;font-size:9px}
 }
@@ -884,14 +884,18 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .game-touch{position:absolute;inset:0;z-index:2;display:none;pointer-events:none}
 @media(pointer:coarse){.game-touch{display:block}}
 @media(max-width:1024px){.game-touch{display:block}}
-.gt-pad{position:absolute;left:14px;bottom:14px;width:132px;height:132px;
-  display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;
-  gap:4px;pointer-events:auto}
-.gt-btn{background:rgba(140,160,230,.14);border:1px solid var(--line-2);border-radius:10px;
-  color:var(--ink);font-size:16px;display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-.gt-btn:active{background:rgba(255,206,77,.28);border-color:var(--gold)}
-.gt-up{grid-column:2;grid-row:1}.gt-left{grid-column:1;grid-row:2}
-.gt-right{grid-column:3;grid-row:2}.gt-down{grid-column:2;grid-row:3}
+/* Floating analog joystick — touch anywhere on the left half to steer */
+.gt-joy-zone{position:absolute;left:0;top:0;width:50%;height:100%;pointer-events:auto;
+  -webkit-tap-highlight-color:transparent;touch-action:none}
+.gt-joy-base{position:absolute;width:120px;height:120px;border-radius:50%;
+  border:2px solid rgba(255,206,77,.35);background:rgba(255,206,77,.06);
+  transform:translate(-50%,-50%);pointer-events:none;transition:opacity .15s}
+.gt-joy-thumb{position:absolute;width:54px;height:54px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,rgba(255,233,168,.9),rgba(255,206,77,.6) 60%,rgba(184,138,24,.5));
+  border:2px solid rgba(255,206,77,.5);box-shadow:0 4px 16px rgba(255,206,77,.3);
+  transform:translate(-50%,-50%);pointer-events:none}
+.gt-joy-zone.active .gt-joy-base{opacity:1}
+.gt-joy-zone .gt-joy-base{opacity:0;transition:opacity .12s}
 .gt-fire{position:absolute;right:18px;bottom:22px;width:74px;height:74px;border-radius:50%;
   background:linear-gradient(180deg,var(--gold-bri),var(--gold) 58%,var(--gold-deep));
   color:#1c1304;font-family:'Sora';font-weight:800;font-size:13px;letter-spacing:.5px;
@@ -916,8 +920,8 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   aspect-ratio:auto;border-radius:0;border:none;z-index:9999;margin:0}
 .game-wrap.mobile-fs .game-fs-btn{display:none}
 .game-wrap.mobile-fs .game-exit{display:flex}
-.game-wrap.mobile-fs .gt-pad{opacity:.5;transition:opacity .15s}
-.game-wrap.mobile-fs .gt-pad:active{opacity:.85}
+.game-wrap.mobile-fs .gt-joy-zone.active .gt-joy-base{opacity:.45}
+.game-wrap.mobile-fs .gt-joy-thumb{opacity:.6}
 .game-wrap.mobile-fs .gt-fire{opacity:.55;transition:opacity .15s}
 .game-wrap.mobile-fs .gt-fire:active{opacity:.9}
 .game-wrap.mobile-fs .gt-bomb{opacity:.5;transition:opacity .15s}
@@ -3229,16 +3233,11 @@ function viewPlay(){
           <h3 id="goTitle">GOLDEN DEFENDER</h3>
           <p id="goSub">Manti fly in from the right and loop back around. Shoot them, dodge them, and keep the Humanoids company.</p>
           <button id="gameGoBtn" class="btn primary">START</button>
-          <div class="go-keys">Arrows / WASD to move &nbsp;·&nbsp; Space or Fire to shoot &nbsp;·&nbsp; B to bomb &nbsp;·&nbsp; Esc to pause</div>
+          <div class="go-keys">Drag left side to steer &nbsp;·&nbsp; Arrows / WASD also work &nbsp;·&nbsp; Fire or Space to shoot &nbsp;·&nbsp; B to bomb</div>
         </div>
       </div>
       <div class="game-touch" id="gameTouch">
-        <div class="gt-pad" id="gtPad">
-          <button class="gt-btn gt-up" data-dir="up" aria-label="Up">▲</button>
-          <button class="gt-btn gt-left" data-dir="left" aria-label="Left">◀</button>
-          <button class="gt-btn gt-right" data-dir="right" aria-label="Right">▶</button>
-          <button class="gt-btn gt-down" data-dir="down" aria-label="Down">▼</button>
-        </div>
+        <div class="gt-joy-zone" id="gtJoyZone"></div>
         <button class="gt-bomb" id="gtBomb" aria-label="Bomb">BOMB</button>
         <button class="gt-fire" id="gtFire" aria-label="Fire">FIRE</button>
       </div>
@@ -4412,6 +4411,8 @@ $('#lightbox').addEventListener('touchend',e=>{
   let keys={};
   let touchDir={up:false,down:false,left:false,right:false};
   let fireHeld=false;
+  /* Analog joystick state for touchscreens */
+  let joyVec={x:0,y:0,active:false};
   let STARS=[]; const STAR_COUNT=60;
   let wired=false, touchWired=false, resizeObs=null;
 
@@ -4754,21 +4755,117 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   function wireTouch(){
     if(touchWired) return; touchWired=true;
-    const pad=document.getElementById('gtPad');
-    const fireBtn=document.getElementById('gtFire');
-    if(pad){
-      pad.querySelectorAll('.gt-btn').forEach(b=>{
-        const dir=b.dataset.dir;
-        const on=(ev)=>{ ev.preventDefault(); touchDir[dir]=true; };
-        const off=(ev)=>{ ev.preventDefault(); touchDir[dir]=false; };
-        b.addEventListener('touchstart',on,{passive:false});
-        b.addEventListener('touchend',off,{passive:false});
-        b.addEventListener('touchcancel',off,{passive:false});
-        b.addEventListener('mousedown',on);
-        b.addEventListener('mouseup',off);
-        b.addEventListener('mouseleave',off);
+
+    /* --- Floating analog joystick on the left half of the screen --- */
+    const joyZone=document.getElementById('gtJoyZone');
+    if(joyZone){
+      let baseEl=null,thumbEl=null;
+      let touchId=null,startX=0,startY=0;
+      const JOY_MAX=60; /* max drag radius in px before full speed */
+
+      const ensureVisuals=()=>{
+        if(!baseEl){
+          baseEl=document.createElement('div'); baseEl.className='gt-joy-base';
+          thumbEl=document.createElement('div'); thumbEl.className='gt-joy-thumb';
+          joyZone.appendChild(baseEl);
+          joyZone.appendChild(thumbEl);
+        }
+      };
+      const showVisuals=(x,y)=>{
+        ensureVisuals();
+        joyZone.classList.add('active');
+        baseEl.style.left=x+'px';
+        baseEl.style.top=y+'px';
+        baseEl.style.opacity='';
+        thumbEl.style.left=x+'px';
+        thumbEl.style.top=y+'px';
+        thumbEl.style.opacity='';
+      };
+      const hideVisuals=()=>{
+        joyZone.classList.remove('active');
+        if(baseEl) baseEl.style.opacity='0';
+        if(thumbEl) thumbEl.style.opacity='0';
+      };
+      const updateThumb=(x,y)=>{
+        if(thumbEl){ thumbEl.style.left=x+'px'; thumbEl.style.top=y+'px'; }
+      };
+
+      const onStart=(cx,cy,id)=>{
+        if(touchId!==null) return;
+        touchId=id;
+        startX=cx; startY=cy;
+        joyVec.active=true;
+        showVisuals(cx,cy);
+      };
+      const onMove=(cx,cy)=>{
+        if(touchId===null) return;
+        let dx=cx-startX, dy=cy-startY;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist>JOY_MAX){
+          /* Clamp to max radius */
+          dx=dx/dist*JOY_MAX;
+          dy=dy/dist*JOY_MAX;
+        }
+        /* Normalized -1..1 for movement */
+        joyVec.x=dx/JOY_MAX;
+        joyVec.y=dy/JOY_MAX;
+        updateThumb(startX+dx, startY+dy);
+      };
+      const onEnd=()=>{
+        touchId=null;
+        joyVec.x=0; joyVec.y=0; joyVec.active=false;
+        hideVisuals();
+      };
+
+      /* Touch events */
+      joyZone.addEventListener('touchstart',(e)=>{
+        e.preventDefault();
+        const t=e.changedTouches[0];
+        if(!t) return;
+        const rect=joyZone.getBoundingClientRect();
+        onStart(t.clientX-rect.left, t.clientY-rect.top, t.identifier);
+      },{passive:false});
+      joyZone.addEventListener('touchmove',(e)=>{
+        e.preventDefault();
+        if(touchId===null) return;
+        for(const t of e.changedTouches){
+          if(t.identifier===touchId){
+            const rect=joyZone.getBoundingClientRect();
+            onMove(t.clientX-rect.left, t.clientY-rect.top);
+            break;
+          }
+        }
+      },{passive:false});
+      joyZone.addEventListener('touchend',(e)=>{
+        e.preventDefault();
+        for(const t of e.changedTouches){
+          if(t.identifier===touchId){ onEnd(); break; }
+        }
+      },{passive:false});
+      joyZone.addEventListener('touchcancel',(e)=>{
+        for(const t of e.changedTouches){
+          if(t.identifier===touchId){ onEnd(); break; }
+        }
+      },{passive:false});
+
+      /* Mouse / trackpad events (for touch laptops and testing) */
+      joyZone.addEventListener('mousedown',(e)=>{
+        e.preventDefault();
+        const rect=joyZone.getBoundingClientRect();
+        onStart(e.clientX-rect.left, e.clientY-rect.top, 'mouse');
+      });
+      window.addEventListener('mousemove',(e)=>{
+        if(touchId!=='mouse') return;
+        const rect=joyZone.getBoundingClientRect();
+        onMove(e.clientX-rect.left, e.clientY-rect.top);
+      });
+      window.addEventListener('mouseup',()=>{
+        if(touchId==='mouse') onEnd();
       });
     }
+
+    /* --- Fire button --- */
+    const fireBtn=document.getElementById('gtFire');
     if(fireBtn){
       const fon=(ev)=>{ ev.preventDefault(); fireHeld=true; if(state==='idle') startGame(); };
       const foff=(ev)=>{ ev.preventDefault(); fireHeld=false; };
@@ -4778,6 +4875,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       fireBtn.addEventListener('mousedown',fon);
       fireBtn.addEventListener('mouseup',foff);
     }
+    /* --- Bomb button --- */
     const bombBtn=document.getElementById('gtBomb');
     if(bombBtn){
       const bon=(ev)=>{ ev.preventDefault(); useBomb(); };
@@ -4883,15 +4981,23 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   function update(dt){
     elapsed+=dt;
-    const up=keys['ArrowUp']||keys['w']||keys['W']||touchDir.up;
-    const down=keys['ArrowDown']||keys['s']||keys['S']||touchDir.down;
-    const left=keys['ArrowLeft']||keys['a']||keys['A']||touchDir.left;
-    const right=keys['ArrowRight']||keys['d']||keys['D']||touchDir.right;
+    const up=keys['ArrowUp']||keys['w']||keys['W'];
+    const down=keys['ArrowDown']||keys['s']||keys['S'];
+    const left=keys['ArrowLeft']||keys['a']||keys['A'];
+    const right=keys['ArrowRight']||keys['d']||keys['D'];
     const speed=320;
-    if(up) player.y-=speed*dt;
-    if(down) player.y+=speed*dt;
-    if(left){ player.x-=speed*dt; player.facing=-1; }
-    if(right){ player.x+=speed*dt; player.facing=1; }
+    if(joyVec.active){
+      /* Analog joystick — full 360-degree movement, speed proportional to drag */
+      player.x+=joyVec.x*speed*dt;
+      player.y+=joyVec.y*speed*dt;
+      if(joyVec.x<-0.15) player.facing=-1;
+      else if(joyVec.x>0.15) player.facing=1;
+    } else {
+      if(up) player.y-=speed*dt;
+      if(down) player.y+=speed*dt;
+      if(left){ player.x-=speed*dt; player.facing=-1; }
+      if(right){ player.x+=speed*dt; player.facing=1; }
+    }
     player.x=Math.max(player.r+4,Math.min(W-player.r-4,player.x));
     player.y=Math.max(flightTop(),Math.min(flightBottom(),player.y));
     if(player.invuln>0) player.invuln=Math.max(0,player.invuln-dt);
@@ -6006,6 +6112,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     keys={};
     fireHeld=false;
     touchDir={up:false,down:false,left:false,right:false};
+    joyVec={x:0,y:0,active:false};
     if(raf){ cancelAnimationFrame(raf); raf=null; }
     if(resizeObs){ resizeObs.disconnect(); resizeObs=null; }
   };
