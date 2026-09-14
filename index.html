@@ -868,8 +868,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 }
 /* Smaller touch controls on narrow phones */
 @media(max-width:420px){
-  .gt-joy-base{width:100px;height:100px}
-  .gt-joy-thumb{width:44px;height:44px}
+  .gt-dpad{width:118px;height:118px;left:10px;bottom:14px}
   .gt-fire{width:64px;height:64px;right:12px;bottom:16px;font-size:12px}
   .gt-bomb{width:46px;height:46px;right:84px;bottom:24px;font-size:9px}
 }
@@ -896,18 +895,20 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .game-touch{position:absolute;inset:0;z-index:2;display:none;pointer-events:none}
 @media(pointer:coarse){.game-touch{display:block}}
 @media(max-width:1024px){.game-touch{display:block}}
-/* Floating analog joystick — touch anywhere on the left half to steer */
-.gt-joy-zone{position:absolute;left:0;top:0;width:50%;height:100%;pointer-events:auto;
-  -webkit-tap-highlight-color:transparent;touch-action:none}
-.gt-joy-base{position:absolute;width:120px;height:120px;border-radius:50%;
-  border:2px solid rgba(255,206,77,.35);background:rgba(255,206,77,.06);
-  transform:translate(-50%,-50%);pointer-events:none;transition:opacity .15s}
-.gt-joy-thumb{position:absolute;width:54px;height:54px;border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,rgba(255,233,168,.9),rgba(255,206,77,.6) 60%,rgba(184,138,24,.5));
-  border:2px solid rgba(255,206,77,.5);box-shadow:0 4px 16px rgba(255,206,77,.3);
-  transform:translate(-50%,-50%);pointer-events:none}
-.gt-joy-zone.active .gt-joy-base{opacity:1}
-.gt-joy-zone .gt-joy-base{opacity:0;transition:opacity .12s}
+/* Fixed 8-way D-pad, bottom-left — a 3x3 grid of discrete direction cells
+   (N/NE/E/SE/S/SW/W/NW around an empty hub) instead of a floating analog
+   stick. Each cell is either fully on or fully off, so there's no drag
+   distance to fumble and no oversensitive small-movement drift. */
+.gt-dpad{position:absolute;left:16px;bottom:20px;width:150px;height:150px;
+  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  gap:5px;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:none}
+.gt-dpad-cell{border-radius:10px;background:rgba(255,206,77,.10);
+  border:1px solid rgba(255,206,77,.28);display:flex;align-items:center;justify-content:center;
+  transition:background .08s,transform .08s;pointer-events:auto}
+.gt-dpad-cell svg{width:44%;height:44%;opacity:.7;stroke:#ffe08a}
+.gt-dpad-cell.active{background:rgba(255,206,77,.6);transform:scale(.92)}
+.gt-dpad-cell.active svg{opacity:1}
+.gt-dpad-hub{border-radius:10px;background:rgba(255,206,77,.04);pointer-events:none}
 .gt-fire{position:absolute;right:18px;bottom:22px;width:74px;height:74px;border-radius:50%;
   background:linear-gradient(180deg,var(--gold-bri),var(--gold) 58%,var(--gold-deep));
   color:#1c1304;font-family:'Sora';font-weight:800;font-size:13px;letter-spacing:.5px;
@@ -932,8 +933,8 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
   aspect-ratio:auto;border-radius:0;border:none;z-index:9999;margin:0}
 .game-wrap.mobile-fs .game-fs-btn{display:none}
 .game-wrap.mobile-fs .game-exit{display:flex}
-.game-wrap.mobile-fs .gt-joy-zone.active .gt-joy-base{opacity:.45}
-.game-wrap.mobile-fs .gt-joy-thumb{opacity:.6}
+.game-wrap.mobile-fs .gt-dpad{opacity:.55;transition:opacity .15s}
+.game-wrap.mobile-fs .gt-dpad-cell.active{opacity:1}
 .game-wrap.mobile-fs .gt-fire{opacity:.55;transition:opacity .15s}
 .game-wrap.mobile-fs .gt-fire:active{opacity:.9}
 .game-wrap.mobile-fs .gt-bomb{opacity:.5;transition:opacity .15s}
@@ -3245,11 +3246,21 @@ function viewPlay(){
           <h3 id="goTitle">GOLDEN DEFENDER</h3>
           <p id="goSub">Manti fly in from the right and loop back around. Shoot them, dodge them, and keep the Humanoids company.</p>
           <button id="gameGoBtn" class="btn primary">START</button>
-          <div class="go-keys">Drag left side to steer &nbsp;·&nbsp; Arrows / WASD also work &nbsp;·&nbsp; Fire or Space to shoot &nbsp;·&nbsp; B to bomb</div>
+          <div class="go-keys">D-pad to steer &nbsp;·&nbsp; Arrows / WASD also work &nbsp;·&nbsp; Fire or Space to shoot &nbsp;·&nbsp; B to bomb</div>
         </div>
       </div>
       <div class="game-touch" id="gameTouch">
-        <div class="gt-joy-zone" id="gtJoyZone"></div>
+        <div class="gt-dpad" id="gtDpad" role="group" aria-label="Move">
+          <div class="gt-dpad-cell" data-dx="-1" data-dy="-1"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(-45deg)"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></div>
+          <div class="gt-dpad-cell" data-dx="0" data-dy="-1"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></div>
+          <div class="gt-dpad-cell" data-dx="1" data-dy="-1"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(45deg)"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></div>
+          <div class="gt-dpad-cell" data-dx="-1" data-dy="0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(-90deg)"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></div>
+          <div class="gt-dpad-hub"></div>
+          <div class="gt-dpad-cell" data-dx="1" data-dy="0"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(90deg)"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></div>
+          <div class="gt-dpad-cell" data-dx="-1" data-dy="1"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(-135deg)"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></div>
+          <div class="gt-dpad-cell" data-dx="0" data-dy="1"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></div>
+          <div class="gt-dpad-cell" data-dx="1" data-dy="1"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(135deg)"><path d="M12 4l7 8h-4v8h-6v-8H5z"/></svg></div>
+        </div>
         <button class="gt-bomb" id="gtBomb" aria-label="Bomb">BOMB</button>
         <button class="gt-fire" id="gtFire" aria-label="Fire">FIRE</button>
       </div>
@@ -4484,6 +4495,13 @@ $('#lightbox').addEventListener('touchend',e=>{
     return terrain[terrain.length-1].hf;
   }
   function terrainYAt(x){ return H-terrainHeightAt(x/W)*H; }
+  /* Lowest a Lander is ever allowed to fly at a given x — hugs just above
+     the actual terrain contour at that point instead of the fixed
+     flightBottom() every other enemy uses, so Landers never dip below a
+     hill the way a flat bottom bound would allow. */
+  function landerFloorAt(x){
+    return Math.min(flightBottom(), terrainYAt(x)-Math.max(20,scaleUnit()*0.035));
+  }
   function flightTop(){ return H*0.15; }
   /* Ship and enemies fly freely over/through the terrain — no floor collision,
      just kept within the visible canvas near the bottom. */
@@ -4635,7 +4653,11 @@ $('#lightbox').addEventListener('touchend',e=>{
     const bossTier=boss?Math.min(3,bossTierForWave(wave)):0;
     const bossMul=boss?(1.15+bossTier*0.18):1;
     const tough=boss?bossToughness(wave):null;
-    enemies.push({
+    // About half of all Landers hug the terrain contour like the Humanoids
+    // walk it, instead of wandering the normal altitude band. See the
+    // terrainFollower branch in update() for the actual movement.
+    const terrainFollower=(key==='lander')&&Math.random()<0.5;
+    const en={
       key, x:W+40+Math.random()*70, y:flightTop()+Math.random()*(flightBottom()-flightTop()),
       vx:-(speedBase*diff*bossMul*(0.85+Math.random()*0.3)),
       bobAmp:(10+Math.random()*22)*(boss?1.4:1),
@@ -4644,8 +4666,11 @@ $('#lightbox').addEventListener('touchend',e=>{
       r:Math.max(7,s*rMul),
       boss, hp:tough?tough.hp:1, maxHp:tough?tough.hp:1,
       hitScale:tough?tough.hitScale:1, hitFlash:0,
-      carrying:null, diveTarget:null, aiState:'normal'
-    });
+      carrying:null, diveTarget:null, aiState:'normal',
+      terrainFollower
+    };
+    if(terrainFollower) en.y=landerFloorAt(en.x);
+    enemies.push(en);
   }
 
   function resetPlayer(){
@@ -4780,112 +4805,69 @@ $('#lightbox').addEventListener('touchend',e=>{
   function wireTouch(){
     if(touchWired) return; touchWired=true;
 
-    /* --- Floating analog joystick on the left half of the screen --- */
-    const joyZone=document.getElementById('gtJoyZone');
-    if(joyZone){
-      let baseEl=null,thumbEl=null;
-      let touchId=null,startX=0,startY=0;
-      const JOY_MAX=60; /* max drag radius in px before full speed */
+    /* --- 8-way D-pad, bottom-left --- */
+    /* Discrete directions only: each of the 8 cells is either fully on or
+       fully off (dx/dy of -1/0/1, normalized to length 1). No drag distance
+       to misjudge and no small-movement drift — this replaces the old
+       floating analog stick, which was too sensitive to tiny touch moves. */
+    const dpad=document.getElementById('gtDpad');
+    if(dpad){
+      let touchId=null, activeCell=null;
 
-      const ensureVisuals=()=>{
-        if(!baseEl){
-          baseEl=document.createElement('div'); baseEl.className='gt-joy-base';
-          thumbEl=document.createElement('div'); thumbEl.className='gt-joy-thumb';
-          joyZone.appendChild(baseEl);
-          joyZone.appendChild(thumbEl);
-        }
+      const setDir=(cell)=>{
+        if(activeCell) activeCell.classList.remove('active');
+        activeCell=cell;
+        if(!cell){ joyVec.x=0; joyVec.y=0; joyVec.active=false; return; }
+        cell.classList.add('active');
+        const dx=parseFloat(cell.dataset.dx), dy=parseFloat(cell.dataset.dy);
+        const len=Math.hypot(dx,dy)||1;
+        joyVec.x=dx/len; joyVec.y=dy/len; joyVec.active=true;
       };
-      const showVisuals=(x,y)=>{
-        ensureVisuals();
-        joyZone.classList.add('active');
-        baseEl.style.left=x+'px';
-        baseEl.style.top=y+'px';
-        baseEl.style.opacity='';
-        thumbEl.style.left=x+'px';
-        thumbEl.style.top=y+'px';
-        thumbEl.style.opacity='';
-      };
-      const hideVisuals=()=>{
-        joyZone.classList.remove('active');
-        if(baseEl) baseEl.style.opacity='0';
-        if(thumbEl) thumbEl.style.opacity='0';
-      };
-      const updateThumb=(x,y)=>{
-        if(thumbEl){ thumbEl.style.left=x+'px'; thumbEl.style.top=y+'px'; }
+      const cellAt=(cx,cy)=>{
+        const el=document.elementFromPoint(cx,cy);
+        if(!el) return null;
+        const cell=el.closest('.gt-dpad-cell');
+        return (cell&&dpad.contains(cell))?cell:null;
       };
 
       const onStart=(cx,cy,id)=>{
         if(touchId!==null) return;
         touchId=id;
-        startX=cx; startY=cy;
-        joyVec.active=true;
-        showVisuals(cx,cy);
+        setDir(cellAt(cx,cy));
       };
-      const onMove=(cx,cy)=>{
-        if(touchId===null) return;
-        let dx=cx-startX, dy=cy-startY;
-        const dist=Math.sqrt(dx*dx+dy*dy);
-        if(dist>JOY_MAX){
-          /* Clamp to max radius */
-          dx=dx/dist*JOY_MAX;
-          dy=dy/dist*JOY_MAX;
-        }
-        /* Normalized -1..1 for movement */
-        joyVec.x=dx/JOY_MAX;
-        joyVec.y=dy/JOY_MAX;
-        updateThumb(startX+dx, startY+dy);
+      const onMove=(cx,cy,id)=>{
+        if(touchId===null||id!==touchId) return;
+        setDir(cellAt(cx,cy));
       };
-      const onEnd=()=>{
+      const onEnd=(id)=>{
+        if(id!==touchId) return;
         touchId=null;
-        joyVec.x=0; joyVec.y=0; joyVec.active=false;
-        hideVisuals();
+        setDir(null);
       };
 
-      /* Touch events */
-      joyZone.addEventListener('touchstart',(e)=>{
+      /* Touch events — re-checked on every move so sliding a finger between
+         adjacent cells (e.g. N to NE) works without lifting it. */
+      dpad.addEventListener('touchstart',(e)=>{
         e.preventDefault();
         const t=e.changedTouches[0];
-        if(!t) return;
-        const rect=joyZone.getBoundingClientRect();
-        onStart(t.clientX-rect.left, t.clientY-rect.top, t.identifier);
+        if(t) onStart(t.clientX,t.clientY,t.identifier);
       },{passive:false});
-      joyZone.addEventListener('touchmove',(e)=>{
+      dpad.addEventListener('touchmove',(e)=>{
         e.preventDefault();
-        if(touchId===null) return;
-        for(const t of e.changedTouches){
-          if(t.identifier===touchId){
-            const rect=joyZone.getBoundingClientRect();
-            onMove(t.clientX-rect.left, t.clientY-rect.top);
-            break;
-          }
-        }
+        for(const t of e.changedTouches) onMove(t.clientX,t.clientY,t.identifier);
       },{passive:false});
-      joyZone.addEventListener('touchend',(e)=>{
+      dpad.addEventListener('touchend',(e)=>{
         e.preventDefault();
-        for(const t of e.changedTouches){
-          if(t.identifier===touchId){ onEnd(); break; }
-        }
+        for(const t of e.changedTouches) onEnd(t.identifier);
       },{passive:false});
-      joyZone.addEventListener('touchcancel',(e)=>{
-        for(const t of e.changedTouches){
-          if(t.identifier===touchId){ onEnd(); break; }
-        }
+      dpad.addEventListener('touchcancel',(e)=>{
+        for(const t of e.changedTouches) onEnd(t.identifier);
       },{passive:false});
 
       /* Mouse / trackpad events (for touch laptops and testing) */
-      joyZone.addEventListener('mousedown',(e)=>{
-        e.preventDefault();
-        const rect=joyZone.getBoundingClientRect();
-        onStart(e.clientX-rect.left, e.clientY-rect.top, 'mouse');
-      });
-      window.addEventListener('mousemove',(e)=>{
-        if(touchId!=='mouse') return;
-        const rect=joyZone.getBoundingClientRect();
-        onMove(e.clientX-rect.left, e.clientY-rect.top);
-      });
-      window.addEventListener('mouseup',()=>{
-        if(touchId==='mouse') onEnd();
-      });
+      dpad.addEventListener('mousedown',(e)=>{ e.preventDefault(); onStart(e.clientX,e.clientY,'mouse'); });
+      window.addEventListener('mousemove',(e)=>{ if(touchId==='mouse') onMove(e.clientX,e.clientY,'mouse'); });
+      window.addEventListener('mouseup',()=>{ onEnd('mouse'); });
     }
 
     /* --- Fire button --- */
@@ -5162,6 +5144,27 @@ $('#lightbox').addEventListener('touchend',e=>{
         }
         continue;
       }
+      /* Terrain-hugging Landers: fly a steady contour just above the ground,
+         like the Humanoids walking below them, instead of wandering the
+         normal altitude band. Bob only ever lifts them off the floor, never
+         pushes them into it, and they stay too low to start an abduction
+         dive (that requires being in the screen's upper half) — trading the
+         grab-and-carry threat for a harder-to-avoid low strafing run. */
+      if(en.key==='lander'&&en.terrainFollower&&en.aiState==='normal'){
+        en.phase+=dt*en.bobSpeed;
+        en.x+=en.vx*dt;
+        const floorY=landerFloorAt(en.x);
+        const desiredY=floorY-Math.abs(Math.sin(en.phase))*en.bobAmp*0.6;
+        en.y+=(desiredY-en.y)*Math.min(1,dt*4);
+        en.y=Math.max(flightTop(),Math.min(floorY,en.y));
+        if(en.x<-60){
+          en.x=W+40+Math.random()*80;
+          en.phase=Math.random()*6.28;
+          en.y=landerFloorAt(en.x);
+          if(en.carrying){ en.carrying=null; en.aiState='normal'; }
+        }
+        continue;
+      }
       if(frantic){
         // full frenzy: fast, unpredictable zig-zag on both axes plus random
         // sharp dodge-jumps — hard to track and hard to land a hit on.
@@ -5177,7 +5180,12 @@ $('#lightbox').addEventListener('touchend',e=>{
         en.x+=en.vx*dt;
         en.y+=Math.sin(en.phase)*en.bobAmp*dt;
       }
-      en.y=Math.max(flightTop(),Math.min(flightBottom(),en.y));
+      // Landers get their terrain-aware floor here too — covers the ones
+      // that aren't terrainFollowers but could still bob down into a hill,
+      // and boss-wave Landers, which skip the terrainFollower branch above.
+      en.y=en.key==='lander'
+        ? Math.max(flightTop(),Math.min(landerFloorAt(en.x),en.y))
+        : Math.max(flightTop(),Math.min(flightBottom(),en.y));
       if(en.x<-60){
         en.x=W+40+Math.random()*80;
         en.y=flightTop()+Math.random()*(flightBottom()-flightTop());
