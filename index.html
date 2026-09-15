@@ -4704,7 +4704,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function resetPlayer(){
-    player={x:W*(IS_TOUCH_CONTROLS?0.09:0.16),y:H*0.42,r:Math.max(12,scaleUnit()*0.030),facing:1,invuln:1.2};
+    player={x:Math.max(W*0.05,Math.max(12,scaleUnit()*0.030)+4),y:H*0.42,r:Math.max(12,scaleUnit()*0.030),facing:1,invuln:1.2};
   }
 
   /* Wave 1 needs 20 kills; every wave after that needs 5 more than the
@@ -5052,6 +5052,18 @@ $('#lightbox').addEventListener('touchend',e=>{
     }
   }
 
+  // Reserved for humanoids killed by Goldie's laser, never enemy or fall deaths.
+  function spawnHumanoidKillBurst(x,y){
+    const radius=Math.max(36,scaleUnit()*0.09);
+    particles.push({x,y,vx:0,vy:0,life:0.32,maxLife:0.32,
+      c:'#ff5ea8',humanoidRing:true,radius});
+    for(let i=0;i<24;i++){
+      const a=i*Math.PI*2/24, speed=radius*(i%2?5:8);
+      particles.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,
+        life:0.28,maxLife:0.28,c:i%2?'#ff5ea8':'#ffffff'});
+    }
+  }
+
   /* Straight out of the original arcade: destroying a Pod cracks it open
      and releases a scattering of Swarmers (2-8 of them) — whether it was
      shot, smart-bombed, or rammed by the ship. They spawn right where the
@@ -5115,6 +5127,73 @@ $('#lightbox').addEventListener('touchend',e=>{
     if(wave%5===0) replenishHumanoids();
     state='wavebreak'; waveBreakTimer=isBossWave(wave)?BOSS_WAVE_BREAK_DURATION:WAVE_BREAK_DURATION;
     updateHud();
+  }
+
+  // Species-specific flight paths. Mutants and abduction AI keep their own logic.
+  function moveManti(en,dt,frantic){
+    if(en.moveTime===undefined){
+      en.moveTime=0;
+      en.moveDir=en.y>H*0.55?-1:1;
+    }
+    const speed=Math.abs(en.vx)*(frantic?1.3:1);
+    en.moveTime+=dt;
+    const t=en.moveTime;
+    if(en.key==='baiter'){
+      // Brake and feint vertically, lock Goldie's height, then sweep across.
+      if(en.baiterStage===undefined){ en.baiterStage='feint'; en.baiterTimer=0.55; }
+      en.baiterTimer-=dt;
+      if(en.baiterStage==='feint'){
+        en.x-=speed*0.45*dt;
+        en.y+=en.moveDir*speed*0.7*dt;
+        if(en.baiterTimer<=0){
+          en.baiterStage='sweep'; en.baiterTimer=0.75;
+          en.baiterVy=Math.max(-speed,Math.min(speed,(player.y-en.y)/0.75));
+        }
+      } else if(en.baiterStage==='sweep'){
+        en.x-=speed*1.55*dt;
+        en.y+=en.baiterVy*dt;
+        if(en.baiterTimer<=0){ en.baiterStage='cruise'; }
+      } else { en.x-=speed*dt; }
+    } else if(en.key==='bomber'){
+      // Long diagonal dive, level bombing run, then climb back out.
+      const leg=t%3;
+      en.x-=speed*dt;
+      en.y+=(leg<0.8?en.moveDir*speed*0.65:leg>2.2?-en.moveDir*speed*0.65:0)*dt;
+    } else if(en.key==='pod'){
+      // Stair-step entry: glide, shift altitude, glide again.
+      const leg=t%1.6;
+      en.x-=speed*(leg<1.1?1:0.5)*dt;
+      if(leg>=1.1) en.y+=en.moveDir*speed*0.85*dt;
+    } else if(en.key==='swarmer'){
+      // One large curl per pass; each Swarmer gets its own timing and direction.
+      // Reset swirlStart only on screen wrap, never after finishing the curl.
+      if(en.swirlStart===undefined){
+        en.swirlStart=0.1+Math.random()*0.65;
+        en.swirlAngle=Math.random()*Math.PI*2;
+        en.swirlDir=Math.random()<0.5?-1:1;
+      }
+      const duration=0.95;
+      const radius=Math.max(36,scaleUnit()*0.115);
+      const offset=(time)=>{
+        const age=time-en.swirlStart;
+        if(age<0||age>=duration) return {x:0,y:0};
+        const u=age/duration;
+        const r=radius*Math.sin(Math.PI*u);
+        const a=en.swirlAngle+en.swirlDir*Math.PI*2*u;
+        return {x:Math.cos(a)*r,y:Math.sin(a)*r};
+      };
+      const before=offset(Math.max(0,t-dt)), after=offset(t);
+      const curling=t>=en.swirlStart&&t<en.swirlStart+duration;
+      en.x-=speed*(curling?1.25:0.85)*dt;
+      en.x+=after.x-before.x;
+      en.y+=after.y-before.y;
+    } else {
+      // Airborne Landers enter on a diagonal, then cruise before abducting.
+      en.x-=speed*dt;
+      if(t<0.9) en.y+=en.moveDir*speed*0.55*dt;
+    }
+    if(en.y<=flightTop()) en.moveDir=1;
+    if(en.y>=flightBottom()) en.moveDir=-1;
   }
 
   function update(dt){
@@ -5250,21 +5329,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         }
         continue;
       }
-      if(frantic){
-        // full frenzy: fast, unpredictable zig-zag on both axes plus random
-        // sharp dodge-jumps — hard to track and hard to land a hit on.
-        en.phase+=dt*en.bobSpeed*3.6;
-        en.zigPhase+=dt*(18+Math.random()*14);
-        en.x+=en.vx*dt*1.3+Math.sin(en.zigPhase)*230*dt;
-        en.y+=Math.sin(en.phase*2.1)*en.bobAmp*3.2*dt+Math.cos(en.zigPhase*1.7)*220*dt;
-        if(Math.random()<0.05){
-          en.y+=(Math.random()<0.5?-1:1)*(30+Math.random()*55);
-        }
-      } else {
-        en.phase+=dt*en.bobSpeed;
-        en.x+=en.vx*dt;
-        en.y+=Math.sin(en.phase)*en.bobAmp*dt;
-      }
+      moveManti(en,dt,frantic);
       // Landers get their terrain-aware floor here too — covers the ones
       // that aren't terrainFollowers but could still bob down into a hill,
       // and boss-wave Landers, which skip the terrainFollower branch above.
@@ -5276,6 +5341,8 @@ $('#lightbox').addEventListener('touchend',e=>{
         en.y=flightTop()+Math.random()*(flightBottom()-flightTop());
         en.phase=Math.random()*6.28;
         en.zigPhase=Math.random()*6.28;
+        en.moveTime=undefined; en.baiterStage=undefined;
+        if(en.key==='swarmer') en.swirlStart=undefined;
         if(en.carrying){ en.carrying=null; en.aiState='normal'; }
       }
     }
@@ -5413,7 +5480,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       }
     }
 
-    // shooting a Humanoid blows it up — same laser, same explosion, one less
+    // shooting a Humanoid triggers a unique kill burst — one less
     // person left standing on the terrain. Only some of them get a last
     // word in, and never two overlapping call-outs at once.
     if(bullets.length&&humanoids.length){
@@ -5426,7 +5493,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           const dx=b.x-hx, dy=b.y-hy;
           if(dx*dx+dy*dy<(hr+b.r)*(hr+b.r)){
             bullets.splice(j,1);
-            spawnParticles(hx,hy);
+            spawnHumanoidKillBurst(hx,hy);
             if(Math.random()<0.4 && spotIsFree(hx,hy)){
               killTexts.push({
                 x:hx, y:hy-hs*0.6,
@@ -5539,7 +5606,8 @@ $('#lightbox').addEventListener('touchend',e=>{
 
     for(let i=particles.length-1;i>=0;i--){
       const p=particles[i];
-      p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=140*dt;
+      p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt;
+      if(!p.humanoidRing) p.vy+=140*dt;
       if(p.life<=0) particles.splice(i,1);
     }
   }
@@ -6070,12 +6138,20 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function drawParticles(){
+    ctx.save();
     for(const p of particles){
-      ctx.globalAlpha=Math.max(0,p.life/0.6);
+      ctx.globalAlpha=Math.max(0,Math.min(1,p.life/(p.maxLife||0.6)));
+      if(p.humanoidRing){
+        const r=p.radius*(0.3+1.7*(1-p.life/p.maxLife));
+        ctx.strokeStyle=p.c;
+        ctx.lineWidth=Math.max(2,scaleUnit()*0.004);
+        ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.stroke();
+        continue;
+      }
       ctx.fillStyle=p.c;
       ctx.fillRect(p.x-2,p.y-2,4,4);
     }
-    ctx.globalAlpha=1;
+    ctx.restore();
   }
 
   /* Big centered "WAVE X" call-out during the short pause between waves. */
