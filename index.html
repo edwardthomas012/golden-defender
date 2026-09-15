@@ -4704,7 +4704,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function resetPlayer(){
-    player={x:W*(IS_TOUCH_CONTROLS?0.09:0.16),y:H*0.42,r:Math.max(12,scaleUnit()*0.030),facing:1,invuln:1.2};
+    player={x:Math.max(W*0.09,Math.max(12,scaleUnit()*0.030)+4),y:H*0.42,r:Math.max(12,scaleUnit()*0.030),facing:1,invuln:1.2};
   }
 
   /* Wave 1 needs 20 kills; every wave after that needs 5 more than the
@@ -5049,6 +5049,18 @@ $('#lightbox').addEventListener('touchend',e=>{
       const a=Math.random()*6.283, s=60+Math.random()*140;
       particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:0.5+Math.random()*0.3,
         c:Math.random()<0.5?'#ffce4d':'#ff9d4d'});
+    }
+  }
+
+  // Reserved for humanoids killed by Goldie's laser, never enemy or fall deaths.
+  function spawnHumanoidKillBurst(x,y){
+    const radius=Math.max(18,scaleUnit()*0.045);
+    particles.push({x,y,vx:0,vy:0,life:0.85,maxLife:0.85,
+      c:'#ff5ea8',humanoidRing:true,radius});
+    for(let i=0;i<16;i++){
+      const a=i*Math.PI*2/16, speed=radius*(i%2?3:5);
+      particles.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,
+        life:0.7,maxLife:0.7,c:i%2?'#ff5ea8':'#ffffff'});
     }
   }
 
@@ -5413,7 +5425,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       }
     }
 
-    // shooting a Humanoid blows it up — same laser, same explosion, one less
+    // shooting a Humanoid triggers a unique kill burst — one less
     // person left standing on the terrain. Only some of them get a last
     // word in, and never two overlapping call-outs at once.
     if(bullets.length&&humanoids.length){
@@ -5426,7 +5438,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           const dx=b.x-hx, dy=b.y-hy;
           if(dx*dx+dy*dy<(hr+b.r)*(hr+b.r)){
             bullets.splice(j,1);
-            spawnParticles(hx,hy);
+            spawnHumanoidKillBurst(hx,hy);
             if(Math.random()<0.4 && spotIsFree(hx,hy)){
               killTexts.push({
                 x:hx, y:hy-hs*0.6,
@@ -5539,7 +5551,8 @@ $('#lightbox').addEventListener('touchend',e=>{
 
     for(let i=particles.length-1;i>=0;i--){
       const p=particles[i];
-      p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=140*dt;
+      p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt;
+      if(!p.humanoidRing) p.vy+=140*dt;
       if(p.life<=0) particles.splice(i,1);
     }
   }
@@ -6070,12 +6083,26 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function drawParticles(){
+    ctx.save();
     for(const p of particles){
-      ctx.globalAlpha=Math.max(0,p.life/0.6);
+      ctx.globalAlpha=Math.max(0,Math.min(1,p.life/(p.maxLife||0.6)));
+      if(p.humanoidRing){
+        const r=p.radius*(0.3+1.7*(1-p.life/p.maxLife));
+        ctx.strokeStyle=p.c;
+        ctx.lineWidth=Math.max(2,scaleUnit()*0.004);
+        ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.stroke();
+        ctx.strokeStyle='#ffffff';
+        const d=r*0.5;
+        ctx.beginPath();
+        ctx.moveTo(p.x-d,p.y-d); ctx.lineTo(p.x+d,p.y+d);
+        ctx.moveTo(p.x+d,p.y-d); ctx.lineTo(p.x-d,p.y+d);
+        ctx.stroke();
+        continue;
+      }
       ctx.fillStyle=p.c;
       ctx.fillRect(p.x-2,p.y-2,4,4);
     }
-    ctx.globalAlpha=1;
+    ctx.restore();
   }
 
   /* Big centered "WAVE X" call-out during the short pause between waves. */
