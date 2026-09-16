@@ -1070,6 +1070,28 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 @media(max-width:640px){.go-controls{gap:6px;margin-top:12px}.go-control{font-size:12px;padding:8px 3px}.go-control kbd{font-size:19px;min-width:30px}.go-arrows{grid-template-columns:repeat(3,24px)}.go-arrows kbd{min-width:0;font-size:20px}.go-control small{font-size:10px}.game-pause-hint{font-size:10px;gap:4px;right:100px;padding:4px}}
 @media(max-height:500px){#gameOverlay{align-items:flex-start}.go-controls{margin-top:10px}.go-control{padding:6px}.go-inner h3{margin-bottom:4px}.go-inner p{margin-bottom:8px}}
 
+
+/* Keep all four Hall of Fame groups together at every screen width. */
+#hofOverlay{align-items:flex-start}
+#hofOverlay .hof-inner{max-width:960px;width:100%;min-width:0;padding:0 16px;margin:auto 0;box-sizing:border-box}
+#hofOverlay .hof-columns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;flex-wrap:nowrap}
+#hofOverlay .hof-col{min-width:0}
+#hofOverlay .hof-col li{gap:6px;padding:6px 8px;min-width:0;white-space:nowrap}
+#hofOverlay .hof-rank{min-width:1.6em}
+#hofOverlay .hof-init{min-width:2.4em;letter-spacing:.4px}
+@media(max-width:700px){
+  #hofOverlay{padding:12px 0}
+  #hofOverlay .hof-inner{padding:0 8px}
+  #hofOverlay .hof-columns{gap:5px}
+  #hofOverlay .hof-col{font-size:12px;letter-spacing:0;gap:5px}
+  #hofOverlay .hof-col li{display:grid;grid-template-columns:auto 1fr;gap:3px 2px;padding:6px 3px;border-radius:6px}
+  #hofOverlay .hof-rank{min-width:0;font-size:10px}
+  #hofOverlay .hof-init{min-width:0;letter-spacing:0;text-align:center}
+  #hofOverlay .hof-score{grid-column:1 / -1;justify-self:center;margin:0;font-size:clamp(9px,2.6vw,12px);letter-spacing:0}
+  #hofOverlay .hof-logo{max-height:46px;max-width:90%;object-fit:contain}
+  #hofOverlay .hof-sub{letter-spacing:1px;margin-bottom:10px}
+}
+
 </style>
 </head>
 <body>
