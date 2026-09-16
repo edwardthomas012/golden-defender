@@ -1053,6 +1053,23 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 }
 @keyframes flybySweep{from{transform:translateX(110vw)}to{transform:translateX(-130vw)}}
 @media(prefers-reduced-motion:reduce){.flyby-banner{animation:none!important;display:none!important}}
+
+/* Clear keyboard guide and persistent pause reminder. */
+.go-inner{max-width:600px;width:100%}
+#gameOverlay{overflow:auto}
+.go-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 10px}
+.go-control{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px 8px;background:#11172b;border:1px solid #665631;border-radius:12px;color:#fff0bd;font-size:15px;font-weight:700}
+.go-control kbd,.game-pause-hint kbd{display:inline-flex;align-items:center;justify-content:center;border:1px solid #cfb66c;border-bottom:4px solid #88703c;border-radius:7px;background:#242c43;color:#fff5d2;font:700 24px/1.1 monospace;min-width:38px;min-height:38px;padding:5px}
+.go-arrows{display:grid;grid-template-columns:repeat(3,32px);gap:3px}
+.go-arrows kbd{min-width:0;min-height:30px;font-size:24px;padding:2px}
+.go-arrows kbd:first-child{grid-column:2}
+.go-arrows kbd:nth-child(2){grid-column:1}
+.go-control small{font-size:12px;color:#c5cce1;font-weight:400}
+.game-pause-hint{position:absolute;right:108px;top:10px;z-index:3;display:flex;align-items:center;gap:7px;color:#fff0bd;background:#080c1ce6;border-radius:8px;padding:4px 8px;font:600 13px/1.2 'Sora',sans-serif;pointer-events:none}
+.game-pause-hint kbd{font-size:14px;min-width:0;min-height:22px;padding:2px 5px;border-bottom-width:2px}
+@media(max-width:640px){.go-controls{gap:6px;margin-top:12px}.go-control{font-size:12px;padding:8px 3px}.go-control kbd{font-size:19px;min-width:30px}.go-arrows{grid-template-columns:repeat(3,24px)}.go-arrows kbd{min-width:0;font-size:20px}.go-control small{font-size:10px}.game-pause-hint{font-size:10px;gap:4px;right:100px;padding:4px}}
+@media(max-height:500px){#gameOverlay{align-items:flex-start}.go-controls{margin-top:10px}.go-control{padding:6px}.go-inner h3{margin-bottom:4px}.go-inner p{margin-bottom:8px}}
+
 </style>
 </head>
 <body>
@@ -3236,6 +3253,7 @@ function viewPlay(){
       <div class="game-hud">
         <span class="ghud-item ghud-score"><b id="gScore">0</b></span>
       </div>
+      <div class="game-pause-hint"><kbd>ESC</kbd><span>to pause</span></div>
       <button class="game-fs-btn" id="gameFsBtn" aria-label="Toggle fullscreen" title="Fullscreen">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
         <span id="gameFsLabel">FULL</span>
@@ -3247,7 +3265,13 @@ function viewPlay(){
           <h3 id="goTitle">GOLDEN DEFENDER</h3>
           <p id="goSub">Manti fly in from the right and loop back around. Shoot them, dodge them, and keep the Humanoids company.</p>
           <button id="gameGoBtn" class="btn primary">START</button>
-          <div class="go-keys">Drag left side to steer &nbsp;·&nbsp; Arrows / WASD also work &nbsp;·&nbsp; Fire or Space to shoot &nbsp;·&nbsp; B to bomb</div>
+          <div class="go-controls" aria-label="How to play">
+            <div class="go-control"><div class="go-arrows" aria-label="Arrow keys"><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></div><span>MOVE</span><small>Arrow keys / WASD</small></div>
+            <div class="go-control"><kbd>SPACE</kbd><span>SHOOT</span><small>Hold to fire</small></div>
+            <div class="go-control"><kbd>B</kbd><span>SMART BOMB</span><small>Clear enemies</small></div>
+            <div class="go-control"><kbd>ESC</kbd><span>PAUSE</span><small>Press again to resume</small></div>
+          </div>
+          <div class="go-keys">Touch: drag the left side to steer. Use FIRE and BOMB.</div>
         </div>
       </div>
       <div class="game-touch" id="gameTouch">
@@ -5052,7 +5076,13 @@ $('#lightbox').addEventListener('touchend',e=>{
     }
   }
 
-  // Reserved for humanoids killed by Goldie's laser, never enemy or fall deaths.
+  // Energy gathers into the Lander, then pulses around the new Mutant.
+  function spawnLanderAbsorption(en){
+    particles.push({x:en.x,y:en.y,vx:0,vy:0,life:0.85,maxLife:0.85,
+      absorption:true,target:en,radius:Math.max(30,scaleUnit()*0.065)});
+  }
+
+  // Reserved for humanoids killed by Goldie's laser.
   function spawnHumanoidKillBurst(x,y){
     const radius=Math.max(36,scaleUnit()*0.09);
     particles.push({x,y,vx:0,vy:0,life:0.32,maxLife:0.32,
@@ -5378,6 +5408,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         } else if(en.aiState==='ascending'){
           en.y-=50*dt;
           if(en.y<=flightTop()+20){
+            spawnLanderAbsorption(en);
             en.key='mutant';
             en.carrying=null;
             en.aiState='normal';
@@ -5431,6 +5462,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       } else if(en.aiState==='ascending'){
         en.y-=50*dt;
         if(en.y<=flightTop()+20){
+          spawnLanderAbsorption(en);
           en.key='mutant';
           en.carrying=null;
           en.aiState='normal';
@@ -5607,7 +5639,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(let i=particles.length-1;i>=0;i--){
       const p=particles[i];
       p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt;
-      if(!p.humanoidRing) p.vy+=140*dt;
+      if(!p.humanoidRing&&!p.absorption) p.vy+=140*dt;
       if(p.life<=0) particles.splice(i,1);
     }
   }
@@ -6141,6 +6173,27 @@ $('#lightbox').addEventListener('touchend',e=>{
     ctx.save();
     for(const p of particles){
       ctx.globalAlpha=Math.max(0,Math.min(1,p.life/(p.maxLife||0.6)));
+      if(p.absorption){
+        const u=1-p.life/p.maxLife, x=p.target.x, y=p.target.y;
+        if(u<0.65){
+          const k=u/0.65, r=p.radius*(1-k);
+          ctx.globalAlpha=1-k*0.3;
+          for(let i=0;i<16;i++){
+            const a=i*Math.PI/8+k*Math.PI*3;
+            ctx.fillStyle=i%2?'#8dff88':'#c4ffef';
+            ctx.beginPath();ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,2+3*k,0,Math.PI*2);ctx.fill();
+          }
+          ctx.strokeStyle='#8dff88';ctx.lineWidth=2;
+          ctx.beginPath();ctx.arc(x,y,Math.max(1,r),0,Math.PI*2);ctx.stroke();
+        }else{
+          const k=(u-0.65)/0.35;
+          ctx.globalAlpha=1-k;
+          ctx.strokeStyle='#c884ff';ctx.lineWidth=5*(1-k)+1;
+          ctx.beginPath();ctx.arc(x,y,5+p.radius*k,0,Math.PI*2);ctx.stroke();
+          ctx.fillStyle='#f2dbff';ctx.beginPath();ctx.arc(x,y,3+9*(1-k),0,Math.PI*2);ctx.fill();
+        }
+        continue;
+      }
       if(p.humanoidRing){
         const r=p.radius*(0.3+1.7*(1-p.life/p.maxLife));
         ctx.strokeStyle=p.c;
@@ -6670,3 +6723,4 @@ render();
 <script src="https://counterapi.com/c.js" async></script>
 </body>
 </html>
+
