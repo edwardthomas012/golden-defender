@@ -1073,14 +1073,15 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .enemy-points-guide{margin:12px auto 8px;max-width:700px;padding:10px 12px;border:1px solid rgba(84,217,255,.28);border-radius:10px;background:rgba(7,12,28,.72)}
 .enemy-points-title{font:800 11px/1.2 'Sora',sans-serif;letter-spacing:1.5px;color:#6fe2ff;text-align:center;margin-bottom:8px}
 .enemy-points-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
-.enemy-point{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;padding:6px 3px;border-radius:7px;background:rgba(140,160,230,.08);font-family:'Sora',sans-serif;text-align:center}
-.enemy-point-name{font-size:11px;font-weight:700;color:#ffe9a8;white-space:nowrap}
+.enemy-point{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;padding:6px 3px;border-radius:7px;background:rgba(140,160,230,.08);font-family:'Sora',sans-serif;text-align:center}
+.enemy-point-name{display:flex;align-items:center;justify-content:center;width:100%;min-height:2.35em;font-size:11px;font-weight:700;line-height:1.15;color:#ffe9a8;white-space:normal;overflow-wrap:anywhere}
 .enemy-point-value{font-size:12px;font-weight:800;color:#54d9ff;white-space:nowrap}
 .bonus-award-note{margin:8px auto 0;max-width:700px;padding:8px 12px;border:1px solid rgba(255,206,77,.48);border-radius:9px;background:rgba(45,34,8,.72);color:#fff0bd;text-align:center;font:800 12px/1.35 'Sora',sans-serif;letter-spacing:.35px}
 .bonus-award-note strong{color:#54d9ff}
 .game-pause-hint{position:absolute;right:108px;top:10px;z-index:3;display:flex;align-items:center;gap:7px;color:#fff0bd;background:#080c1ce6;border-radius:8px;padding:4px 8px;font:600 13px/1.2 'Sora',sans-serif;pointer-events:none}
 .game-pause-hint kbd{font-size:14px;min-width:0;min-height:22px;padding:2px 5px;border-bottom-width:2px}
-@media(max-width:640px){.go-controls{gap:6px;margin-top:12px}.go-control{font-size:12px;padding:8px 3px}.go-control kbd{font-size:19px;min-width:30px}.go-arrows{grid-template-columns:repeat(3,24px)}.go-arrows kbd{min-width:0;font-size:20px}.go-control small{font-size:10px}.game-pause-hint{font-size:10px;gap:4px;right:100px;padding:4px}.enemy-points-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.enemy-point{padding:5px 2px}.enemy-point-name{font-size:10px}.enemy-point-value{font-size:11px}}
+@media(max-width:900px){.enemy-points-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:640px){.go-controls{gap:6px;margin-top:12px}.go-control{font-size:12px;padding:8px 3px}.go-control kbd{font-size:19px;min-width:30px}.go-arrows{grid-template-columns:repeat(3,24px)}.go-arrows kbd{min-width:0;font-size:20px}.go-control small{font-size:10px}.game-pause-hint{font-size:10px;gap:4px;right:100px;padding:4px}.enemy-points-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.enemy-point{padding:6px 3px}.enemy-point-name{font-size:10px;min-height:2.3em}.enemy-point-value{font-size:11px}}
 @media(max-height:500px){#gameOverlay{align-items:flex-start}.go-controls{margin-top:10px}.go-control{padding:6px}.go-inner h3{margin-bottom:4px}.go-inner p{margin-bottom:8px}}
 
 
@@ -4460,7 +4461,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   const BOMB_START=3, BOMB_MAX=6;
   let spawnTimer=0, spawnInterval=1000, elapsed=0, fireCooldown=0;
   let wave=1, waveKills=0, waveSpawned=0, waveBreakTimer=0, waveBonusText='';
-  let baiterSpawnCount=0;
+  let baiterKillCount=0, crazedBaitersPending=0;
   let terrainGone=false, prevHumanoidCount=10, screenFlash=0, frenzyBannerTimer=0;
   let speechCooldown=3, speechCountThisWave=0;
   const MAX_SPEECH_PER_WAVE=3;
@@ -4894,11 +4895,8 @@ $('#lightbox').addEventListener('touchend',e=>{
     // walk it, instead of wandering the normal altitude band. See the
     // terrainFollower branch in update() for the actual movement.
     const terrainFollower=(key==='lander')&&Math.random()<0.5;
-    let crazedBaiter=false;
-    if(key==='baiter'){
-      baiterSpawnCount++;
-      crazedBaiter=baiterSpawnCount%25===0;
-    }
+    const crazedBaiter=key==='baiter'&&crazedBaitersPending>0;
+    if(crazedBaiter) crazedBaitersPending--;
     const en={
       key, x:W+40+Math.random()*70, y:flightTop()+Math.random()*(flightBottom()-flightTop()),
       vx:-(speedBase*diff*bossMul*(0.85+Math.random()*0.3)),
@@ -4912,8 +4910,15 @@ $('#lightbox').addEventListener('touchend',e=>{
       terrainFollower,
       crazedBaiter
     };
+    if(crazedBaiter) en.hitScale*=0.78;
     if(terrainFollower) en.y=landerFloorAt(en.x);
     enemies.push(en);
+  }
+
+  function recordBaiterKill(en){
+    if(!en||en.key!=='baiter') return;
+    baiterKillCount++;
+    if(baiterKillCount%15===0) crazedBaitersPending++;
   }
 
   function resetPlayer(){
@@ -4951,7 +4956,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     bullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
     score=0; lives=3; nextExtraLifeScore=EXTRA_AWARD_STEP; spawnTimer=0; spawnInterval=1000; elapsed=0; fireCooldown=0;
     wave=1; waveKills=0; waveSpawned=0; waveBreakTimer=0; waveBonusText=''; bombs=BOMB_START;
-    baiterSpawnCount=0;
+    baiterKillCount=0; crazedBaitersPending=0;
     terrainGone=false; prevHumanoidCount=10; screenFlash=0; frenzyBannerTimer=0;
     speechCooldown=3+Math.random()*3; speechCountThisWave=0;
     statsGamesPlayed++; saveStats();
@@ -5234,6 +5239,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       spawnParticles(en.x,en.y);
       const info=(SITE.enemies||[]).find(x=>x.key===en.key);
       awardPoints((info&&info.score)||100);
+      recordBaiterKill(en);
       if(!en.bonus) waveKills++;
       if(en.key==='pod') podPositions.push({x:en.x,y:en.y});
     }
@@ -5439,13 +5445,15 @@ $('#lightbox').addEventListener('touchend',e=>{
     en.moveTime+=dt;
     const t=en.moveTime;
     if(en.key==='baiter'&&en.crazedBaiter){
-      /* Every 25th Baiter breaks formation and aggressively hunts Goldie
-         with a fast, erratic kamikaze line instead of the normal feint. */
-      en.zigPhase=(en.zigPhase||0)+dt*28;
+      /* After every 15 Baiter kills, the next Baiter breaks formation and
+         hunts Goldie with a fast, layered wiggle instead of a normal feint. */
+      en.zigPhase=(en.zigPhase||0)+dt*40;
       const dx=player.x-en.x, dy=player.y-en.y;
       const distance=Math.max(1,Math.hypot(dx,dy));
-      en.x+=dx/distance*speed*1.65*dt+Math.sin(en.zigPhase)*78*dt;
-      en.y+=dy/distance*speed*1.65*dt+Math.cos(en.zigPhase*1.6)*58*dt;
+      const wiggleX=Math.sin(en.zigPhase)*105+Math.sin(en.zigPhase*2.7)*38;
+      const wiggleY=Math.cos(en.zigPhase*1.45)*92+Math.sin(en.zigPhase*3.15)*34;
+      en.x+=dx/distance*speed*1.72*dt+wiggleX*dt;
+      en.y+=dy/distance*speed*1.72*dt+wiggleY*dt;
     } else if(en.key==='baiter'){
       // Brake and feint vertically, lock Goldie's height, then sweep across.
       if(en.baiterStage===undefined){ en.baiterStage='feint'; en.baiterTimer=0.55; }
@@ -5770,6 +5778,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           } else {
             const info=(SITE.enemies||[]).find(x=>x.key===en.key);
             awardPoints((info&&info.score)||100);
+            recordBaiterKill(en);
             spawnParticles(en.x,en.y);
             if(en.carrying) dropCarriedHumanoid(en);
             if(en.key==='pod') spawnSwarmersFromPod(en.x,en.y);
@@ -5876,6 +5885,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           // Even dying to it, that Manti is gone — award its points same as a clean kill.
           const info=(SITE.enemies||[]).find(x=>x.key===en.key);
           awardPoints((info&&info.score)||100);
+          recordBaiterKill(en);
           lives--;
           if(!en.bonus) waveKills++;
           updateHud();
@@ -6386,8 +6396,8 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(const en of enemies){
       const im=images[en.key], d=en.r*2.5;
       const isCrazed=en.crazed||en.crazedBaiter;
-      const shakeX=isCrazed?Math.sin(elapsed*44+(en.phase||0))*4:0;
-      const shakeY=isCrazed?Math.cos(elapsed*51+(en.phase||0))*3:0;
+      const shakeX=isCrazed?Math.sin(elapsed*(en.crazedBaiter?58:44)+(en.phase||0))*(en.crazedBaiter?6:4):0;
+      const shakeY=isCrazed?Math.cos(elapsed*(en.crazedBaiter?67:51)+(en.phase||0))*(en.crazedBaiter?5:3):0;
       ctx.save();
       if(isCrazed){
         ctx.shadowColor=en.crazedBaiter?'rgba(84,217,255,.98)':'rgba(255,55,90,.95)';
