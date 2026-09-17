@@ -4826,11 +4826,15 @@ $('#lightbox').addEventListener('touchend',e=>{
     return humanoids.length+fallingHumanoids.length+enemies.filter(e=>e.carrying).length;
   }
 
+  const MAX_DIFFICULTY_FACTOR=4.4;
   function difficultyFactor(){
-    const waveGrowth=Math.min(2.65,(wave-1)*0.08+Math.max(0,wave-5)*0.12);
+    /* Pressure rises on every wave, with a modest extra lift after the first
+       boss. The hard cap keeps late play demanding without becoming a blur. */
+    const everyWave=Math.min(2.35,(wave-1)*0.11);
+    const postFirstBoss=Math.min(0.40,Math.max(0,wave-5)*0.025);
     const frenzy=activeHumanoidCount()===0?0.45:0;
     const boss=isBossWave(wave)?0.3:0;
-    return Math.min(4.65, 1.6+waveGrowth+frenzy+boss);
+    return Math.min(MAX_DIFFICULTY_FACTOR,1.55+everyWave+postFirstBoss+frenzy+boss);
   }
   function isFrantic(){ return activeHumanoidCount()===0; }
 
@@ -5206,9 +5210,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       if(en.key==='pod') podPositions.push({x:en.x,y:en.y});
     }
     for(const en of enemies){
-      if(en.carrying){
-        fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
-      }
+      if(en.carrying) dropCarriedHumanoid(en);
     }
     enemies=[];
     for(const p of podPositions) spawnSwarmersFromPod(p.x,p.y);
@@ -5246,17 +5248,66 @@ $('#lightbox').addEventListener('touchend',e=>{
     en.carrying=h;
     h.speechText=nextCarriedLine();
     h.speechTimer=99;
-    const idx=humanoids.indexOf(h);
-    if(idx>=0) humanoids.splice(idx,1);
+    const groundIdx=humanoids.indexOf(h);
+    if(groundIdx>=0) humanoids.splice(groundIdx,1);
+    const fallingIdx=fallingHumanoids.indexOf(h);
+    if(fallingIdx>=0){
+      fallingHumanoids.splice(fallingIdx,1);
+      h.catchCount=(h.catchCount||0)+1;
+    }
     en.aiState='ascending';
     en.diveTarget=null;
+    /* A clearly visible share of successful abductions make a second trip.
+       They pass completely above the gold line while still carrying the
+       Humanoid, wrap to the bottom, then transform on the next climb. */
+    en.abductionPassesRemaining=Math.random()<0.38?2:1;
+  }
+
+  function dropCarriedHumanoid(en){
+    if(!en.carrying) return;
+    fallingHumanoids.push({
+      x:en.x,y:en.y,vy:0,
+      woman:en.carrying.woman,
+      walkPhase:en.carrying.walkPhase,
+      speechText:nextDroppedLine(),speechTimer:99,
+      catchCount:en.carrying.catchCount||0
+    });
+  }
+
+  function tryCatchFallingHumanoid(en,dt){
+    if(en.aiState!=='normal'||en.carrying||fallingHumanoids.length===0) return false;
+    const lowerHalf=flightTop()+(flightBottom()-flightTop())*0.5;
+    const catchRadius=Math.max(44,scaleUnit()*0.09);
+    for(let i=fallingHumanoids.length-1;i>=0;i--){
+      const h=fallingHumanoids[i];
+      if(h.y<lowerHalf) continue;
+      const dx=h.x-en.x, dy=h.y-en.y;
+      if(dx*dx+dy*dy>catchRadius*catchRadius) continue;
+      /* Proximity only creates an opportunity; the catch remains a random
+         event. Repeated drops can be caught again without a limit. */
+      if(Math.random()>=Math.min(0.12,dt*1.25)) continue;
+      en.x=h.x;
+      en.y=h.y-en.r*1.6;
+      beginLanderCarry(en,h);
+      return true;
+    }
+    return false;
   }
 
   function updateLanderAscent(en,dt){
     en.y-=(62+Math.min(28,wave*1.8))*dt;
-    /* The gold line below the scanner is the playfield ceiling. Keep the
-       entire Lander sprite below it and transform exactly at that line. */
+    /* Most Landers transform at the gold line. A two-pass Lander instead
+       carries the entire pair above the line, wraps to the bottom, and
+       completes one more climb before transforming. */
     const transformY=flightTop()+Math.max(12,en.r*1.3);
+    if((en.abductionPassesRemaining||1)>1){
+      const exitY=flightTop()-(en.r*1.6+humanoidSize());
+      if(en.y>exitY) return;
+      en.abductionPassesRemaining--;
+      en.x=Math.max(W*0.09,Math.min(W*0.91,en.x));
+      en.y=flightBottom()+en.r*2.2;
+      return;
+    }
     if(en.y>transformY) return;
     en.y=transformY;
     spawnLanderAbsorption(en);
@@ -5265,6 +5316,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     en.carrying=null;
     en.aiState='normal';
     en.diveTarget=null;
+    en.abductionPassesRemaining=0;
     en.vx=-Math.max(180,Math.abs(en.vx)*1.55);
     en.zigPhase=Math.random()*6.28;
   }
@@ -5596,6 +5648,7 @@ $('#lightbox').addEventListener('touchend',e=>{
        Defender mechanic. */
     for(const en of enemies){
       if(en.key!=='lander'||en.boss) continue;
+      tryCatchFallingHumanoid(en,dt);
       if(en.terrainFollower){
         /* Terrain-hugging Landers line up with a Humanoid, then dip through
            the terrain outline to the same below-ground pickup position
@@ -5692,9 +5745,7 @@ $('#lightbox').addEventListener('touchend',e=>{
             score+=(info&&info.score)||100;
             while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
             spawnParticles(en.x,en.y);
-            if(en.carrying){
-              fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
-            }
+            if(en.carrying) dropCarriedHumanoid(en);
             if(en.key==='pod') spawnSwarmersFromPod(en.x,en.y);
             enemies.splice(i,1);
             if(!en.bonus) waveKills++;
@@ -5785,9 +5836,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         const dx=en.x-player.x, dy=en.y-player.y;
         const killR=en.r*0.55+player.r*0.55; // tighter than the drawn size — has to actually touch, not just get near
         if(dx*dx+dy*dy<killR*killR){
-          if(en.carrying){
-            fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
-          }
+          if(en.carrying) dropCarriedHumanoid(en);
           if(en.key==='pod') spawnSwarmersFromPod(en.x,en.y);
           enemies.splice(i,1);
           spawnParticles(player.x,player.y);
