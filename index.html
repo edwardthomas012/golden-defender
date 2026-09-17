@@ -1065,9 +1065,15 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .go-arrows kbd:first-child{grid-column:2}
 .go-arrows kbd:nth-child(2){grid-column:1}
 .go-control small{font-size:12px;color:#c5cce1;font-weight:400}
+.enemy-points-guide{margin:12px auto 8px;max-width:700px;padding:10px 12px;border:1px solid rgba(84,217,255,.28);border-radius:10px;background:rgba(7,12,28,.72)}
+.enemy-points-title{font:800 11px/1.2 'Sora',sans-serif;letter-spacing:1.5px;color:#6fe2ff;text-align:center;margin-bottom:8px}
+.enemy-points-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.enemy-point{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;padding:6px 3px;border-radius:7px;background:rgba(140,160,230,.08);font-family:'Sora',sans-serif;text-align:center}
+.enemy-point-name{font-size:11px;font-weight:700;color:#ffe9a8;white-space:nowrap}
+.enemy-point-value{font-size:12px;font-weight:800;color:#54d9ff;white-space:nowrap}
 .game-pause-hint{position:absolute;right:108px;top:10px;z-index:3;display:flex;align-items:center;gap:7px;color:#fff0bd;background:#080c1ce6;border-radius:8px;padding:4px 8px;font:600 13px/1.2 'Sora',sans-serif;pointer-events:none}
 .game-pause-hint kbd{font-size:14px;min-width:0;min-height:22px;padding:2px 5px;border-bottom-width:2px}
-@media(max-width:640px){.go-controls{gap:6px;margin-top:12px}.go-control{font-size:12px;padding:8px 3px}.go-control kbd{font-size:19px;min-width:30px}.go-arrows{grid-template-columns:repeat(3,24px)}.go-arrows kbd{min-width:0;font-size:20px}.go-control small{font-size:10px}.game-pause-hint{font-size:10px;gap:4px;right:100px;padding:4px}}
+@media(max-width:640px){.go-controls{gap:6px;margin-top:12px}.go-control{font-size:12px;padding:8px 3px}.go-control kbd{font-size:19px;min-width:30px}.go-arrows{grid-template-columns:repeat(3,24px)}.go-arrows kbd{min-width:0;font-size:20px}.go-control small{font-size:10px}.game-pause-hint{font-size:10px;gap:4px;right:100px;padding:4px}.enemy-points-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.enemy-point{padding:5px 2px}.enemy-point-name{font-size:10px}.enemy-point-value{font-size:11px}}
 @media(max-height:500px){#gameOverlay{align-items:flex-start}.go-controls{margin-top:10px}.go-control{padding:6px}.go-inner h3{margin-bottom:4px}.go-inner p{margin-bottom:8px}}
 
 
@@ -3267,6 +3273,15 @@ function viewEnemies(){
   </section>`;
 }
 
+function gameEnemyPointsGuide(){
+  const order=['lander','mutant','baiter','bomber','pod','swarmer'];
+  const cards=order.map(key=>{
+    const enemy=SITE.enemies.find(item=>item.key===key);
+    return enemy?`<div class="enemy-point"><span class="enemy-point-name">${esc(enemy.name)}</span><span class="enemy-point-value">${enemy.score.toLocaleString()} PTS</span></div>`:'';
+  }).join('');
+  return `<div class="enemy-points-guide" aria-label="Enemy point values"><div class="enemy-points-title">ENEMY POINT VALUES</div><div class="enemy-points-grid">${cards}</div></div>`;
+}
+
 function viewPlay(){
   return `<section class="block wrap">
     <div class="sec-head"><div><span class="eyebrow">Sector 1981 // playable tribute</span><h2>Play</h2>
@@ -3293,6 +3308,7 @@ function viewPlay(){
             <div class="go-control"><kbd>B</kbd><span>SMART BOMB</span><small>Clear enemies</small></div>
             <div class="go-control"><kbd>ESC</kbd><span>PAUSE</span><small>Press again to resume</small></div>
           </div>
+          ${gameEnemyPointsGuide()}
           <div class="go-keys">Touch: drag the left side to steer. Use FIRE and BOMB.</div>
         </div>
       </div>
@@ -3327,6 +3343,7 @@ function viewPlay(){
               <div class="hof-ctl"><span class="hof-key">Esc</span><span>Pause / Resume</span></div>
               <div class="hof-ctl"><span class="hof-key">Tap</span><span>D-pad &amp; Fire/Bomb buttons (touch)</span></div>
             </div>
+            ${gameEnemyPointsGuide()}
           </div>
           <div class="hof-summary" id="hofSummary" style="display:none"></div>
           <button id="hofPlayAgain" class="btn primary" style="display:none">PLAY AGAIN</button>
@@ -4399,7 +4416,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   let state='idle';
   let raf=null, lastT=0;
   let W=900, H=562;
-  let player, bullets=[], enemies=[], particles=[], humanoids=[], killTexts=[], fallingHumanoids=[];
+  let player, bullets=[], enemyBullets=[], enemies=[], particles=[], humanoids=[], killTexts=[], fallingHumanoids=[];
   let terrain=[];
   let score=0, lives=3, highScore=0, nextExtraLifeScore=10000, bombs=3;
   const BOMB_START=3, BOMB_MAX=6;
@@ -4665,6 +4682,16 @@ $('#lightbox').addEventListener('touchend',e=>{
   /* Everything is sized off the play area itself, so ship/enemies/humanoids
      stay clearly visible whatever the visitor's screen size. */
   function scaleUnit(){ return Math.min(W,H); }
+  function humanoidSize(){ return Math.max(15,scaleUnit()*0.032); }
+  /* Humanoids walk just below the glowing terrain outline, inside the land
+     silhouette. Landers use the same below-terrain point when abducting. */
+  function humanoidYAt(x){
+    const size=humanoidSize();
+    return Math.min(H-2,terrainYAt(x)+size*0.95);
+  }
+  function landerPickupYAt(x){
+    return Math.min(H-4,humanoidYAt(x)-humanoidSize()*0.48);
+  }
 
   function seedHumanoids(){
     humanoids=[];
@@ -4676,7 +4703,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   function replenishHumanoids(){
     while(humanoids.length<10){
       humanoids.push({
-        xf:0.05+Math.random()*0.90,
+        xf:0.09+Math.random()*0.86,
         dir:Math.random()<0.5?-1:1,
         speed:0.010+Math.random()*0.016,
         walkPhase:Math.random()*6.28,
@@ -4781,10 +4808,10 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function difficultyFactor(){
-    const waveGrowth=Math.min(2.2,(wave-1)*0.08+Math.max(0,wave-5)*0.06);
+    const waveGrowth=Math.min(2.65,(wave-1)*0.08+Math.max(0,wave-5)*0.12);
     const frenzy=activeHumanoidCount()===0?0.45:0;
     const boss=isBossWave(wave)?0.3:0;
-    return Math.min(4.2, 1.6+waveGrowth+frenzy+boss);
+    return Math.min(4.65, 1.6+waveGrowth+frenzy+boss);
   }
   function isFrantic(){ return activeHumanoidCount()===0; }
 
@@ -4861,7 +4888,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   function startGame(){
     if(typeof hideHOF==='function') hideHOF();
     genTerrain(); seedHumanoids(); resetPlayer();
-    bullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
+    bullets=[]; enemyBullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
     score=0; lives=3; nextExtraLifeScore=10000; spawnTimer=0; spawnInterval=1000; elapsed=0; fireCooldown=0;
     wave=1; waveKills=0; waveSpawned=0; waveBreakTimer=0; waveBonusText=''; bombs=BOMB_START;
     terrainGone=false; prevHumanoidCount=10; screenFlash=0; frenzyBannerTimer=0;
@@ -4941,7 +4968,7 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   function idleFrame(){
     genTerrain(); seedHumanoids(); resetPlayer();
-    bullets=[]; enemies=[]; particles=[]; fallingHumanoids=[];
+    bullets=[]; enemyBullets=[]; enemies=[]; particles=[]; fallingHumanoids=[];
     draw();
   }
 
@@ -5156,6 +5183,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       }
     }
     enemies=[];
+    enemyBullets=[];
     for(const p of podPositions) spawnSwarmersFromPod(p.x,p.y);
     screenFlash=Math.max(screenFlash,0.7);
     updateHud();
@@ -5232,7 +5260,8 @@ $('#lightbox').addEventListener('touchend',e=>{
         // a small huddle — fades out over burstTimer seconds, after which
         // they settle into the normal leftward drift/loop like any Manti.
         burstVx:Math.cos(ang)*burstSpeed, burstVy:Math.sin(ang)*burstSpeed,
-        burstTimer:0.55+Math.random()*0.45
+        burstTimer:0.55+Math.random()*0.45,
+        shotCooldown:0.8+Math.random()*1.6
       });
     }
     spawnParticles(x,y);
@@ -5257,7 +5286,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
     waveBonusText=survivors+' Humanoid'+(survivors===1?'':'s')+' saved — +'+bonus+' bonus';
     wave++; waveKills=0; waveSpawned=0;
-    bullets=[]; // fresh start next wave — no shots carrying over
+    bullets=[]; enemyBullets=[]; // fresh start next wave — no shots carrying over
     speechCountThisWave=0; speechCooldown=3+Math.random()*4;
     if(wave%5===0) replenishHumanoids();
     state='wavebreak'; waveBreakTimer=isBossWave(wave)?BOSS_WAVE_BREAK_DURATION:WAVE_BREAK_DURATION;
@@ -5360,6 +5389,11 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(let i=bullets.length-1;i>=0;i--){
       const b=bullets[i]; b.x+=b.vx*dt;
       if(b.x<-20||b.x>W+20) bullets.splice(i,1);
+    }
+    for(let i=enemyBullets.length-1;i>=0;i--){
+      const b=enemyBullets[i];
+      b.x+=b.vx*dt; b.y+=b.vy*dt;
+      if(b.x<-30||b.x>W+30||b.y<-30||b.y>H+30) enemyBullets.splice(i,1);
     }
 
     spawnTimer+=dt;
@@ -5484,6 +5518,24 @@ $('#lightbox').addEventListener('touchend',e=>{
 
     for(const en of enemies){ if(en.hitFlash>0) en.hitFlash=Math.max(0,en.hitFlash-dt*4); }
 
+    /* After the first boss wave, every Swarmer can fire a carefully aimed
+       plasma shot at Goldie. Later waves shorten the reload and speed the
+       shot up, reinforcing the post-boss difficulty ramp. */
+    if(wave>=6){
+      for(const en of enemies){
+        if(en.key!=='swarmer') continue;
+        if(en.shotCooldown===undefined) en.shotCooldown=0.7+Math.random()*1.5;
+        en.shotCooldown-=dt;
+        if(en.shotCooldown<=0&&en.x>-20&&en.x<W+20){
+          const dx=player.x-en.x, dy=player.y-en.y;
+          const distance=Math.max(1,Math.hypot(dx,dy));
+          const shotSpeed=185+Math.min(145,(wave-6)*8);
+          enemyBullets.push({x:en.x,y:en.y,vx:dx/distance*shotSpeed,vy:dy/distance*shotSpeed,r:Math.max(3,scaleUnit()*0.007)});
+          en.shotCooldown=Math.max(0.65,1.85-(wave-6)*0.045)+Math.random()*0.8;
+        }
+      }
+    }
+
     /* Lander abduction AI: landers above the halfway line can dive down to
        grab a humanoid directly below them, carry it upward, and if not shot
        in time, mutate it into a mutant at the top of the screen. Classic
@@ -5491,25 +5543,35 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(const en of enemies){
       if(en.key!=='lander'||en.boss) continue;
       if(en.terrainFollower){
-        /* Terrain-hugging Landers are already down at Humanoid height, so
-           there's no need for a dive — on a random chance, whichever one
-           is currently lined up with a Humanoid just grabs it and heads
-           for the top, same mutation payoff as the flying Landers' dive. */
+        /* Terrain-hugging Landers line up with a Humanoid, then dip through
+           the terrain outline to the same below-ground pickup position
+           before carrying the Humanoid upward. */
         if(en.aiState==='normal' && humanoids.length>0 && !en.carrying){
           const enXf=en.x/W;
           for(const h of humanoids){
             if(Math.abs(enXf-h.xf)<0.04){
               if(Math.random()<0.012){
-                en.carrying=h;
-                en.carrying.speechText=nextCarriedLine();
-                en.carrying.speechTimer=99;
-                const idx=humanoids.indexOf(h);
-                if(idx>=0) humanoids.splice(idx,1);
-                en.aiState='ascending';
+                en.aiState='diving';
+                en.diveTarget=h;
                 break;
               }
             }
           }
+        } else if(en.aiState==='diving'){
+          if(en.diveTarget&&humanoids.indexOf(en.diveTarget)>=0){
+            const targetX=en.diveTarget.xf*W, targetY=landerPickupYAt(targetX);
+            const dx=targetX-en.x, dy=targetY-en.y;
+            en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*dt);
+            en.y+=Math.sign(dy)*Math.min(Math.abs(dy),160*dt);
+            if(Math.abs(dy)<4&&Math.abs(dx)<8){
+              en.carrying=en.diveTarget;
+              en.carrying.speechText=nextCarriedLine();
+              en.carrying.speechTimer=99;
+              const idx=humanoids.indexOf(en.diveTarget);
+              if(idx>=0) humanoids.splice(idx,1);
+              en.aiState='ascending'; en.diveTarget=null;
+            }
+          }else{ en.aiState='normal'; en.diveTarget=null; }
         } else if(en.aiState==='ascending'){
           en.y-=50*dt;
           if(en.y<=flightTop()+20){
@@ -5544,7 +5606,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       } else if(en.aiState==='diving'){
         if(en.diveTarget && humanoids.indexOf(en.diveTarget)>=0){
           const targetX=en.diveTarget.xf*W;
-          const targetY=terrainYAt(targetX);
+          const targetY=landerPickupYAt(targetX);
           const dy=targetY-en.y;
           const dx=targetX-en.x;
           // Steer horizontally toward the target so the lander follows the humanoid
@@ -5624,7 +5686,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       const hs=Math.max(15,scaleUnit()*0.032), hr=hs*0.62;
       for(let i=humanoids.length-1;i>=0;i--){
         const h=humanoids[i];
-        const hx=h.xf*W, hy=terrainYAt(hx)-hs*0.5;
+        const hx=h.xf*W, hy=humanoidYAt(hx)-hs*0.5;
         for(let j=bullets.length-1;j>=0;j--){
           const b=bullets[j];
           const dx=b.x-hx, dy=b.y-hy;
@@ -5654,7 +5716,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       fh.y+=fh.vy*dt;
       fh.walkPhase+=dt*6;
       if(fh.speechTimer>0) fh.speechTimer=Math.max(0,fh.speechTimer-dt);
-      const groundY=terrainYAt(fh.x);
+      const groundY=humanoidYAt(fh.x);
       if(fh.y>=groundY){
         if(fh.vy>400){
           spawnParticles(fh.x,groundY);
@@ -5667,7 +5729,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           }
         } else {
           humanoids.push({
-            xf:Math.max(0.05,Math.min(0.95,fh.x/W)), dir:Math.random()<0.5?-1:1,
+            xf:Math.max(0.09,Math.min(0.95,fh.x/W)), dir:Math.random()<0.5?-1:1,
             speed:0.010+Math.random()*0.016, walkPhase:fh.walkPhase,
             woman:fh.woman, speechText:'', speechTimer:0
           });
@@ -5686,6 +5748,20 @@ $('#lightbox').addEventListener('touchend',e=>{
       if(k.life<=0) killTexts.splice(i,1);
     }
 
+    if(player.invuln<=0){
+      for(let i=enemyBullets.length-1;i>=0;i--){
+        const b=enemyBullets[i], dx=b.x-player.x, dy=b.y-player.y;
+        const hitR=player.r*0.58+b.r;
+        if(dx*dx+dy*dy<hitR*hitR){
+          enemyBullets.splice(i,1);
+          spawnParticles(player.x,player.y);
+          lives--; updateHud();
+          if(lives<=0){ endGame(); return; }
+          resetPlayer(); player.invuln=1.6;
+          break;
+        }
+      }
+    }
 
     if(player.invuln<=0){
       for(let i=enemies.length-1;i>=0;i--){
@@ -5720,7 +5796,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(const h of humanoids){
       h.walkPhase+=dt*6;
       h.xf+=h.dir*h.speed*dt;
-      if(h.xf<0.05||h.xf>0.95){ h.dir*=-1; h.xf=Math.max(0.05,Math.min(0.95,h.xf)); }
+      if(h.xf<0.09||h.xf>0.95){ h.dir*=-1; h.xf=Math.max(0.09,Math.min(0.95,h.xf)); }
       if(h.speechTimer>0) h.speechTimer=Math.max(0,h.speechTimer-dt);
     }
 
@@ -5731,7 +5807,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       speechCooldown-=dt;
       if(speechCooldown<=0&&speechCountThisWave<MAX_SPEECH_PER_WAVE){
         const h=humanoids[Math.floor(Math.random()*humanoids.length)];
-        const hx=h.xf*W, hy=terrainYAt(hx);
+        const hx=h.xf*W, hy=humanoidYAt(hx);
         if(spotIsFree(hx,hy)){
           h.speechText=nextWalkLine();
           h.speechTimer=4.2;
@@ -6168,9 +6244,9 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function drawHumanoids(){
-    const s=Math.max(15,scaleUnit()*0.032);
+    const s=humanoidSize();
     for(const h of humanoids){
-      const x=h.xf*W, y=terrainYAt(x);
+      const x=h.xf*W, y=humanoidYAt(x);
       drawHumanoidFigure(x,y,s,h.woman,h.walkPhase);
       if(h.speechTimer>0){
         let a=1;
@@ -6271,6 +6347,18 @@ $('#lightbox').addEventListener('touchend',e=>{
       ctx.stroke();
       ctx.fillStyle='#ffffff';
       ctx.beginPath(); ctx.arc(b.x,b.y,b.r*0.6,0,6.283); ctx.fill();
+    }
+    for(const b of enemyBullets){
+      const tail=14+b.r*2;
+      const speed=Math.max(1,Math.hypot(b.vx,b.vy));
+      const tx=b.x-b.vx/speed*tail, ty=b.y-b.vy/speed*tail;
+      const g=ctx.createLinearGradient(b.x,b.y,tx,ty);
+      g.addColorStop(0,'#ffffff');
+      g.addColorStop(0.28,'#ff5e7a');
+      g.addColorStop(1,'rgba(255,44,82,0)');
+      ctx.strokeStyle=g; ctx.lineWidth=Math.max(3,b.r*1.4); ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(tx,ty); ctx.stroke();
+      ctx.fillStyle='#fff2f5'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,6.283); ctx.fill();
     }
   }
 
