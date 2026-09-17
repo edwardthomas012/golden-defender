@@ -4225,10 +4225,11 @@ $('#lightbox').addEventListener('touchend',e=>{
     try{ localStorage.setItem(STATS_KEY, JSON.stringify({games:statsGamesPlayed,bestWave:statsBestWave})); }catch(e){}
   }
 
-  /* Golden Hall of Fame — 20 local high scores. All twenty start at 50,000
-     until a run actually beats one of them, same as the reference boards
-     on the arcade cabinet. Persisted per-browser via localStorage. */
+  /* Golden Hall of Fame — a shared Firebase leaderboard with a local/offline
+     fallback. All twenty start at 50,000 until real runs beat them. */
   const HOF_KEY='goldenDefenderHallOfFame_v2';
+  const HOF_PENDING_KEY='goldenDefenderPendingSharedScores_v1';
+  const HOF_MIGRATION_KEY='goldenDefenderSharedMigration_v1';
   const DEFAULT_HOF=[
     {i:'EAT',s:50000},{i:'CCT',s:50000},{i:'TAY',s:50000},{i:'WLC',s:50000},{i:'TES',s:50000},
     {i:'JLT',s:50000},{i:'TOO',s:50000},{i:'WIZ',s:50000},{i:'RRM',s:50000},{i:'JET',s:50000},
@@ -4236,11 +4237,33 @@ $('#lightbox').addEventListener('touchend',e=>{
     {i:'LUX',s:50000},{i:'JAX',s:50000},{i:'KAI',s:50000},{i:'VEX',s:50000},{i:'ORB',s:50000}
   ];
   let hallOfFame=DEFAULT_HOF.slice();
+  let legacyScoresToMigrate=[];
+  let legacyMigrationCaptured=false;
+  let sharedLeaderboardUnsubscribe=null;
+  let flushingSharedScores=false;
+
+  function validHOFEntry(entry){
+    return entry && /^[A-Z]{1,3}$/.test(String(entry.i||'')) && Number.isInteger(Number(entry.s)) && Number(entry.s)>0;
+  }
+  function normalizeHOF(entries){
+    const real=(Array.isArray(entries)?entries:[]).filter(validHOFEntry).map(entry=>({
+      i:String(entry.i).toUpperCase().slice(0,3),
+      s:Math.min(99999999,Math.floor(Number(entry.s)))
+    }));
+    return real.concat(DEFAULT_HOF).sort((a,b)=>b.s-a.s).slice(0,20);
+  }
   function loadHOF(){
     try{
       const raw=JSON.parse(localStorage.getItem(HOF_KEY));
-      hallOfFame=(Array.isArray(raw)&&raw.length===20)?raw:DEFAULT_HOF.slice();
+      hallOfFame=normalizeHOF(raw);
+      if(!legacyMigrationCaptured){
+        legacyScoresToMigrate=hallOfFame.filter(entry=>entry.s>50000);
+        legacyMigrationCaptured=true;
+      }
     }catch(e){ hallOfFame=DEFAULT_HOF.slice(); }
+    connectSharedLeaderboard();
+    migrateLegacyLocalScores();
+    flushPendingSharedScores();
   }
   function saveHOF(){ try{ localStorage.setItem(HOF_KEY, JSON.stringify(hallOfFame)); }catch(e){} }
   function hofQualifies(sc){ return sc>hallOfFame[hallOfFame.length-1].s; }
@@ -4251,6 +4274,63 @@ $('#lightbox').addEventListener('touchend',e=>{
     hallOfFame=hallOfFame.slice(0,20);
     saveHOF();
   }
+  function getPendingSharedScores(){
+    try{
+      const raw=JSON.parse(localStorage.getItem(HOF_PENDING_KEY)||'[]');
+      return Array.isArray(raw)?raw.filter(validHOFEntry):[];
+    }catch(e){ return []; }
+  }
+  function setPendingSharedScores(entries){
+    try{ localStorage.setItem(HOF_PENDING_KEY,JSON.stringify(entries)); }catch(e){}
+  }
+  function queueSharedScore(initials,sc){
+    const clean=(initials||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3)||'YOU';
+    const value=Math.min(99999999,Math.floor(Number(sc)||0));
+    if(value<=0) return;
+    const pending=getPendingSharedScores();
+    pending.push({i:clean,s:value});
+    setPendingSharedScores(pending);
+  }
+  async function flushPendingSharedScores(){
+    if(flushingSharedScores||!window.GoldenLeaderboard) return;
+    flushingSharedScores=true;
+    const pending=getPendingSharedScores();
+    let sent=0;
+    try{
+      while(sent<pending.length){
+        const entry=pending[sent];
+        await window.GoldenLeaderboard.submit(entry.i,entry.s);
+        sent++;
+        setPendingSharedScores(pending.slice(sent));
+      }
+    }catch(e){
+      console.warn('Shared leaderboard submission will retry later.',e);
+    }finally{ flushingSharedScores=false; }
+  }
+  function migrateLegacyLocalScores(){
+    if(!legacyMigrationCaptured) return;
+    try{
+      if(localStorage.getItem(HOF_MIGRATION_KEY)==='1') return;
+      legacyScoresToMigrate.forEach(entry=>queueSharedScore(entry.i,entry.s));
+      localStorage.setItem(HOF_MIGRATION_KEY,'1');
+    }catch(e){}
+    flushPendingSharedScores();
+  }
+  function connectSharedLeaderboard(){
+    if(sharedLeaderboardUnsubscribe||!window.GoldenLeaderboard||!legacyMigrationCaptured) return;
+    sharedLeaderboardUnsubscribe=window.GoldenLeaderboard.subscribe(entries=>{
+      hallOfFame=normalizeHOF(entries);
+      saveHOF();
+      renderHOF();
+      migrateLegacyLocalScores();
+      flushPendingSharedScores();
+    },error=>{
+      console.warn('Using the saved leaderboard until Firebase reconnects.',error);
+    });
+    migrateLegacyLocalScores();
+    flushPendingSharedScores();
+  }
+  window.addEventListener('golden-leaderboard-ready',connectSharedLeaderboard);
   /* Embedded directly (rather than referenced by relative path) so it
      plays correctly whether this file is opened straight off a desktop or
      served from the live site — the "Highest Score" sting from the Sounds
@@ -4830,7 +4910,10 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
   function submitHOFEntry(){
     if(pendingScoreForHOF==null) return;
-    hofInsert(hofInitialsInput?hofInitialsInput.value:'', pendingScoreForHOF);
+    const clean=(hofInitialsInput?hofInitialsInput.value:'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3)||'YOU';
+    hofInsert(clean, pendingScoreForHOF);
+    queueSharedScore(clean,pendingScoreForHOF);
+    flushPendingSharedScores();
     pendingScoreForHOF=null;
     if(hofSummary) hofSummary.textContent=gameOverSummaryText();
     showHOF('gameover');
@@ -6396,8 +6479,8 @@ $('#lightbox').addEventListener('touchend',e=>{
         if(gameFsLabel) gameFsLabel.textContent=document.fullscreenElement?'EXIT':'FULL';
         setTimeout(()=>{ if(canvas) resize(); },120);
       });
-      /* Owner-only score reset: type GOLDRESET while the Hall of Fame is
-         visible. No button is shown to visitors — they never see this option. */
+      /* Owner-only local reset: type GOLDRESET while the Hall of Fame is
+         visible. Shared Firebase scores are intentionally never deleted here. */
       let resetBuf='';
       document.addEventListener('keydown',function(ev){
         if(!hofOverlay||hofOverlay.classList.contains('hidden')){ resetBuf=''; return; }
@@ -6405,9 +6488,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           resetBuf=(resetBuf+ev.key.toUpperCase()).slice(-9);
           if(resetBuf==='GOLDRESET'){
             resetBuf='';
-            if(confirm('Reset all Hall of Fame scores to defaults?')){
-              hallOfFame=DEFAULT_HOF.slice();
-              saveHOF();
+            if(confirm('Reset this browser\'s game stats? The global Hall of Fame will remain unchanged.')){
               highScore=0;
               try{ localStorage.removeItem(HS_KEY); }catch(e){}
               statsGamesPlayed=0; statsBestWave=0;
@@ -6741,8 +6822,61 @@ render();
 })();
 
 </script>
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js';
+  import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js';
+  import {
+    getFirestore, collection, addDoc, query, orderBy, limit,
+    onSnapshot, serverTimestamp
+  } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
+
+  const firebaseConfig={
+    apiKey:'AIzaSyDqdY7WBMLB12mZmdisa7aGWlvAKAWLAtw',
+    authDomain:'golden-defender.firebaseapp.com',
+    projectId:'golden-defender',
+    storageBucket:'golden-defender.firebasestorage.app',
+    messagingSenderId:'950969168655',
+    appId:'1:950969168655:web:ea52825f74280af06ec47a',
+    measurementId:'G-MXC1B4QH8D'
+  };
+
+  try{
+    const firebaseApp=initializeApp(firebaseConfig);
+    const auth=getAuth(firebaseApp);
+    const database=getFirestore(firebaseApp);
+    const authReady=signInAnonymously(auth);
+
+    window.GoldenLeaderboard={
+      subscribe(onScores,onError){
+        const topScores=query(collection(database,'scores'),orderBy('score','desc'),limit(20));
+        return onSnapshot(topScores,snapshot=>{
+          onScores(snapshot.docs.map(scoreDoc=>{
+            const data=scoreDoc.data();
+            return {i:String(data.initials||'').toUpperCase().slice(0,3),s:Number(data.score)||0};
+          }));
+        },onError);
+      },
+      async submit(initials,score){
+        const credential=await authReady;
+        const clean=String(initials||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
+        const value=Math.floor(Number(score));
+        if(!/^[A-Z]{1,3}$/.test(clean)||!Number.isInteger(value)||value<=0||value>99999999){
+          throw new Error('Invalid leaderboard score');
+        }
+        await addDoc(collection(database,'scores'),{
+          initials:clean,
+          score:value,
+          createdAt:serverTimestamp(),
+          uid:credential.user.uid
+        });
+      }
+    };
+    window.dispatchEvent(new Event('golden-leaderboard-ready'));
+  }catch(error){
+    console.warn('Firebase leaderboard could not start; local scores remain available.',error);
+  }
+</script>
 <!-- Footer visitor counter — free, no-signup service (counterapi.com) -->
 <script src="https://counterapi.com/c.js" async></script>
 </body>
 </html>
-
