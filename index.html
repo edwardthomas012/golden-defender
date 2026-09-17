@@ -976,6 +976,11 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .hof-init{color:var(--gold-bri);min-width:2.8em;letter-spacing:1px}
 .hof-r1 .hof-init{color:#fff3cf;text-shadow:0 0 8px rgba(255,206,77,.6)}
 .hof-score{margin-left:auto;color:var(--plasma);font-variant-numeric:tabular-nums}
+.hof-sync-status{min-height:1.25em;margin:-7px 0 13px;font-family:'Sora';font-size:11px;
+  font-weight:700;letter-spacing:.35px;color:var(--ink-dim)}
+.hof-sync-status[data-state="saving"]{color:var(--gold-bri)}
+.hof-sync-status[data-state="saved"]{color:#77e6a5}
+.hof-sync-status[data-state="offline"]{color:#ffb36b}
 .hof-entry{display:flex;flex-direction:column;align-items:center;gap:10px;margin:6px 0 18px}
 .hof-entry label{font-size:12px;letter-spacing:.4px;color:var(--gold-bri);font-weight:700}
 .hof-entry-row{display:flex;gap:8px;align-items:center}
@@ -3334,6 +3339,7 @@ function viewPlay(){
             <ol class="hof-col" id="hofColC" start="11"></ol>
             <ol class="hof-col" id="hofColD" start="16"></ol>
           </div>
+          <div class="hof-sync-status" id="hofSyncStatus" role="status" aria-live="polite">Connecting to the global leaderboard...</div>
           <div class="hof-entry" id="hofEntryRow" style="display:none">
             <label for="hofInitials">NEW HIGH SCORE! ENTER YOUR INITIALS:</label>
             <div class="hof-entry-row">
@@ -4252,6 +4258,7 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   /* Golden Hall of Fame — a shared Firebase leaderboard with a local/offline
      fallback. All twenty start at 50,000 until real runs beat them. */
+  const MAX_SCORE=999999975;
   const HOF_KEY='goldenDefenderHallOfFame_v2';
   const HOF_PENDING_KEY='goldenDefenderPendingSharedScores_v1';
   const HOF_MIGRATION_KEY='goldenDefenderSharedMigration_v1';
@@ -4267,13 +4274,19 @@ $('#lightbox').addEventListener('touchend',e=>{
   let sharedLeaderboardUnsubscribe=null;
   let flushingSharedScores=false;
 
+  function setLeaderboardStatus(message,state){
+    if(!hofSyncStatus) return;
+    hofSyncStatus.textContent=message;
+    hofSyncStatus.dataset.state=state||'';
+  }
+
   function validHOFEntry(entry){
     return entry && /^[A-Z]{1,3}$/.test(String(entry.i||'')) && Number.isInteger(Number(entry.s)) && Number(entry.s)>0;
   }
   function normalizeHOF(entries){
     const real=(Array.isArray(entries)?entries:[]).filter(validHOFEntry).map(entry=>({
       i:String(entry.i).toUpperCase().slice(0,3),
-      s:Math.min(99999999,Math.floor(Number(entry.s)))
+      s:Math.min(MAX_SCORE,Math.floor(Number(entry.s)))
     }));
     return real.concat(DEFAULT_HOF).sort((a,b)=>b.s-a.s).slice(0,20);
   }
@@ -4286,6 +4299,9 @@ $('#lightbox').addEventListener('touchend',e=>{
         legacyMigrationCaptured=true;
       }
     }catch(e){ hallOfFame=DEFAULT_HOF.slice(); }
+    if(window.GoldenLeaderboardError){
+      setLeaderboardStatus('Global leaderboard unavailable — scores will retry automatically.','offline');
+    }
     connectSharedLeaderboard();
     migrateLegacyLocalScores();
     flushPendingSharedScores();
@@ -4310,7 +4326,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
   function queueSharedScore(initials,sc){
     const clean=(initials||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3)||'YOU';
-    const value=Math.min(99999999,Math.floor(Number(sc)||0));
+    const value=Math.min(MAX_SCORE,Math.floor(Number(sc)||0));
     if(value<=0) return;
     const pending=getPendingSharedScores();
     pending.push({i:clean,s:value});
@@ -4322,13 +4338,16 @@ $('#lightbox').addEventListener('touchend',e=>{
     const pending=getPendingSharedScores();
     let sent=0;
     try{
+      if(pending.length) setLeaderboardStatus('Saving score to the global leaderboard...','saving');
       while(sent<pending.length){
         const entry=pending[sent];
         await window.GoldenLeaderboard.submit(entry.i,entry.s);
         sent++;
         setPendingSharedScores(pending.slice(sent));
       }
+      setLeaderboardStatus(pending.length?'Score saved globally.':'Global leaderboard connected.','saved');
     }catch(e){
+      setLeaderboardStatus('Saved on this device — global save will retry automatically.','offline');
       console.warn('Shared leaderboard submission will retry later.',e);
     }finally{ flushingSharedScores=false; }
   }
@@ -4350,12 +4369,17 @@ $('#lightbox').addEventListener('touchend',e=>{
       migrateLegacyLocalScores();
       flushPendingSharedScores();
     },error=>{
+      setLeaderboardStatus('Global leaderboard unavailable — showing saved scores.','offline');
       console.warn('Using the saved leaderboard until Firebase reconnects.',error);
     });
     migrateLegacyLocalScores();
     flushPendingSharedScores();
   }
   window.addEventListener('golden-leaderboard-ready',connectSharedLeaderboard);
+  window.addEventListener('golden-leaderboard-error',()=>{
+    setLeaderboardStatus('Global leaderboard unavailable — scores will retry automatically.','offline');
+  });
+  window.addEventListener('online',()=>{ connectSharedLeaderboard(); flushPendingSharedScores(); });
   /* Embedded directly (rather than referenced by relative path) so it
      plays correctly whether this file is opened straight off a desktop or
      served from the live site — the "Highest Score" sting from the Sounds
@@ -4417,7 +4441,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   };
 
   let canvas, ctx, overlay, scoreEl, livesEl, highEl, waveEl, bombsEl, nextBossEl, goTitle, goSub, goBtn;
-  let hofOverlay, hofColA, hofColB, hofColC, hofColD, hofEntryRow, hofInitialsInput, hofSubmitBtn, hofHint, hofControlsWrap, hofSummary, hofPlayAgainBtn;
+  let hofOverlay, hofColA, hofColB, hofColC, hofColD, hofEntryRow, hofInitialsInput, hofSubmitBtn, hofHint, hofControlsWrap, hofSummary, hofPlayAgainBtn, hofSyncStatus;
   let gameFsBtn, gameFsLabel, gameExitBtn;
   let pendingScoreForHOF=null;
   let images={}, imagesReady=false;
@@ -4428,6 +4452,10 @@ $('#lightbox').addEventListener('touchend',e=>{
   let terrain=[];
   const EXTRA_AWARD_STEP=25000;
   let score=0, lives=3, highScore=0, nextExtraLifeScore=EXTRA_AWARD_STEP, bombs=3;
+  function awardPoints(points){
+    score=Math.min(MAX_SCORE,score+Math.max(0,Math.floor(Number(points)||0)));
+    while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
+  }
   const BOMB_START=3, BOMB_MAX=6;
   let spawnTimer=0, spawnInterval=1000, elapsed=0, fireCooldown=0;
   let wave=1, waveKills=0, waveSpawned=0, waveBreakTimer=0, waveBonusText='';
@@ -5204,8 +5232,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(const en of enemies){
       spawnParticles(en.x,en.y);
       const info=(SITE.enemies||[]).find(x=>x.key===en.key);
-      score+=(info&&info.score)||100;
-      while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
+      awardPoints((info&&info.score)||100);
       if(!en.bonus) waveKills++;
       if(en.key==='pod') podPositions.push({x:en.x,y:en.y});
     }
@@ -5388,8 +5415,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     if(enemies.length>0) return;
     const survivors=humanoids.length;
     const bonus=survivors*100;
-    score+=bonus;
-    while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
+    awardPoints(bonus);
     waveBonusText=survivors+' Humanoid'+(survivors===1?'':'s')+' saved — +'+bonus+' bonus';
     wave++; waveKills=0; waveSpawned=0;
     bullets=[]; // fresh start next wave — no shots carrying over
@@ -5742,8 +5768,7 @@ $('#lightbox').addEventListener('touchend',e=>{
             spawnParticles(en.x,en.y);
           } else {
             const info=(SITE.enemies||[]).find(x=>x.key===en.key);
-            score+=(info&&info.score)||100;
-            while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
+            awardPoints((info&&info.score)||100);
             spawnParticles(en.x,en.y);
             if(en.carrying) dropCarriedHumanoid(en);
             if(en.key==='pod') spawnSwarmersFromPod(en.x,en.y);
@@ -5842,8 +5867,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           spawnParticles(player.x,player.y);
           // Even dying to it, that Manti is gone — award its points same as a clean kill.
           const info=(SITE.enemies||[]).find(x=>x.key===en.key);
-          score+=(info&&info.score)||100;
-          while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
+          awardPoints((info&&info.score)||100);
           lives--;
           if(!en.bonus) waveKills++;
           updateHud();
@@ -6609,6 +6633,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     hofControlsWrap=document.getElementById('hofControlsWrap');
     hofSummary=document.getElementById('hofSummary');
     hofPlayAgainBtn=document.getElementById('hofPlayAgain');
+    hofSyncStatus=document.getElementById('hofSyncStatus');
     loadHOF();
     if(hofSubmitBtn) hofSubmitBtn.onclick=submitHOFEntry;
     if(hofPlayAgainBtn) hofPlayAgainBtn.onclick=()=>{ if(state==='gameover'){ hideHOF(); startGame(); } };
@@ -6986,7 +7011,7 @@ render();
   } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 
   const firebaseConfig={
-    apiKey:'AIzaSyDqdY7WBMLB12mZmdisa7aGWlvAKAWLAtw',
+    apiKey:'AIzaSyDqdY7WBMlB12mZmdjsa7aGWIvAKAWlAtw',
     authDomain:'golden-defender.firebaseapp.com',
     projectId:'golden-defender',
     storageBucket:'golden-defender.firebasestorage.app',
@@ -6999,7 +7024,7 @@ render();
     const firebaseApp=initializeApp(firebaseConfig);
     const auth=getAuth(firebaseApp);
     const database=getFirestore(firebaseApp);
-    const authReady=signInAnonymously(auth);
+    const credential=await signInAnonymously(auth);
 
     window.GoldenLeaderboard={
       subscribe(onScores,onError){
@@ -7012,10 +7037,9 @@ render();
         },onError);
       },
       async submit(initials,score){
-        const credential=await authReady;
         const clean=String(initials||'').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3);
         const value=Math.floor(Number(score));
-        if(!/^[A-Z]{1,3}$/.test(clean)||!Number.isInteger(value)||value<=0||value>99999999){
+        if(!/^[A-Z]{1,3}$/.test(clean)||!Number.isInteger(value)||value<=0||value>999999975){
           throw new Error('Invalid leaderboard score');
         }
         await addDoc(collection(database,'scores'),{
@@ -7028,7 +7052,9 @@ render();
     };
     window.dispatchEvent(new Event('golden-leaderboard-ready'));
   }catch(error){
+    window.GoldenLeaderboardError=true;
     console.warn('Firebase leaderboard could not start; local scores remain available.',error);
+    window.dispatchEvent(new Event('golden-leaderboard-error'));
   }
 </script>
 <!-- Footer visitor counter — free, no-signup service (counterapi.com) -->
