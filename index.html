@@ -1071,6 +1071,8 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .enemy-point{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;padding:6px 3px;border-radius:7px;background:rgba(140,160,230,.08);font-family:'Sora',sans-serif;text-align:center}
 .enemy-point-name{font-size:11px;font-weight:700;color:#ffe9a8;white-space:nowrap}
 .enemy-point-value{font-size:12px;font-weight:800;color:#54d9ff;white-space:nowrap}
+.bonus-award-note{margin:8px auto 0;max-width:700px;padding:8px 12px;border:1px solid rgba(255,206,77,.48);border-radius:9px;background:rgba(45,34,8,.72);color:#fff0bd;text-align:center;font:800 12px/1.35 'Sora',sans-serif;letter-spacing:.35px}
+.bonus-award-note strong{color:#54d9ff}
 .game-pause-hint{position:absolute;right:108px;top:10px;z-index:3;display:flex;align-items:center;gap:7px;color:#fff0bd;background:#080c1ce6;border-radius:8px;padding:4px 8px;font:600 13px/1.2 'Sora',sans-serif;pointer-events:none}
 .game-pause-hint kbd{font-size:14px;min-width:0;min-height:22px;padding:2px 5px;border-bottom-width:2px}
 @media(max-width:640px){.go-controls{gap:6px;margin-top:12px}.go-control{font-size:12px;padding:8px 3px}.go-control kbd{font-size:19px;min-width:30px}.go-arrows{grid-template-columns:repeat(3,24px)}.go-arrows kbd{min-width:0;font-size:20px}.go-control small{font-size:10px}.game-pause-hint{font-size:10px;gap:4px;right:100px;padding:4px}.enemy-points-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.enemy-point{padding:5px 2px}.enemy-point-name{font-size:10px}.enemy-point-value{font-size:11px}}
@@ -3282,6 +3284,10 @@ function gameEnemyPointsGuide(){
   return `<div class="enemy-points-guide" aria-label="Enemy point values"><div class="enemy-points-title">ENEMY POINT VALUES</div><div class="enemy-points-grid">${cards}</div></div>`;
 }
 
+function gameBonusAwardGuide(){
+  return `<div class="bonus-award-note" aria-label="Extra man and smart bomb award">★ EXTRA MAN + SMART BOMB EVERY <strong>25,000 POINTS</strong> ★</div>`;
+}
+
 function viewPlay(){
   return `<section class="block wrap">
     <div class="sec-head"><div><span class="eyebrow">Sector 1981 // playable tribute</span><h2>Play</h2>
@@ -3309,6 +3315,7 @@ function viewPlay(){
             <div class="go-control"><kbd>ESC</kbd><span>PAUSE</span><small>Press again to resume</small></div>
           </div>
           ${gameEnemyPointsGuide()}
+          ${gameBonusAwardGuide()}
           <div class="go-keys">Touch: drag the left side to steer. Use FIRE and BOMB.</div>
         </div>
       </div>
@@ -3344,6 +3351,7 @@ function viewPlay(){
               <div class="hof-ctl"><span class="hof-key">Tap</span><span>D-pad &amp; Fire/Bomb buttons (touch)</span></div>
             </div>
             ${gameEnemyPointsGuide()}
+            ${gameBonusAwardGuide()}
           </div>
           <div class="hof-summary" id="hofSummary" style="display:none"></div>
           <button id="hofPlayAgain" class="btn primary" style="display:none">PLAY AGAIN</button>
@@ -4418,10 +4426,12 @@ $('#lightbox').addEventListener('touchend',e=>{
   let W=900, H=562;
   let player, bullets=[], enemies=[], particles=[], humanoids=[], killTexts=[], fallingHumanoids=[];
   let terrain=[];
-  let score=0, lives=3, highScore=0, nextExtraLifeScore=10000, bombs=3;
+  const EXTRA_AWARD_STEP=25000;
+  let score=0, lives=3, highScore=0, nextExtraLifeScore=EXTRA_AWARD_STEP, bombs=3;
   const BOMB_START=3, BOMB_MAX=6;
   let spawnTimer=0, spawnInterval=1000, elapsed=0, fireCooldown=0;
   let wave=1, waveKills=0, waveSpawned=0, waveBreakTimer=0, waveBonusText='';
+  let baiterSpawnCount=0;
   let terrainGone=false, prevHumanoidCount=10, screenFlash=0, frenzyBannerTimer=0;
   let speechCooldown=3, speechCountThisWave=0;
   const MAX_SPEECH_PER_WAVE=3;
@@ -4827,7 +4837,9 @@ $('#lightbox').addEventListener('touchend',e=>{
   function spawnEnemy(){
     // 'swarmer' removed from the direct-spawn roster — Swarmers now only
     // ever come from a Pod being destroyed (see spawnSwarmersFromPod).
-    const types=['lander','mutant','baiter','bomber','pod'];
+    /* Weighted roster: Baiters are deliberately common and Pods are rare.
+       Boss waves still retain their named enemy theme. */
+    const types=['lander','lander','mutant','baiter','baiter','baiter','bomber','bomber','pod'];
     const boss=isBossWave(wave);
     let key=boss?bossKeyForWave(wave):types[Math.floor(Math.random()*types.length)];
     // A "Swarmer" boss wave still exists (theming/toughness/target all still
@@ -4849,6 +4861,11 @@ $('#lightbox').addEventListener('touchend',e=>{
     // walk it, instead of wandering the normal altitude band. See the
     // terrainFollower branch in update() for the actual movement.
     const terrainFollower=(key==='lander')&&Math.random()<0.5;
+    let crazedBaiter=false;
+    if(key==='baiter'){
+      baiterSpawnCount++;
+      crazedBaiter=baiterSpawnCount%25===0;
+    }
     const en={
       key, x:W+40+Math.random()*70, y:flightTop()+Math.random()*(flightBottom()-flightTop()),
       vx:-(speedBase*diff*bossMul*(0.85+Math.random()*0.3)),
@@ -4859,7 +4876,8 @@ $('#lightbox').addEventListener('touchend',e=>{
       boss, hp:tough?tough.hp:1, maxHp:tough?tough.hp:1,
       hitScale:tough?tough.hitScale:1, hitFlash:0,
       carrying:null, diveTarget:null, aiState:'normal',
-      terrainFollower
+      terrainFollower,
+      crazedBaiter
     };
     if(terrainFollower) en.y=landerFloorAt(en.x);
     enemies.push(en);
@@ -4898,8 +4916,9 @@ $('#lightbox').addEventListener('touchend',e=>{
     if(typeof hideHOF==='function') hideHOF();
     genTerrain(); seedHumanoids(); resetPlayer();
     bullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
-    score=0; lives=3; nextExtraLifeScore=10000; spawnTimer=0; spawnInterval=1000; elapsed=0; fireCooldown=0;
+    score=0; lives=3; nextExtraLifeScore=EXTRA_AWARD_STEP; spawnTimer=0; spawnInterval=1000; elapsed=0; fireCooldown=0;
     wave=1; waveKills=0; waveSpawned=0; waveBreakTimer=0; waveBonusText=''; bombs=BOMB_START;
+    baiterSpawnCount=0;
     terrainGone=false; prevHumanoidCount=10; screenFlash=0; frenzyBannerTimer=0;
     speechCooldown=3+Math.random()*3; speechCountThisWave=0;
     statsGamesPlayed++; saveStats();
@@ -5182,7 +5201,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       spawnParticles(en.x,en.y);
       const info=(SITE.enemies||[]).find(x=>x.key===en.key);
       score+=(info&&info.score)||100;
-      while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
+      while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
       if(!en.bonus) waveKills++;
       if(en.key==='pod') podPositions.push({x:en.x,y:en.y});
     }
@@ -5231,30 +5250,22 @@ $('#lightbox').addEventListener('touchend',e=>{
     if(idx>=0) humanoids.splice(idx,1);
     en.aiState='ascending';
     en.diveTarget=null;
-    /* Some Landers make a complete extra abduction pass. They disappear
-       through the ceiling still holding the Humanoid, wrap to the bottom,
-       and the second climb always ends in a successful transformation. */
-    en.abductionTripsRemaining=Math.random()<0.36?2:1;
   }
 
   function updateLanderAscent(en,dt){
     en.y-=(62+Math.min(28,wave*1.8))*dt;
-    if(en.y>-en.r*2.4) return;
-    if((en.abductionTripsRemaining||1)>1){
-      en.abductionTripsRemaining--;
-      en.x=Math.max(W*0.09,Math.min(W*0.91,en.x));
-      en.y=H+en.r*1.8;
-      return;
-    }
+    /* The gold line below the scanner is the playfield ceiling. Keep the
+       entire Lander sprite below it and transform exactly at that line. */
+    const transformY=flightTop()+Math.max(12,en.r*1.3);
+    if(en.y>transformY) return;
+    en.y=transformY;
     spawnLanderAbsorption(en);
     en.key='mutant';
     en.crazed=true;
     en.carrying=null;
     en.aiState='normal';
     en.diveTarget=null;
-    en.abductionTripsRemaining=0;
     en.vx=-Math.max(180,Math.abs(en.vx)*1.55);
-    en.y=flightTop()+Math.max(12,en.r);
     en.zigPhase=Math.random()*6.28;
   }
 
@@ -5278,13 +5289,14 @@ $('#lightbox').addEventListener('touchend',e=>{
   function spawnSwarmersFromPod(x,y){
     const n=2+Math.floor(Math.random()*7); // 2..8 inclusive
     const s=scaleUnit();
+    const lateWaveSpeed=wave>5?Math.min(2.6,1.85+(wave-6)*0.045):1;
     for(let i=0;i<n;i++){
       const ang=Math.random()*6.283, dist=10+Math.random()*20;
       const burstSpeed=(90+Math.random()*220)*(s/700||1);
       enemies.push({
         key:'swarmer',
         x:x+Math.cos(ang)*dist, y:y+Math.sin(ang)*dist,
-        vx:-(190*(0.7+Math.random()*0.5)),
+        vx:-(190*lateWaveSpeed*(0.7+Math.random()*0.5)),
         bobAmp:10+Math.random()*22,
         bobSpeed:1.1+Math.random()*1.7,
         phase:Math.random()*6.28,
@@ -5325,12 +5337,15 @@ $('#lightbox').addEventListener('touchend',e=>{
     const survivors=humanoids.length;
     const bonus=survivors*100;
     score+=bonus;
-    while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
+    while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
     waveBonusText=survivors+' Humanoid'+(survivors===1?'':'s')+' saved — +'+bonus+' bonus';
     wave++; waveKills=0; waveSpawned=0;
     bullets=[]; // fresh start next wave — no shots carrying over
     speechCountThisWave=0; speechCooldown=3+Math.random()*4;
+    /* Every new wave gets a fresh terrain contour. A wiped-out landscape
+       stays absent until the scheduled Humanoid replenishment restores it. */
     if(wave%5===0) replenishHumanoids();
+    else if(!terrainGone) genTerrain();
     state='wavebreak'; waveBreakTimer=isBossWave(wave)?BOSS_WAVE_BREAK_DURATION:WAVE_BREAK_DURATION;
     updateHud();
   }
@@ -5344,7 +5359,15 @@ $('#lightbox').addEventListener('touchend',e=>{
     const speed=Math.abs(en.vx)*(frantic?1.3:1);
     en.moveTime+=dt;
     const t=en.moveTime;
-    if(en.key==='baiter'){
+    if(en.key==='baiter'&&en.crazedBaiter){
+      /* Every 25th Baiter breaks formation and aggressively hunts Goldie
+         with a fast, erratic kamikaze line instead of the normal feint. */
+      en.zigPhase=(en.zigPhase||0)+dt*28;
+      const dx=player.x-en.x, dy=player.y-en.y;
+      const distance=Math.max(1,Math.hypot(dx,dy));
+      en.x+=dx/distance*speed*1.65*dt+Math.sin(en.zigPhase)*78*dt;
+      en.y+=dy/distance*speed*1.65*dt+Math.cos(en.zigPhase*1.6)*58*dt;
+    } else if(en.key==='baiter'){
       // Brake and feint vertically, lock Goldie's height, then sweep across.
       if(en.baiterStage===undefined){ en.baiterStage='feint'; en.baiterTimer=0.55; }
       en.baiterTimer-=dt;
@@ -5667,7 +5690,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           } else {
             const info=(SITE.enemies||[]).find(x=>x.key===en.key);
             score+=(info&&info.score)||100;
-            while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
+            while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
             spawnParticles(en.x,en.y);
             if(en.carrying){
               fallingHumanoids.push({x:en.x,y:en.y,vy:0,woman:en.carrying.woman,walkPhase:en.carrying.walkPhase,speechText:nextDroppedLine(),speechTimer:99});
@@ -5771,7 +5794,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           // Even dying to it, that Manti is gone — award its points same as a clean kill.
           const info=(SITE.enemies||[]).find(x=>x.key===en.key);
           score+=(info&&info.score)||100;
-          while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
+          while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=EXTRA_AWARD_STEP; }
           lives--;
           if(!en.bonus) waveKills++;
           updateHud();
@@ -6283,11 +6306,12 @@ $('#lightbox').addEventListener('touchend',e=>{
   function drawEnemies(){
     for(const en of enemies){
       const im=images[en.key], d=en.r*2.5;
-      const shakeX=en.crazed?Math.sin(elapsed*44+(en.phase||0))*4:0;
-      const shakeY=en.crazed?Math.cos(elapsed*51+(en.phase||0))*3:0;
+      const isCrazed=en.crazed||en.crazedBaiter;
+      const shakeX=isCrazed?Math.sin(elapsed*44+(en.phase||0))*4:0;
+      const shakeY=isCrazed?Math.cos(elapsed*51+(en.phase||0))*3:0;
       ctx.save();
-      if(en.crazed){
-        ctx.shadowColor='rgba(255,55,90,.95)';
+      if(isCrazed){
+        ctx.shadowColor=en.crazedBaiter?'rgba(84,217,255,.98)':'rgba(255,55,90,.95)';
         ctx.shadowBlur=Math.max(8,en.r*0.9);
       } else if(en.boss){
         // faint red pulse marks a boss-wave Manti as extra tough
