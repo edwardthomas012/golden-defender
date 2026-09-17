@@ -880,6 +880,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .ghud-item{font-size:12px}
 .ghud-item.ghud-score{font-size:20px;letter-spacing:.4px}
 .ghud-item b{color:var(--ink);font-weight:800;margin-left:5px}
+.ghud-item.ghud-score b{color:#63f58c;text-shadow:0 0 12px rgba(74,255,128,.5),0 2px 8px rgba(0,0,0,.9)}
 .game-overlay{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;
   background:rgba(4,5,13,.72);backdrop-filter:blur(3px);text-align:center;padding:20px;transition:opacity .2s}
 .game-overlay.hidden{opacity:0;pointer-events:none}
@@ -4247,6 +4248,8 @@ $('#lightbox').addEventListener('touchend',e=>{
    - A procedural terrain (peaks & valleys) runs along the bottom, and a
      handful of Humanoids walk back and forth on it. */
 (function(){
+  const BOSS_TEST_MODE=new URLSearchParams(window.location.search).get('boss')==='1';
+  const DIFFICULTY_CAP_WAVE=35;
   const HS_KEY='goldenDefenderHighScore_v2';
   const STATS_KEY='goldenDefenderStats_v2';
   let statsGamesPlayed=0, statsBestWave=0;
@@ -4856,12 +4859,13 @@ $('#lightbox').addEventListener('touchend',e=>{
     return humanoids.length+fallingHumanoids.length+enemies.filter(e=>e.carrying).length;
   }
 
-  const MAX_DIFFICULTY_FACTOR=4.4;
+  const MAX_DIFFICULTY_FACTOR=5.0;
   function difficultyFactor(){
-    /* Pressure rises on every wave, with a modest extra lift after the first
-       boss. The hard cap keeps late play demanding without becoming a blur. */
-    const everyWave=Math.min(2.35,(wave-1)*0.11);
-    const postFirstBoss=Math.min(0.40,Math.max(0,wave-5)*0.025);
+    /* Pressure now rises through Wave 35 instead of flattening in the low
+       twenties. The cap keeps late play demanding without becoming a blur. */
+    const cappedWave=Math.min(DIFFICULTY_CAP_WAVE,wave);
+    const everyWave=Math.min(2.90,(cappedWave-1)*0.085);
+    const postFirstBoss=Math.min(0.55,Math.max(0,cappedWave-5)*0.0185);
     const frenzy=activeHumanoidCount()===0?0.45:0;
     const boss=isBossWave(wave)?0.3:0;
     return Math.min(MAX_DIFFICULTY_FACTOR,1.55+everyWave+postFirstBoss+frenzy+boss);
@@ -4925,26 +4929,23 @@ $('#lightbox').addEventListener('touchend',e=>{
     player={x:Math.max(W*0.05,Math.max(12,scaleUnit()*0.030)+4),y:H*0.42,r:Math.max(12,scaleUnit()*0.030),facing:1,invuln:1.2};
   }
 
-  /* Wave 1 needs 20 kills; every wave after that needs 5 more than the
-     last (25, 30, 35...). After wave 5 the target jumps by 8 per wave
-     instead of 5, so the challenge is noticeably steeper for experienced
-     players. Capped at 120 so very late waves stay a real fight without
-     turning into pure grind. Boss waves use their own round-number scale
-     instead (Pods 20 → Baiters 50), climbing a bit further each repeat lap
-     before it, too, tops out. */
+  /* Enemy quotas rise in stages through Wave 35, then hold steady so late
+     play stays demanding without turning into pure grind. Boss quotas rise
+     from 24 on Wave 5 to 60 on Wave 35. */
   function waveTarget(w){
     if(isBossWave(w)){
-      const rank=bossRankForWave(w), tier=Math.min(3,bossTierForWave(w));
-      return 20+rank*6+tier*15;
+      return Math.min(60,24+(Math.min(DIFFICULTY_CAP_WAVE,w)/5-1)*6);
     }
-    if(w<=5) return Math.min(120, 25+(w-1)*5);
-    return Math.min(120, 45+(w-5)*10);
+    const cappedWave=Math.min(DIFFICULTY_CAP_WAVE,w);
+    if(cappedWave<=5) return 25+(cappedWave-1)*5;
+    if(cappedWave<=25) return 45+(cappedWave-5)*4;
+    return 125+(cappedWave-25)*3;
   }
 
   function updateHud(){
-    if(scoreEl) scoreEl.textContent=score;
+    if(scoreEl) scoreEl.textContent=score.toLocaleString('en-US');
     if(livesEl) livesEl.textContent=Math.max(0,lives);
-    if(highEl) highEl.textContent=highScore;
+    if(highEl) highEl.textContent=highScore.toLocaleString('en-US');
     if(waveEl) waveEl.textContent=wave;
     if(bombsEl) bombsEl.textContent=bombs;
     if(nextBossEl) nextBossEl.textContent=isBossWave(wave)?'NOW':String(5-(wave%5));
@@ -4955,13 +4956,14 @@ $('#lightbox').addEventListener('touchend',e=>{
     genTerrain(); seedHumanoids(); resetPlayer();
     bullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
     score=0; lives=3; nextExtraLifeScore=EXTRA_AWARD_STEP; spawnTimer=0; spawnInterval=1000; elapsed=0; fireCooldown=0;
-    wave=1; waveKills=0; waveSpawned=0; waveBreakTimer=0; waveBonusText=''; bombs=BOMB_START;
+    wave=BOSS_TEST_MODE?5:1; waveKills=0; waveSpawned=0; waveBreakTimer=0; waveBonusText=''; bombs=BOMB_START;
     baiterKillCount=0; crazedBaitersPending=0;
     terrainGone=false; prevHumanoidCount=10; screenFlash=0; frenzyBannerTimer=0;
     speechCooldown=3+Math.random()*3; speechCountThisWave=0;
-    statsGamesPlayed++; saveStats();
+    if(!BOSS_TEST_MODE){ statsGamesPlayed++; saveStats(); }
     updateHud();
-    state='playing';
+    state=BOSS_TEST_MODE?'wavebreak':'playing';
+    if(BOSS_TEST_MODE) waveBreakTimer=BOSS_WAVE_BREAK_DURATION;
     if(overlay) overlay.classList.add('hidden');
     // The Start/Play Again button keeps keyboard focus after being clicked;
     // pointer-events:none only blocks mouse/touch, not a stray Enter press
@@ -4999,7 +5001,8 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
   function hideHOF(){ if(hofOverlay) hofOverlay.classList.add('hidden'); }
   function gameOverSummaryText(){
-    return 'Final score: '+score+' — reached Wave '+wave+((score>=highScore&&score>0)?' — new high score!':'')+' · Best wave: '+statsBestWave;
+    if(BOSS_TEST_MODE) return 'Boss Test score: '+score.toLocaleString('en-US')+' — scores from this tester are not submitted to the Hall of Fame.';
+    return 'Final score: '+score.toLocaleString('en-US')+' — reached Wave '+wave+((score>=highScore&&score>0)?' — new high score!':'')+' · Best wave: '+statsBestWave;
   }
   function submitHOFEntry(){
     if(pendingScoreForHOF==null) return;
@@ -5017,12 +5020,14 @@ $('#lightbox').addEventListener('touchend',e=>{
      qualifies), with an initials-entry step first when it does. */
   function endGame(){
     state='gameover';
-    if(score>highScore){ highScore=score; try{ localStorage.setItem(HS_KEY,String(highScore)); }catch(e){} }
-    if(wave>statsBestWave){ statsBestWave=wave; }
-    saveStats();
+    if(!BOSS_TEST_MODE){
+      if(score>highScore){ highScore=score; try{ localStorage.setItem(HS_KEY,String(highScore)); }catch(e){} }
+      if(wave>statsBestWave){ statsBestWave=wave; }
+      saveStats();
+    }
     updateHud();
     playGameOverSting();
-    if(hofQualifies(score)){
+    if(!BOSS_TEST_MODE&&hofQualifies(score)){
       pendingScoreForHOF=score;
       showHOF('entry');
     } else {
@@ -5424,7 +5429,8 @@ $('#lightbox').addEventListener('touchend',e=>{
     const bonus=survivors*100;
     awardPoints(bonus);
     waveBonusText=survivors+' Humanoid'+(survivors===1?'':'s')+' saved — +'+bonus+' bonus';
-    wave++; waveKills=0; waveSpawned=0;
+    wave=BOSS_TEST_MODE?(wave>=DIFFICULTY_CAP_WAVE?5:wave+5):wave+1;
+    waveKills=0; waveSpawned=0;
     bullets=[]; // fresh start next wave — no shots carrying over
     speechCountThisWave=0; speechCooldown=3+Math.random()*4;
     /* Every new wave gets a fresh terrain contour. A wiped-out landscape
@@ -5544,10 +5550,14 @@ $('#lightbox').addEventListener('touchend',e=>{
     }
     spawnTimer+=dt;
     const diff=difficultyFactor();
-    const targetInterval=Math.max(150,(900-(wave-1)*60-elapsed*20)/diff);
+    const cappedWave=Math.min(DIFFICULTY_CAP_WAVE,wave);
+    /* Preserve the established spawn pressure through Wave 25, then trim
+       another two milliseconds per wave until the final Wave 35 cap. */
+    const establishedInterval=Math.max(150,(900-(Math.min(25,cappedWave)-1)*60-elapsed*20)/diff);
+    const targetInterval=Math.max(130,establishedInterval-Math.max(0,cappedWave-25)*2)*(isBossWave(wave)?0.92:1);
     if(spawnTimer>=targetInterval/1000&&waveSpawned<waveTarget(wave)){
       spawnTimer=0;
-      const cap=12+Math.min(16,wave-1)+(activeHumanoidCount()===0?4:0);
+      const cap=12+Math.min(20,Math.floor((cappedWave-1)*0.6))+(activeHumanoidCount()===0?4:0);
       if(enemies.length<cap){ spawnEnemy(); waveSpawned++; }
     }
 
@@ -6522,12 +6532,23 @@ $('#lightbox').addEventListener('touchend',e=>{
     ctx.textAlign='center';
     ctx.fillStyle=boss?'#ff9a6a':'#ffe9a8';
     ctx.shadowColor=boss?'rgba(255,120,80,.9)':'rgba(255,206,77,.85)'; ctx.shadowBlur=Math.max(8,scaleUnit()*0.03);
-    ctx.font='800 '+Math.max(28,scaleUnit()*0.11)+'px Sora, sans-serif';
-    ctx.fillText(boss?('WAVE '+wave+' — BOSS WAVE: '+bossLabel(bossKeyForWave(wave)).toUpperCase()+'S'):('WAVE '+wave), W/2, H*0.38);
+    const title=boss?('WAVE '+wave+' — BOSS: '+bossLabel(bossKeyForWave(wave)).toUpperCase()+'S'):('WAVE '+wave);
+    let titleSize=Math.max(24,Math.min(58,scaleUnit()*0.078));
+    do{
+      ctx.font='800 '+titleSize+'px Sora, sans-serif';
+      if(ctx.measureText(title).width<=W*0.86||titleSize<=22) break;
+      titleSize-=2;
+    }while(titleSize>22);
+    ctx.fillText(title, W/2, H*0.38);
     ctx.shadowBlur=0;
     ctx.fillStyle='#cfe0ff';
-    ctx.font='700 '+Math.max(13,scaleUnit()*0.032)+'px Sora, sans-serif';
     const sub=boss?BOSS_INTRO_LINES[bossKeyForWave(wave)](waveTarget(wave)):('Defeat '+waveTarget(wave)+' Manti');
+    let subSize=Math.max(11,Math.min(22,scaleUnit()*0.030));
+    do{
+      ctx.font='700 '+subSize+'px Sora, sans-serif';
+      if(ctx.measureText(sub).width<=W*0.9||subSize<=10) break;
+      subSize-=1;
+    }while(subSize>10);
     ctx.fillText(sub, W/2, H*0.38+Math.max(30,scaleUnit()*0.07));
     if(waveBonusText){
       ctx.fillStyle='#ffe08a';
@@ -6660,7 +6681,11 @@ $('#lightbox').addEventListener('touchend',e=>{
 
     try{ highScore=parseInt(localStorage.getItem(HS_KEY)||'0',10)||0; }catch(e){ highScore=0; }
     loadStats();
-    if(goSub) goSub.textContent='Manti fly in from the right and loop back around. Shoot them, dodge them, and keep the Humanoids company.'+(statsGamesPlayed>0?(' Games played: '+statsGamesPlayed+' · Best wave: '+statsBestWave+'.'):'');
+    if(BOSS_TEST_MODE){
+      if(goTitle) goTitle.textContent='GOLDEN DEFENDER — BOSS GAME';
+      if(goBtn) goBtn.textContent='START BOSS TEST';
+      if(goSub) goSub.textContent='Boss waves only: 5, 10, 15, 20, 25, 30, and 35. After Wave 35 the test loops back to Wave 5. Test scores are never submitted to the public leaderboard.';
+    } else if(goSub) goSub.textContent='Manti fly in from the right and loop back around. Shoot them, dodge them, and keep the Humanoids company.'+(statsGamesPlayed>0?(' Games played: '+statsGamesPlayed+' · Best wave: '+statsBestWave+'.'):'');
     state='idle';
     updateHud();
     seedStars();
