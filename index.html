@@ -1072,7 +1072,7 @@ footer{border-top:1px solid var(--line);background:rgba(7,10,24,.6);margin-top:3
 .go-control small{font-size:12px;color:#c5cce1;font-weight:400}
 .enemy-points-guide{margin:12px auto 8px;max-width:700px;padding:10px 12px;border:1px solid rgba(84,217,255,.28);border-radius:10px;background:rgba(7,12,28,.72)}
 .enemy-points-title{font:800 11px/1.2 'Sora',sans-serif;letter-spacing:1.5px;color:#6fe2ff;text-align:center;margin-bottom:8px}
-.enemy-points-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.enemy-points-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
 .enemy-point{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;padding:6px 3px;border-radius:7px;background:rgba(140,160,230,.08);font-family:'Sora',sans-serif;text-align:center}
 .enemy-point-name{font-size:11px;font-weight:700;color:#ffe9a8;white-space:nowrap}
 .enemy-point-value{font-size:12px;font-weight:800;color:#54d9ff;white-space:nowrap}
@@ -3282,11 +3282,12 @@ function viewEnemies(){
 
 function gameEnemyPointsGuide(){
   const order=['lander','mutant','baiter','bomber','pod','swarmer'];
-  const cards=order.map(key=>{
+  const enemyCards=order.map(key=>{
     const enemy=SITE.enemies.find(item=>item.key===key);
     return enemy?`<div class="enemy-point"><span class="enemy-point-name">${esc(enemy.name)}</span><span class="enemy-point-value">${enemy.score.toLocaleString()} PTS</span></div>`:'';
   }).join('');
-  return `<div class="enemy-points-guide" aria-label="Enemy point values"><div class="enemy-points-title">ENEMY POINT VALUES</div><div class="enemy-points-grid">${cards}</div></div>`;
+  const rescueCard=`<div class="enemy-point"><span class="enemy-point-name">Humanoid Rescue</span><span class="enemy-point-value">500 PTS</span></div>`;
+  return `<div class="enemy-points-guide" aria-label="Scoring point values"><div class="enemy-points-title">SCORING</div><div class="enemy-points-grid">${enemyCards}${rescueCard}</div></div>`;
 }
 
 function gameBonusAwardGuide(){
@@ -5833,6 +5834,12 @@ $('#lightbox').addEventListener('touchend',e=>{
             });
           }
         } else {
+          awardPoints(500);
+          killTexts.push({
+            x:fh.x, y:groundY-scaleUnit()*0.045,
+            text:'HUMANOID RESCUED +500', color:'#77e6a5',
+            life:2.2, maxLife:2.2, vy:-scaleUnit()*0.022
+          });
           humanoids.push({
             xf:Math.max(0.09,Math.min(0.91,fh.x/W)), dir:Math.random()<0.5?-1:1,
             speed:0.010+Math.random()*0.016, walkPhase:fh.walkPhase,
@@ -5840,6 +5847,7 @@ $('#lightbox').addEventListener('touchend',e=>{
             turnTimer:0.7+Math.random()*2.3,
             woman:fh.woman, speechText:'', speechTimer:0
           });
+          updateHud();
         }
         fallingHumanoids.splice(i,1);
       }
@@ -6293,9 +6301,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     ctx.restore();
   }
 
-  /* Floating last-words text where a Humanoid was just shot — rises and
-     fades over about 1.6s, red-tinted to read as "ouch" rather than the
-     friendly gold ambient chatter bubbles. */
+  /* Floating event text for Humanoid deaths and successful rescues. */
   function drawKillTexts(){
     for(const k of killTexts){
       const total=k.maxLife||1.6;
@@ -6309,7 +6315,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       ctx.font='800 '+fontSize+'px Sora, sans-serif';
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.shadowColor='rgba(0,0,0,.9)'; ctx.shadowBlur=fontSize*0.4;
-      ctx.fillStyle='#ff8a8a';
+      ctx.fillStyle=k.color||'#ff8a8a';
       /* Wrap kill text into up to 3 lines, clamped to screen — no truncation */
       var maxWidth=Math.min(240,ctx.canvas?ctx.canvas.width*0.42:220);
       var words=String(k.text).split(' ');
