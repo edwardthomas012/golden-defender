@@ -4416,7 +4416,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   let state='idle';
   let raf=null, lastT=0;
   let W=900, H=562;
-  let player, bullets=[], enemyBullets=[], enemies=[], particles=[], humanoids=[], killTexts=[], fallingHumanoids=[];
+  let player, bullets=[], enemies=[], particles=[], humanoids=[], killTexts=[], fallingHumanoids=[];
   let terrain=[];
   let score=0, lives=3, highScore=0, nextExtraLifeScore=10000, bombs=3;
   const BOMB_START=3, BOMB_MAX=6;
@@ -4683,14 +4683,19 @@ $('#lightbox').addEventListener('touchend',e=>{
      stay clearly visible whatever the visitor's screen size. */
   function scaleUnit(){ return Math.min(W,H); }
   function humanoidSize(){ return Math.max(15,scaleUnit()*0.032); }
-  /* Humanoids walk just below the glowing terrain outline, inside the land
-     silhouette. Landers use the same below-terrain point when abducting. */
-  function humanoidYAt(x){
+  /* Humanoids roam throughout the underground area: from just below the
+     glowing terrain outline all the way down to the bottom of the screen. */
+  function humanoidSurfaceYAt(x){
     const size=humanoidSize();
     return Math.min(H-2,terrainYAt(x)+size*0.95);
   }
-  function landerPickupYAt(x){
-    return Math.min(H-4,humanoidYAt(x)-humanoidSize()*0.48);
+  function humanoidY(h){
+    const surface=humanoidSurfaceYAt(h.xf*W);
+    const depth=Math.max(0,Math.min(1,h.depth||0));
+    return surface+(H-2-surface)*depth;
+  }
+  function landerPickupY(h){
+    return Math.min(H-4,humanoidY(h)-humanoidSize()*0.48);
   }
 
   function seedHumanoids(){
@@ -4703,9 +4708,13 @@ $('#lightbox').addEventListener('touchend',e=>{
   function replenishHumanoids(){
     while(humanoids.length<10){
       humanoids.push({
-        xf:0.09+Math.random()*0.86,
+        xf:0.09+Math.random()*0.82,
         dir:Math.random()<0.5?-1:1,
         speed:0.010+Math.random()*0.016,
+        depth:Math.random(),
+        depthDir:Math.random()<0.5?-1:1,
+        depthSpeed:0.07+Math.random()*0.11,
+        turnTimer:0.7+Math.random()*2.3,
         walkPhase:Math.random()*6.28,
         woman:humanoids.length%2===0,
         speechText:'', speechTimer:0
@@ -4888,7 +4897,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   function startGame(){
     if(typeof hideHOF==='function') hideHOF();
     genTerrain(); seedHumanoids(); resetPlayer();
-    bullets=[]; enemyBullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
+    bullets=[]; enemies=[]; particles=[]; killTexts=[]; fallingHumanoids=[];
     score=0; lives=3; nextExtraLifeScore=10000; spawnTimer=0; spawnInterval=1000; elapsed=0; fireCooldown=0;
     wave=1; waveKills=0; waveSpawned=0; waveBreakTimer=0; waveBonusText=''; bombs=BOMB_START;
     terrainGone=false; prevHumanoidCount=10; screenFlash=0; frenzyBannerTimer=0;
@@ -4968,7 +4977,7 @@ $('#lightbox').addEventListener('touchend',e=>{
 
   function idleFrame(){
     genTerrain(); seedHumanoids(); resetPlayer();
-    bullets=[]; enemyBullets=[]; enemies=[]; particles=[]; fallingHumanoids=[];
+    bullets=[]; enemies=[]; particles=[]; fallingHumanoids=[];
     draw();
   }
 
@@ -5183,7 +5192,6 @@ $('#lightbox').addEventListener('touchend',e=>{
       }
     }
     enemies=[];
-    enemyBullets=[];
     for(const p of podPositions) spawnSwarmersFromPod(p.x,p.y);
     screenFlash=Math.max(screenFlash,0.7);
     updateHud();
@@ -5213,6 +5221,41 @@ $('#lightbox').addEventListener('touchend',e=>{
   function spawnLanderAbsorption(en){
     particles.push({x:en.x,y:en.y,vx:0,vy:0,life:0.85,maxLife:0.85,
       absorption:true,target:en,radius:Math.max(30,scaleUnit()*0.065)});
+  }
+
+  function beginLanderCarry(en,h){
+    en.carrying=h;
+    h.speechText=nextCarriedLine();
+    h.speechTimer=99;
+    const idx=humanoids.indexOf(h);
+    if(idx>=0) humanoids.splice(idx,1);
+    en.aiState='ascending';
+    en.diveTarget=null;
+    /* Some Landers make a complete extra abduction pass. They disappear
+       through the ceiling still holding the Humanoid, wrap to the bottom,
+       and the second climb always ends in a successful transformation. */
+    en.abductionTripsRemaining=Math.random()<0.36?2:1;
+  }
+
+  function updateLanderAscent(en,dt){
+    en.y-=(62+Math.min(28,wave*1.8))*dt;
+    if(en.y>-en.r*2.4) return;
+    if((en.abductionTripsRemaining||1)>1){
+      en.abductionTripsRemaining--;
+      en.x=Math.max(W*0.09,Math.min(W*0.91,en.x));
+      en.y=H+en.r*1.8;
+      return;
+    }
+    spawnLanderAbsorption(en);
+    en.key='mutant';
+    en.crazed=true;
+    en.carrying=null;
+    en.aiState='normal';
+    en.diveTarget=null;
+    en.abductionTripsRemaining=0;
+    en.vx=-Math.max(180,Math.abs(en.vx)*1.55);
+    en.y=flightTop()+Math.max(12,en.r);
+    en.zigPhase=Math.random()*6.28;
   }
 
   // Reserved for humanoids killed by Goldie's laser.
@@ -5260,8 +5303,7 @@ $('#lightbox').addEventListener('touchend',e=>{
         // a small huddle — fades out over burstTimer seconds, after which
         // they settle into the normal leftward drift/loop like any Manti.
         burstVx:Math.cos(ang)*burstSpeed, burstVy:Math.sin(ang)*burstSpeed,
-        burstTimer:0.55+Math.random()*0.45,
-        shotCooldown:0.8+Math.random()*1.6
+        burstTimer:0.55+Math.random()*0.45
       });
     }
     spawnParticles(x,y);
@@ -5286,7 +5328,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     while(score>=nextExtraLifeScore){ lives++; bombs++; nextExtraLifeScore+=10000; }
     waveBonusText=survivors+' Humanoid'+(survivors===1?'':'s')+' saved — +'+bonus+' bonus';
     wave++; waveKills=0; waveSpawned=0;
-    bullets=[]; enemyBullets=[]; // fresh start next wave — no shots carrying over
+    bullets=[]; // fresh start next wave — no shots carrying over
     speechCountThisWave=0; speechCooldown=3+Math.random()*4;
     if(wave%5===0) replenishHumanoids();
     state='wavebreak'; waveBreakTimer=isBossWave(wave)?BOSS_WAVE_BREAK_DURATION:WAVE_BREAK_DURATION;
@@ -5390,12 +5432,6 @@ $('#lightbox').addEventListener('touchend',e=>{
       const b=bullets[i]; b.x+=b.vx*dt;
       if(b.x<-20||b.x>W+20) bullets.splice(i,1);
     }
-    for(let i=enemyBullets.length-1;i>=0;i--){
-      const b=enemyBullets[i];
-      b.x+=b.vx*dt; b.y+=b.vy*dt;
-      if(b.x<-30||b.x>W+30||b.y<-30||b.y>H+30) enemyBullets.splice(i,1);
-    }
-
     spawnTimer+=dt;
     const diff=difficultyFactor();
     const targetInterval=Math.max(150,(900-(wave-1)*60-elapsed*20)/diff);
@@ -5420,6 +5456,19 @@ $('#lightbox').addEventListener('touchend',e=>{
       // Diving/ascending landers are fully controlled by the abduction AI below —
       // skip normal drift/bob so they track the humanoid and rise straight up.
       if(en.aiState==='diving'||en.aiState==='ascending') continue;
+      /* A Mutant born from an abduction is a Crazed Mutant: it visibly
+         shudders and relentlessly kamikazes toward Goldie at higher speed.
+         Naturally spawned Mutants retain their existing one-dash move. */
+      if(en.key==='mutant'&&en.crazed){
+        en.zigPhase=(en.zigPhase||0)+dt*25;
+        const dx=player.x-en.x, dy=player.y-en.y;
+        const distance=Math.max(1,Math.hypot(dx,dy));
+        const chargeSpeed=Math.max(235,Math.abs(en.vx)*1.55);
+        en.x+=dx/distance*chargeSpeed*dt+Math.sin(en.zigPhase)*62*dt;
+        en.y+=dy/distance*chargeSpeed*dt+Math.cos(en.zigPhase*1.7)*48*dt;
+        en.y=Math.max(flightTop(),Math.min(flightBottom(),en.y));
+        continue;
+      }
       /* Mutant AI: one dash burst per screen wrap, then continue left and
          wrap around. This keeps mutants dynamic but not relentlessly
          aggressive — they lunge once, then leave and come back. */
@@ -5518,24 +5567,6 @@ $('#lightbox').addEventListener('touchend',e=>{
 
     for(const en of enemies){ if(en.hitFlash>0) en.hitFlash=Math.max(0,en.hitFlash-dt*4); }
 
-    /* After the first boss wave, every Swarmer can fire a carefully aimed
-       plasma shot at Goldie. Later waves shorten the reload and speed the
-       shot up, reinforcing the post-boss difficulty ramp. */
-    if(wave>=6){
-      for(const en of enemies){
-        if(en.key!=='swarmer') continue;
-        if(en.shotCooldown===undefined) en.shotCooldown=0.7+Math.random()*1.5;
-        en.shotCooldown-=dt;
-        if(en.shotCooldown<=0&&en.x>-20&&en.x<W+20){
-          const dx=player.x-en.x, dy=player.y-en.y;
-          const distance=Math.max(1,Math.hypot(dx,dy));
-          const shotSpeed=185+Math.min(145,(wave-6)*8);
-          enemyBullets.push({x:en.x,y:en.y,vx:dx/distance*shotSpeed,vy:dy/distance*shotSpeed,r:Math.max(3,scaleUnit()*0.007)});
-          en.shotCooldown=Math.max(0.65,1.85-(wave-6)*0.045)+Math.random()*0.8;
-        }
-      }
-    }
-
     /* Lander abduction AI: landers above the halfway line can dive down to
        grab a humanoid directly below them, carry it upward, and if not shot
        in time, mutate it into a mutant at the top of the screen. Classic
@@ -5559,28 +5590,16 @@ $('#lightbox').addEventListener('touchend',e=>{
           }
         } else if(en.aiState==='diving'){
           if(en.diveTarget&&humanoids.indexOf(en.diveTarget)>=0){
-            const targetX=en.diveTarget.xf*W, targetY=landerPickupYAt(targetX);
+            const targetX=en.diveTarget.xf*W, targetY=landerPickupY(en.diveTarget);
             const dx=targetX-en.x, dy=targetY-en.y;
             en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*dt);
             en.y+=Math.sign(dy)*Math.min(Math.abs(dy),160*dt);
             if(Math.abs(dy)<4&&Math.abs(dx)<8){
-              en.carrying=en.diveTarget;
-              en.carrying.speechText=nextCarriedLine();
-              en.carrying.speechTimer=99;
-              const idx=humanoids.indexOf(en.diveTarget);
-              if(idx>=0) humanoids.splice(idx,1);
-              en.aiState='ascending'; en.diveTarget=null;
+              beginLanderCarry(en,en.diveTarget);
             }
           }else{ en.aiState='normal'; en.diveTarget=null; }
         } else if(en.aiState==='ascending'){
-          en.y-=50*dt;
-          if(en.y<=flightTop()+20){
-            spawnLanderAbsorption(en);
-            en.key='mutant';
-            en.carrying=null;
-            en.aiState='normal';
-            en.vx=en.vx*1.3;
-          }
+          updateLanderAscent(en,dt);
         }
         if(en.carrying){
           en.carrying.walkPhase+=dt*6;
@@ -5606,19 +5625,13 @@ $('#lightbox').addEventListener('touchend',e=>{
       } else if(en.aiState==='diving'){
         if(en.diveTarget && humanoids.indexOf(en.diveTarget)>=0){
           const targetX=en.diveTarget.xf*W;
-          const targetY=landerPickupYAt(targetX);
+          const targetY=landerPickupY(en.diveTarget);
           const dy=targetY-en.y;
           const dx=targetX-en.x;
           // Steer horizontally toward the target so the lander follows the humanoid
           en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*dt);
           if(Math.abs(dy)<4 && Math.abs(dx)<8){
-            en.carrying=en.diveTarget;
-            en.carrying.speechText=nextCarriedLine();
-            en.carrying.speechTimer=99;
-            const idx=humanoids.indexOf(en.diveTarget);
-            if(idx>=0) humanoids.splice(idx,1);
-            en.aiState='ascending';
-            en.diveTarget=null;
+            beginLanderCarry(en,en.diveTarget);
           } else {
             en.y+=Math.sign(dy)*160*dt;
           }
@@ -5627,14 +5640,7 @@ $('#lightbox').addEventListener('touchend',e=>{
           en.diveTarget=null;
         }
       } else if(en.aiState==='ascending'){
-        en.y-=50*dt;
-        if(en.y<=flightTop()+20){
-          spawnLanderAbsorption(en);
-          en.key='mutant';
-          en.carrying=null;
-          en.aiState='normal';
-          en.vx=en.vx*1.3;
-        }
+        updateLanderAscent(en,dt);
       }
       if(en.carrying){
         en.carrying.walkPhase+=dt*6;
@@ -5686,7 +5692,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       const hs=Math.max(15,scaleUnit()*0.032), hr=hs*0.62;
       for(let i=humanoids.length-1;i>=0;i--){
         const h=humanoids[i];
-        const hx=h.xf*W, hy=humanoidYAt(hx)-hs*0.5;
+        const hx=h.xf*W, hy=humanoidY(h)-hs*0.5;
         for(let j=bullets.length-1;j>=0;j--){
           const b=bullets[j];
           const dx=b.x-hx, dy=b.y-hy;
@@ -5716,7 +5722,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       fh.y+=fh.vy*dt;
       fh.walkPhase+=dt*6;
       if(fh.speechTimer>0) fh.speechTimer=Math.max(0,fh.speechTimer-dt);
-      const groundY=humanoidYAt(fh.x);
+      const groundY=humanoidSurfaceYAt(fh.x);
       if(fh.y>=groundY){
         if(fh.vy>400){
           spawnParticles(fh.x,groundY);
@@ -5729,8 +5735,10 @@ $('#lightbox').addEventListener('touchend',e=>{
           }
         } else {
           humanoids.push({
-            xf:Math.max(0.09,Math.min(0.95,fh.x/W)), dir:Math.random()<0.5?-1:1,
+            xf:Math.max(0.09,Math.min(0.91,fh.x/W)), dir:Math.random()<0.5?-1:1,
             speed:0.010+Math.random()*0.016, walkPhase:fh.walkPhase,
+            depth:0, depthDir:1, depthSpeed:0.07+Math.random()*0.11,
+            turnTimer:0.7+Math.random()*2.3,
             woman:fh.woman, speechText:'', speechTimer:0
           });
         }
@@ -5746,21 +5754,6 @@ $('#lightbox').addEventListener('touchend',e=>{
       const k=killTexts[i];
       k.life-=dt; k.y+=k.vy*dt;
       if(k.life<=0) killTexts.splice(i,1);
-    }
-
-    if(player.invuln<=0){
-      for(let i=enemyBullets.length-1;i>=0;i--){
-        const b=enemyBullets[i], dx=b.x-player.x, dy=b.y-player.y;
-        const hitR=player.r*0.58+b.r;
-        if(dx*dx+dy*dy<hitR*hitR){
-          enemyBullets.splice(i,1);
-          spawnParticles(player.x,player.y);
-          lives--; updateHud();
-          if(lives<=0){ endGame(); return; }
-          resetPlayer(); player.invuln=1.6;
-          break;
-        }
-      }
     }
 
     if(player.invuln<=0){
@@ -5796,7 +5789,15 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(const h of humanoids){
       h.walkPhase+=dt*6;
       h.xf+=h.dir*h.speed*dt;
-      if(h.xf<0.09||h.xf>0.95){ h.dir*=-1; h.xf=Math.max(0.09,Math.min(0.95,h.xf)); }
+      h.depth+=(h.depthDir||1)*(h.depthSpeed||0.1)*dt;
+      h.turnTimer=(h.turnTimer||0)-dt;
+      if(h.turnTimer<=0){
+        if(Math.random()<0.55) h.dir*=-1;
+        if(Math.random()<0.65) h.depthDir*=-1;
+        h.turnTimer=0.7+Math.random()*2.3;
+      }
+      if(h.xf<0.09||h.xf>0.91){ h.dir*=-1; h.xf=Math.max(0.09,Math.min(0.91,h.xf)); }
+      if(h.depth<0||h.depth>1){ h.depthDir*=-1; h.depth=Math.max(0,Math.min(1,h.depth)); }
       if(h.speechTimer>0) h.speechTimer=Math.max(0,h.speechTimer-dt);
     }
 
@@ -5807,7 +5808,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       speechCooldown-=dt;
       if(speechCooldown<=0&&speechCountThisWave<MAX_SPEECH_PER_WAVE){
         const h=humanoids[Math.floor(Math.random()*humanoids.length)];
-        const hx=h.xf*W, hy=humanoidYAt(hx);
+        const hx=h.xf*W, hy=humanoidY(h);
         if(spotIsFree(hx,hy)){
           h.speechText=nextWalkLine();
           h.speechTimer=4.2;
@@ -6246,7 +6247,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   function drawHumanoids(){
     const s=humanoidSize();
     for(const h of humanoids){
-      const x=h.xf*W, y=humanoidYAt(x);
+      const x=h.xf*W, y=humanoidY(h);
       drawHumanoidFigure(x,y,s,h.woman,h.walkPhase);
       if(h.speechTimer>0){
         let a=1;
@@ -6282,18 +6283,23 @@ $('#lightbox').addEventListener('touchend',e=>{
   function drawEnemies(){
     for(const en of enemies){
       const im=images[en.key], d=en.r*2.5;
+      const shakeX=en.crazed?Math.sin(elapsed*44+(en.phase||0))*4:0;
+      const shakeY=en.crazed?Math.cos(elapsed*51+(en.phase||0))*3:0;
       ctx.save();
-      if(en.boss){
+      if(en.crazed){
+        ctx.shadowColor='rgba(255,55,90,.95)';
+        ctx.shadowBlur=Math.max(8,en.r*0.9);
+      } else if(en.boss){
         // faint red pulse marks a boss-wave Manti as extra tough
         ctx.shadowColor='rgba(255,90,90,.85)';
         ctx.shadowBlur=Math.max(4,en.r*0.5);
       }
       if(en.hitFlash>0) ctx.globalAlpha=1-en.hitFlash*0.55;
       if(im&&im.complete&&im.naturalWidth){
-        ctx.translate(en.x,en.y);
+        ctx.translate(en.x+shakeX,en.y+shakeY);
         if(en.vx>0) ctx.scale(-1,1);
         drawSpriteFit(im,0,0,d);
-      } else { ctx.fillStyle='#ff5d5d'; ctx.beginPath(); ctx.arc(en.x,en.y,en.r,0,6.283); ctx.fill(); }
+      } else { ctx.fillStyle='#ff5d5d'; ctx.beginPath(); ctx.arc(en.x+shakeX,en.y+shakeY,en.r,0,6.283); ctx.fill(); }
       ctx.restore();
       if(en.carrying){
         const hs=Math.max(15,scaleUnit()*0.032);
@@ -6347,18 +6353,6 @@ $('#lightbox').addEventListener('touchend',e=>{
       ctx.stroke();
       ctx.fillStyle='#ffffff';
       ctx.beginPath(); ctx.arc(b.x,b.y,b.r*0.6,0,6.283); ctx.fill();
-    }
-    for(const b of enemyBullets){
-      const tail=14+b.r*2;
-      const speed=Math.max(1,Math.hypot(b.vx,b.vy));
-      const tx=b.x-b.vx/speed*tail, ty=b.y-b.vy/speed*tail;
-      const g=ctx.createLinearGradient(b.x,b.y,tx,ty);
-      g.addColorStop(0,'#ffffff');
-      g.addColorStop(0.28,'#ff5e7a');
-      g.addColorStop(1,'rgba(255,44,82,0)');
-      ctx.strokeStyle=g; ctx.lineWidth=Math.max(3,b.r*1.4); ctx.lineCap='round';
-      ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(tx,ty); ctx.stroke();
-      ctx.fillStyle='#fff2f5'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,6.283); ctx.fill();
     }
   }
 
