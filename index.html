@@ -4725,6 +4725,12 @@ $('#lightbox').addEventListener('touchend',e=>{
   /* Everything is sized off the play area itself, so ship/enemies/humanoids
      stay clearly visible whatever the visitor's screen size. */
   function scaleUnit(){ return Math.min(W,H); }
+  /* Gameplay speeds are authored for the normal desktop arena. Horizontal
+     and vertical travel scale independently so motion covers the same share
+     of a window, fullscreen display, phone, or tablet. */
+  const MOTION_BASE_W=1188, MOTION_BASE_H=742.5;
+  function motionScaleX(){ return W/MOTION_BASE_W; }
+  function motionScaleY(){ return H/MOTION_BASE_H; }
   function humanoidSize(){ return Math.max(15,scaleUnit()*0.032); }
   /* Humanoids roam throughout the underground area: from just below the
      glowing terrain outline all the way down to the bottom of the screen. */
@@ -4791,11 +4797,29 @@ $('#lightbox').addEventListener('touchend',e=>{
     if(!canvas) return;
     const rect=canvas.getBoundingClientRect();
     if(!rect.width||!rect.height) return;
+    const oldW=W, oldH=H;
     const dpr=Math.min(window.devicePixelRatio||1,2);
     canvas.width=Math.round(rect.width*dpr);
     canvas.height=Math.round(rect.height*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     W=rect.width; H=rect.height;
+    /* Keep every active object in the same relative screen position when
+       entering/exiting fullscreen or rotating a device. */
+    if(oldW>0&&oldH>0&&(Math.abs(W-oldW)>0.5||Math.abs(H-oldH)>0.5)){
+      const sx=W/oldW, sy=H/oldH, sr=Math.min(sx,sy);
+      const scalePoint=o=>{ if(o){ if(Number.isFinite(o.x)) o.x*=sx; if(Number.isFinite(o.y)) o.y*=sy; } };
+      scalePoint(player);
+      if(player&&Number.isFinite(player.r)) player.r*=sr;
+      bullets.forEach(o=>{ scalePoint(o); if(Number.isFinite(o.r)) o.r*=sr; });
+      enemies.forEach(o=>{
+        scalePoint(o);
+        if(Number.isFinite(o.r)) o.r*=sr;
+        if(Number.isFinite(o.bobAmp)) o.bobAmp*=sr;
+      });
+      particles.forEach(o=>{ scalePoint(o); if(Number.isFinite(o.radius)) o.radius*=sr; });
+      fallingHumanoids.forEach(scalePoint);
+      killTexts.forEach(scalePoint);
+    }
   }
   /* Called whenever the canvas's real on-screen size becomes known/changes —
      covers the very first paint (when getBoundingClientRect can still be
@@ -5349,7 +5373,7 @@ $('#lightbox').addEventListener('touchend',e=>{
   }
 
   function updateLanderAscent(en,dt){
-    en.y-=(62+Math.min(28,wave*1.8))*dt;
+    en.y-=(62+Math.min(28,wave*1.8))*motionScaleY()*dt;
     /* Most Landers transform at the gold line. A two-pass Lander instead
        carries the entire pair above the line, wraps to the bottom, and
        completes one more climb before transforming. */
@@ -5463,6 +5487,7 @@ $('#lightbox').addEventListener('touchend',e=>{
       en.moveDir=en.y>H*0.55?-1:1;
     }
     const speed=Math.abs(en.vx)*(frantic?1.3:1);
+    const sx=motionScaleX(), sy=motionScaleY();
     en.moveTime+=dt;
     const t=en.moveTime;
     if(en.key==='baiter'&&en.crazedBaiter){
@@ -5474,34 +5499,34 @@ $('#lightbox').addEventListener('touchend',e=>{
       const bossCalm=en.boss?0.80:1;
       const wiggleX=(Math.sin(en.zigPhase)*105+Math.sin(en.zigPhase*2.7)*38)*bossCalm;
       const wiggleY=(Math.cos(en.zigPhase*1.45)*92+Math.sin(en.zigPhase*3.15)*34)*bossCalm;
-      en.x+=dx/distance*speed*(en.boss?1.40:1.72)*dt+wiggleX*dt;
-      en.y+=dy/distance*speed*(en.boss?1.40:1.72)*dt+wiggleY*dt;
+      en.x+=dx/distance*speed*(en.boss?1.40:1.72)*sx*dt+wiggleX*sx*dt;
+      en.y+=dy/distance*speed*(en.boss?1.40:1.72)*sy*dt+wiggleY*sy*dt;
     } else if(en.key==='baiter'){
       // Brake and feint vertically, lock Goldie's height, then sweep across.
       if(en.baiterStage===undefined){ en.baiterStage='feint'; en.baiterTimer=0.55; }
       en.baiterTimer-=dt;
       if(en.baiterStage==='feint'){
-        en.x-=speed*0.45*dt;
-        en.y+=en.moveDir*speed*0.7*dt;
+        en.x-=speed*0.45*sx*dt;
+        en.y+=en.moveDir*speed*0.7*sy*dt;
         if(en.baiterTimer<=0){
           en.baiterStage='sweep'; en.baiterTimer=0.75;
           en.baiterVy=Math.max(-speed,Math.min(speed,(player.y-en.y)/0.75));
         }
       } else if(en.baiterStage==='sweep'){
-        en.x-=speed*1.55*dt;
-        en.y+=en.baiterVy*dt;
+        en.x-=speed*1.55*sx*dt;
+        en.y+=en.baiterVy*sy*dt;
         if(en.baiterTimer<=0){ en.baiterStage='cruise'; }
-      } else { en.x-=speed*dt; }
+      } else { en.x-=speed*sx*dt; }
     } else if(en.key==='bomber'){
       // Long diagonal dive, level bombing run, then climb back out.
       const leg=t%3;
-      en.x-=speed*dt;
-      en.y+=(leg<0.8?en.moveDir*speed*0.65:leg>2.2?-en.moveDir*speed*0.65:0)*dt;
+      en.x-=speed*sx*dt;
+      en.y+=(leg<0.8?en.moveDir*speed*0.65:leg>2.2?-en.moveDir*speed*0.65:0)*sy*dt;
     } else if(en.key==='pod'){
       // Stair-step entry: glide, shift altitude, glide again.
       const leg=t%1.6;
-      en.x-=speed*(leg<1.1?1:0.5)*dt;
-      if(leg>=1.1) en.y+=en.moveDir*speed*0.85*dt;
+      en.x-=speed*(leg<1.1?1:0.5)*sx*dt;
+      if(leg>=1.1) en.y+=en.moveDir*speed*0.85*sy*dt;
     } else if(en.key==='swarmer'){
       // One large curl per pass; each Swarmer gets its own timing and direction.
       // Reset swirlStart only on screen wrap, never after finishing the curl.
@@ -5522,13 +5547,13 @@ $('#lightbox').addEventListener('touchend',e=>{
       };
       const before=offset(Math.max(0,t-dt)), after=offset(t);
       const curling=t>=en.swirlStart&&t<en.swirlStart+duration;
-      en.x-=speed*(curling?1.25:0.85)*dt;
+      en.x-=speed*(curling?1.25:0.85)*sx*dt;
       en.x+=after.x-before.x;
       en.y+=after.y-before.y;
     } else {
       // Airborne Landers enter on a diagonal, then cruise before abducting.
-      en.x-=speed*dt;
-      if(t<0.9) en.y+=en.moveDir*speed*0.55*dt;
+      en.x-=speed*sx*dt;
+      if(t<0.9) en.y+=en.moveDir*speed*0.55*sy*dt;
     }
     if(en.y<=flightTop()) en.moveDir=1;
     if(en.y>=flightBottom()) en.moveDir=-1;
@@ -5540,18 +5565,18 @@ $('#lightbox').addEventListener('touchend',e=>{
     const down=keys['ArrowDown']||keys['s']||keys['S'];
     const left=keys['ArrowLeft']||keys['a']||keys['A'];
     const right=keys['ArrowRight']||keys['d']||keys['D'];
-    const speed=320;
+    const speed=320, sx=motionScaleX(), sy=motionScaleY();
     if(joyVec.active){
       /* Analog joystick — vertical movement only. Horizontal drag is
          ignored on purpose: a stray backward flick of the thumb used to
          flip the ship's facing, which felt broken on phones/tablets. The
          ship stays parked at its spawn x and just scrolls up and down. */
-      player.y+=joyVec.y*speed*dt;
+      player.y+=joyVec.y*speed*sy*dt;
     } else {
-      if(up) player.y-=speed*dt;
-      if(down) player.y+=speed*dt;
-      if(left){ player.x-=speed*dt; player.facing=-1; }
-      if(right){ player.x+=speed*dt; player.facing=1; }
+      if(up) player.y-=speed*sy*dt;
+      if(down) player.y+=speed*sy*dt;
+      if(left){ player.x-=speed*sx*dt; player.facing=-1; }
+      if(right){ player.x+=speed*sx*dt; player.facing=1; }
     }
     player.x=Math.max(player.r+4,Math.min(W-player.r-4,player.x));
     player.y=Math.max(flightTop(),Math.min(flightBottom(),player.y));
@@ -5561,7 +5586,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     if(fireHeld&&fireCooldown<=0){ fireBullet(); fireCooldown=0.18; }
 
     for(let i=bullets.length-1;i>=0;i--){
-      const b=bullets[i]; b.x+=b.vx*dt;
+      const b=bullets[i]; b.x+=b.vx*sx*dt;
       if(b.x<-20||b.x>W+20) bullets.splice(i,1);
     }
     spawnTimer+=dt;
@@ -5590,8 +5615,8 @@ $('#lightbox').addEventListener('touchend',e=>{
       // the pod "bursts open" instead of just leaking a tidy little cluster.
       if(en.burstTimer>0){
         const k=en.burstTimer/0.6;
-        en.x+=en.burstVx*k*dt;
-        en.y+=en.burstVy*k*dt;
+        en.x+=en.burstVx*k*sx*dt;
+        en.y+=en.burstVy*k*sy*dt;
         en.burstTimer=Math.max(0,en.burstTimer-dt);
       }
       // Diving/ascending landers are fully controlled by the abduction AI below —
@@ -5605,8 +5630,8 @@ $('#lightbox').addEventListener('touchend',e=>{
         const dx=player.x-en.x, dy=player.y-en.y;
         const distance=Math.max(1,Math.hypot(dx,dy));
         const chargeSpeed=Math.max(235,Math.abs(en.vx)*1.55);
-        en.x+=dx/distance*chargeSpeed*dt+Math.sin(en.zigPhase)*62*dt;
-        en.y+=dy/distance*chargeSpeed*dt+Math.cos(en.zigPhase*1.7)*48*dt;
+        en.x+=dx/distance*chargeSpeed*sx*dt+Math.sin(en.zigPhase)*62*sx*dt;
+        en.y+=dy/distance*chargeSpeed*sy*dt+Math.cos(en.zigPhase*1.7)*48*sy*dt;
         en.y=Math.max(flightTop(),Math.min(flightBottom(),en.y));
         continue;
       }
@@ -5627,15 +5652,15 @@ $('#lightbox').addEventListener('touchend',e=>{
           /* Active dash: one burst toward the player, plus zigzag weave */
           en.mutantDash-=dt;
           en.zigPhase=(en.zigPhase||0)+dt*12;
-          en.x+=en.mutantDashVx*dt+Math.sin(en.zigPhase)*90*dt;
-          en.y+=en.mutantDashVy*dt+Math.cos(en.zigPhase*1.4)*70*dt;
+          en.x+=en.mutantDashVx*sx*dt+Math.sin(en.zigPhase)*90*sx*dt;
+          en.y+=en.mutantDashVy*sy*dt+Math.cos(en.zigPhase*1.4)*70*sy*dt;
           if(en.mutantDash<=0){ en.mutantBurstUsed=true; /* done bursting this pass */ }
         } else if(!en.mutantBurstUsed){
           /* Waiting for the one burst — count down delay, then lunge */
           en.mutantBurstDelay-=dt;
           /* Track player's vertical position for the upcoming lunge */
           var pdy=player.y-en.y;
-          en.mutantTargetVy=Math.sign(pdy)*Math.min(Math.abs(pdy),120)*dt;
+          en.mutantTargetVy=Math.sign(pdy)*Math.min(Math.abs(pdy),120*sy*dt);
           if(en.mutantBurstDelay<=0){
             /* Start the one dash burst — horizontal stays leftward, vertical lunges at player */
             en.mutantDash=0.4+Math.random()*0.3;
@@ -5644,14 +5669,14 @@ $('#lightbox').addEventListener('touchend',e=>{
           } else {
             /* Pre-burst: drift left with gentle weave toward player's height */
             en.phase+=dt*en.bobSpeed;
-            en.x-=Math.abs(en.vx)*dt;
-            en.y+=Math.sin(en.phase)*en.bobAmp*dt+en.mutantTargetVy;
+            en.x-=Math.abs(en.vx)*sx*dt;
+            en.y+=Math.sin(en.phase)*en.bobAmp*sy*dt+en.mutantTargetVy;
           }
         } else {
           /* Post-burst: continue left and exit, no more dashes this pass */
           en.phase+=dt*en.bobSpeed;
-          en.x-=Math.abs(en.vx)*dt;
-          en.y+=Math.sin(en.phase)*en.bobAmp*dt;
+          en.x-=Math.abs(en.vx)*sx*dt;
+          en.y+=Math.sin(en.phase)*en.bobAmp*sy*dt;
         }
         /* Keep within vertical flight bounds */
         en.y=Math.max(flightTop(),Math.min(flightBottom(),en.y));
@@ -5675,7 +5700,7 @@ $('#lightbox').addEventListener('touchend',e=>{
          one directly off the ground instead of diving down for it. */
       if(en.key==='lander'&&en.terrainFollower&&en.aiState==='normal'){
         en.phase+=dt*en.bobSpeed;
-        en.x+=en.vx*dt;
+        en.x+=en.vx*sx*dt;
         const floorY=landerFloorAt(en.x);
         const desiredY=floorY-Math.abs(Math.sin(en.phase))*en.bobAmp*0.6;
         en.y+=(desiredY-en.y)*Math.min(1,dt*4);
@@ -5734,8 +5759,8 @@ $('#lightbox').addEventListener('touchend',e=>{
           if(en.diveTarget&&humanoids.indexOf(en.diveTarget)>=0){
             const targetX=en.diveTarget.xf*W, targetY=landerPickupY(en.diveTarget);
             const dx=targetX-en.x, dy=targetY-en.y;
-            en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*dt);
-            en.y+=Math.sign(dy)*Math.min(Math.abs(dy),160*dt);
+            en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*sx*dt);
+            en.y+=Math.sign(dy)*Math.min(Math.abs(dy),160*sy*dt);
             if(Math.abs(dy)<4&&Math.abs(dx)<8){
               beginLanderCarry(en,en.diveTarget);
             }
@@ -5771,11 +5796,11 @@ $('#lightbox').addEventListener('touchend',e=>{
           const dy=targetY-en.y;
           const dx=targetX-en.x;
           // Steer horizontally toward the target so the lander follows the humanoid
-          en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*dt);
+          en.x+=Math.sign(dx)*Math.min(Math.abs(dx),120*sx*dt);
           if(Math.abs(dy)<4 && Math.abs(dx)<8){
             beginLanderCarry(en,en.diveTarget);
           } else {
-            en.y+=Math.sign(dy)*160*dt;
+            en.y+=Math.sign(dy)*160*sy*dt;
           }
         } else {
           en.aiState='normal';
@@ -5859,7 +5884,7 @@ $('#lightbox').addEventListener('touchend',e=>{
     for(let i=fallingHumanoids.length-1;i>=0;i--){
       const fh=fallingHumanoids[i];
       fh.vy+=90*dt;
-      fh.y+=fh.vy*dt;
+      fh.y+=fh.vy*sy*dt;
       fh.walkPhase+=dt*6;
       if(fh.speechTimer>0) fh.speechTimer=Math.max(0,fh.speechTimer-dt);
       const groundY=humanoidSurfaceYAt(fh.x);
@@ -6649,16 +6674,21 @@ $('#lightbox').addEventListener('touchend',e=>{
   function loop(t){
     raf=requestAnimationFrame(loop);
     if(document.hidden){ lastT=t; return; }
-    let dt=(t-(lastT||t))/1000;
+    const frameDt=Math.min(0.25,(t-(lastT||t))/1000);
     lastT=t;
-    dt=Math.min(0.05,dt);
-    if(state==='playing') update(dt);
-    else if(state==='wavebreak'){
-      waveBreakTimer-=dt;
-      if(waveBreakTimer<=0) state='playing';
+    /* Preserve real elapsed time even when fullscreen rendering lowers FPS.
+       Small simulation steps prevent tunnelling without discarding time. */
+    const steps=Math.max(1,Math.ceil(frameDt/0.025));
+    const dt=frameDt/steps;
+    for(let i=0;i<steps;i++){
+      if(state==='playing') update(dt);
+      else if(state==='wavebreak'){
+        waveBreakTimer-=dt;
+        if(waveBreakTimer<=0) state='playing';
+      }
+      if(screenFlash>0) screenFlash=Math.max(0,screenFlash-dt*1.1);
+      if(frenzyBannerTimer>0) frenzyBannerTimer=Math.max(0,frenzyBannerTimer-dt);
     }
-    if(screenFlash>0) screenFlash=Math.max(0,screenFlash-dt*1.1);
-    if(frenzyBannerTimer>0) frenzyBannerTimer=Math.max(0,frenzyBannerTimer-dt);
     draw();
   }
 
